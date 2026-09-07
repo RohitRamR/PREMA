@@ -1,2 +1,2 @@
 # PREMA
-Prema-Indias first astro dating app
+Prema-India's first astro dating app
