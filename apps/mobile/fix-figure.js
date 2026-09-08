@@ -18,13 +18,8 @@ const replacement = `const SideStickFigure = React.memo(function SideStickFigure
   
   const headR = 7.5 * s;
   const neckH = 1 * s;
-  
   const maleTorsoW = 9 * s;
   const torsoH = 21 * s;
-  
-  const dressTopW = 4 * s;
-  const dressBottomW = 16 * s;
-  
   const limbW = 4.5 * s;
   const armH = 17 * s;
   const legH = 20 * s;
@@ -73,45 +68,32 @@ const replacement = `const SideStickFigure = React.memo(function SideStickFigure
         transformOrigin: 'top', transform: [{ rotate: backLegAngle }], zIndex: 1,
       }} />
 
-      {/* Torso/Body */}
+      {/* Torso & Head */}
       {isFemale ? (
-        <View style={{ position: 'absolute', top: bodyTop, left: centerX - dressBottomW / 2, width: dressBottomW, height: torsoH, alignItems: 'center', zIndex: 2 }}>
-          {/* Main Triangle */}
-          <View style={{
-            width: dressTopW, height: 0,
-            borderBottomWidth: torsoH - 4 * s, borderBottomColor: color,
-            borderLeftWidth: (dressBottomW - dressTopW) / 2, borderLeftColor: 'transparent',
-            borderRightWidth: (dressBottomW - dressTopW) / 2, borderRightColor: 'transparent',
-            borderStyle: 'solid', backgroundColor: 'transparent',
-          }} />
-          {/* Flared Hem (like the reference image) */}
-          <View style={{ width: dressBottomW, height: 4 * s, backgroundColor: color, borderRadius: 2 * s, marginTop: -1 }} />
+        <View style={{ position: 'absolute', top: 0, left: centerX - 20 * s, zIndex: 2 }}>
+          <Svg width={40 * s} height={60 * s} viewBox="0 0 40 60">
+            {/* Round Head */}
+            <Circle cx="20" cy="8" r="8" fill={color} />
+            {/* Elegant curved ponytail matching the reference image */}
+            <Path d="M 26 2 C 35 -2, 36 14, 28 18 C 23 20, 28 12, 28 8 C 28 6, 26 4, 26 2 Z" fill={color} />
+            {/* Smooth flared bell dress with rounded corners */}
+            <Path d="M 16 16 L 24 16 L 31 38 Q 32 40 29 40 L 11 40 Q 8 40 9 38 Z" fill={color} />
+          </Svg>
         </View>
       ) : (
-        <View style={{
-          position: 'absolute', top: bodyTop, left: centerX - maleTorsoW / 2,
-          width: maleTorsoW, height: torsoH, backgroundColor: color,
-          borderRadius: maleTorsoW / 2, zIndex: 2,
-        }} />
+        <>
+          <View style={{
+            position: 'absolute', top: bodyTop, left: centerX - maleTorsoW / 2,
+            width: maleTorsoW, height: torsoH, backgroundColor: color,
+            borderRadius: maleTorsoW / 2, zIndex: 2,
+          }} />
+          <View style={{
+            position: 'absolute', top: 0, left: centerX - headR,
+            width: headR * 2, height: headR * 2, borderRadius: headR,
+            backgroundColor: color, zIndex: 3,
+          }} />
+        </>
       )}
-
-      {/* Head & Ponytail */}
-      <View style={{
-        position: 'absolute', top: 0, left: centerX - headR,
-        width: headR * 2 + (isFemale ? 14 * s : 0), height: headR * 2 + (isFemale ? 4 * s : 0),
-        zIndex: 3,
-      }}>
-        {isFemale ? (
-          <Svg width={26 * s} height={20 * s} viewBox="0 0 26 20">
-            {/* Round Head */}
-            <Circle cx="8" cy="8" r="8" fill={color} />
-            {/* Elegant curved ponytail matching the reference image */}
-            <Path d="M 13 3 C 22 1, 24 10, 18 16 C 16 18, 14 18, 17 14 C 19 11, 16 7, 13 8 Z" fill={color} />
-          </Svg>
-        ) : (
-          <View style={{ width: headR * 2, height: headR * 2, borderRadius: headR, backgroundColor: color }} />
-        )}
-      </View>
 
       {/* Front Leg */}
       <RNAnimated.View style={{

@@ -250,11 +250,26 @@ const SideStickFigure = React.memo(function SideStickFigure({
         backgroundColor: color, zIndex: 3,
       }}>
         {isFemale && (
-          <View style={{
-            position: 'absolute', top: 0, right: -5 * s,
-            width: 10 * s, height: 14 * s, borderRadius: 5 * s,
-            backgroundColor: color, transform: [{ rotate: '20deg' }],
-          }} />
+          <>
+            {/* Hair swoop - curves from top of head outward */}
+            <View style={{
+              position: 'absolute', top: -2 * s, right: -6 * s,
+              width: 12 * s, height: 12 * s, borderRadius: 6 * s,
+              backgroundColor: color,
+            }} />
+            {/* Ponytail flowing down - the curved tail part */}
+            <View style={{
+              position: 'absolute', top: 4 * s, right: -10 * s,
+              width: 8 * s, height: 16 * s, borderRadius: 4 * s,
+              backgroundColor: color, transform: [{ rotate: '15deg' }],
+            }} />
+            {/* Ponytail curl tip at bottom */}
+            <View style={{
+              position: 'absolute', top: 16 * s, right: -8 * s,
+              width: 8 * s, height: 8 * s, borderRadius: 4 * s,
+              backgroundColor: color,
+            }} />
+          </>
         )}
       </View>
 
