@@ -1534,7 +1534,7 @@ export default function AnimatedSignUp() {
 
         {/* Slides Container */}
         <View style={{ flex: 1 }}>
-          <FlatList
+          <RNAnimated.FlatList
             ref={flatListRef}
             data={slides}
             keyExtractor={(_, i) => String(i)}
