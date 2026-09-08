@@ -152,19 +152,17 @@ const FLOATING_OFFSETS: { [key: string]: { marginLeft?: number } } = {
 };
 
 // ─── SIDE-VIEW STICK FIGURE ───
-function SideStickFigure({
+const SideStickFigure = React.memo(function SideStickFigure({
   color = C.pri,
   facingLeft = false,
   isFemale = false,
-  legAnim = 0,   
-  armAnim = 0,   
+  walkCycle,
   scale = 1,
 }: {
   color?: string;
   facingLeft?: boolean;
   isFemale?: boolean;
-  legAnim?: number;
-  armAnim?: number;
+  walkCycle?: any;
   scale?: number;
 }) {
   const s = scale;
@@ -181,14 +179,28 @@ function SideStickFigure({
   const limbW = 5.5 * s;
   const armH = 20 * s;
   const legH = 22 * s;
-  
-  const restingLeg = 10; 
-  const restingArm = 15;
-  
-  const frontLeg = legAnim * 35 + restingLeg;
-  const backLeg = -legAnim * 35 - restingLeg;
-  const frontArm = -armAnim * 35 + restingArm;
-  const backArm = armAnim * 35 - restingArm;
+
+  // If walkCycle isn't provided, use a dummy value that doesn't move
+  // Use a stable ref to avoid creating new Animated.Value on every render
+  const dummyWalk = useRef(new RNAnimated.Value(0)).current;
+  const animValue = walkCycle || dummyWalk;
+
+  const frontLegAngle = animValue.interpolate({
+    inputRange: [0, 0.25, 0.5, 0.75, 1],
+    outputRange: ['10deg', '45deg', '10deg', '-25deg', '10deg']
+  });
+  const backLegAngle = animValue.interpolate({
+    inputRange: [0, 0.25, 0.5, 0.75, 1],
+    outputRange: ['-10deg', '-45deg', '-10deg', '25deg', '-10deg']
+  });
+  const frontArmAngle = animValue.interpolate({
+    inputRange: [0, 0.25, 0.5, 0.75, 1],
+    outputRange: ['15deg', '-20deg', '15deg', '50deg', '15deg']
+  });
+  const backArmAngle = animValue.interpolate({
+    inputRange: [0, 0.25, 0.5, 0.75, 1],
+    outputRange: ['-15deg', '20deg', '-15deg', '-50deg', '-15deg']
+  });
 
   const centerX = 20 * s;
 
@@ -198,130 +210,68 @@ function SideStickFigure({
       height: 64 * s,
       transform: [{ scaleX: facingLeft ? -1 : 1 }],
     }}>
-      {isFemale && (
+      {/* Back Arm */}
+      <RNAnimated.View style={{
+        position: 'absolute', top: headR * 2 + gap + 2 * s, left: centerX - limbW / 2,
+        width: limbW, height: armH, backgroundColor: color, borderRadius: limbW / 2,
+        transformOrigin: 'top', transform: [{ rotate: backArmAngle }], zIndex: 1,
+      }} />
+
+      {/* Back Leg */}
+      <RNAnimated.View style={{
+        position: 'absolute', top: headR * 2 + gap + torsoH - 2 * s, left: centerX - limbW / 2,
+        width: limbW, height: legH, backgroundColor: color, borderRadius: limbW / 2,
+        transformOrigin: 'top', transform: [{ rotate: backLegAngle }], zIndex: 1,
+      }} />
+
+      {/* Torso/Body */}
+      {isFemale ? (
         <View style={{
-          position: 'absolute',
-          top: -2 * s,
-          left: centerX - headR - 10.5 * s,
-          width: 14 * s,
-          height: 28 * s,
-          zIndex: 3,
-        }}>
-          <Svg viewBox="-4 -5 32 80" width="100%" height="100%">
-            <Path 
-              d="M 18 15 C 6 0, -4 15, 1 30 C 6 45, 16 40, 11 55 C 8 65, -2 58, -2 58 C 6 68, 26 60, 24 48 C 22 35, 10 40, 9 30 C 8 20, 14 10, 18 22 Z" 
-              fill={color} 
-            />
-          </Svg>
-        </View>
+          position: 'absolute', top: headR * 2 + gap, left: centerX - dressFlare / 2,
+          borderBottomWidth: torsoH, borderBottomColor: color,
+          borderLeftWidth: dressFlare / 2 - dressTop / 2, borderLeftColor: 'transparent',
+          borderRightWidth: dressFlare / 2 - dressTop / 2, borderRightColor: 'transparent',
+          width: dressTop, zIndex: 2,
+        }} />
+      ) : (
+        <View style={{
+          position: 'absolute', top: headR * 2 + gap, left: centerX - maleTorsoW / 2,
+          width: maleTorsoW, height: torsoH, backgroundColor: color,
+          borderRadius: maleTorsoW / 2, zIndex: 2,
+        }} />
       )}
 
       {/* Head */}
       <View style={{
-        position: 'absolute',
-        top: 0,
-        left: centerX - headR,
-        width: headR * 2,
-        height: headR * 2,
-        borderRadius: headR,
-        backgroundColor: color,
-        zIndex: 4,
-      }} />
-
-      {/* Torso / Dress */}
-      {isFemale ? (
-        <View style={{ 
-          position: 'absolute', 
-          top: headR * 2 + gap, 
-          left: centerX - (dressTop + dressFlare * 2) / 2, 
-          width: dressTop + dressFlare * 2, 
-          alignItems: 'center',
-          zIndex: 2 
-        }}>
+        position: 'absolute', top: 0, left: centerX - headR,
+        width: headR * 2, height: headR * 2, borderRadius: headR,
+        backgroundColor: color, zIndex: 3,
+      }}>
+        {isFemale && (
           <View style={{
-            width: dressTop,
-            height: 0,
-            borderBottomWidth: torsoH,
-            borderBottomColor: color,
-            borderLeftWidth: dressFlare,
-            borderLeftColor: 'transparent',
-            borderRightWidth: dressFlare,
-            borderRightColor: 'transparent',
-            borderBottomLeftRadius: 2 * s,
-            borderBottomRightRadius: 2 * s,
+            position: 'absolute', top: 2 * s, right: -4 * s,
+            width: 8 * s, height: 10 * s, borderRadius: 5 * s,
+            backgroundColor: color, transform: [{ rotate: '15deg' }],
           }} />
-        </View>
-      ) : (
-        <View style={{
-          position: 'absolute',
-          top: headR * 2 + gap,
-          left: centerX - maleTorsoW / 2,
-          width: maleTorsoW,
-          height: torsoH,
-          backgroundColor: color,
-          borderRadius: maleTorsoW / 2,
-          zIndex: 2,
-        }} />
-      )}
-
-      {/* Back Arm */}
-      <View style={{
-        position: 'absolute',
-        top: headR * 2 + gap + 1 * s,
-        left: centerX - limbW / 2,
-        width: limbW,
-        height: armH,
-        backgroundColor: color,
-        borderRadius: limbW / 2,
-        transform: [{ rotate: `${backArm}deg` }],
-        transformOrigin: 'top center',
-        zIndex: 1,
-      }} />
-
-      {/* Back Leg */}
-      <View style={{
-        position: 'absolute',
-        top: headR * 2 + gap + torsoH - 2 * s,
-        left: centerX - limbW / 2,
-        width: limbW,
-        height: legH,
-        backgroundColor: color,
-        borderRadius: limbW / 2,
-        transform: [{ rotate: `${backLeg}deg` }],
-        transformOrigin: 'top center',
-        zIndex: 1,
-      }} />
+        )}
+      </View>
 
       {/* Front Leg */}
-      <View style={{
-        position: 'absolute',
-        top: headR * 2 + gap + torsoH - 2 * s,
-        left: centerX - limbW / 2,
-        width: limbW,
-        height: legH,
-        backgroundColor: color,
-        borderRadius: limbW / 2,
-        transform: [{ rotate: `${frontLeg}deg` }],
-        transformOrigin: 'top center',
-        zIndex: 3,
+      <RNAnimated.View style={{
+        position: 'absolute', top: headR * 2 + gap + torsoH - 2 * s, left: centerX - limbW / 2,
+        width: limbW, height: legH, backgroundColor: color, borderRadius: limbW / 2,
+        transformOrigin: 'top', transform: [{ rotate: frontLegAngle }], zIndex: 3,
       }} />
 
       {/* Front Arm */}
-      <View style={{
-        position: 'absolute',
-        top: headR * 2 + gap + 1 * s,
-        left: centerX - limbW / 2,
-        width: limbW,
-        height: armH,
-        backgroundColor: color,
-        borderRadius: limbW / 2,
-        transform: [{ rotate: `${frontArm}deg` }],
-        transformOrigin: 'top center',
-        zIndex: 5,
+      <RNAnimated.View style={{
+        position: 'absolute', top: headR * 2 + gap + 2 * s, left: centerX - limbW / 2,
+        width: limbW, height: armH, backgroundColor: color, borderRadius: limbW / 2,
+        transformOrigin: 'top', transform: [{ rotate: frontArmAngle }], zIndex: 4,
       }} />
     </View>
   );
-}
+});
 
 // ─── SINGLE FLOATING HEART ───
 function FloatingHeart({ delay, x }: { delay: number; x: number }) {
@@ -565,41 +515,28 @@ export default function AnimatedSignUp() {
   const leftX = useRef(new RNAnimated.Value(20)).current;
   const rightX = useRef(new RNAnimated.Value(SW - 60)).current;
   const walkCycle = useRef(new RNAnimated.Value(0)).current;
-  const [legVal, setLegVal] = useState(0);
-  const [armVal, setArmVal] = useState(0);
-  const [, setIsWalking] = useState(false);
+    const isWalkingRef = useRef(false);
   const [showFinale, setShowFinale] = useState(false);
   const [showFlower, setShowFlower] = useState(false);
   const [showHearts, setShowHearts] = useState(false);
-  const [, setShowMessage] = useState(false);
+  const showMessageRef = useRef(false);
   const flowerOpacity = useRef(new RNAnimated.Value(0)).current;
   const flowerScale = useRef(new RNAnimated.Value(1)).current;
   const flowerY = useRef(new RNAnimated.Value(0)).current;
   const flowerRotation = useRef(new RNAnimated.Value(0)).current;
   const messageOpacity = useRef(new RNAnimated.Value(0)).current;
 
-  const walkListenerId = useRef<string | null>(null);
-
+  
   const startWalkCycle = useCallback(() => {
-    setIsWalking(true);
+    isWalkingRef.current = true;
     walkCycle.setValue(0);
 
-    if (walkListenerId.current) {
-      walkCycle.removeListener(walkListenerId.current);
-    }
-
-    walkListenerId.current = walkCycle.addListener(({ value }) => {
-      const v = Math.sin(value * Math.PI * 2);
-      setLegVal(v);
-      setArmVal(v);
-    });
-
+    
+    
     const anim = RNAnimated.loop(
       RNAnimated.timing(walkCycle, {
         toValue: 1,
-        duration: 500,
-        easing: Easing.linear,
-        useNativeDriver: false,
+        duration: 500, easing: Easing.linear, useNativeDriver: true,
       }),
     );
     anim.start();
@@ -614,7 +551,7 @@ export default function AnimatedSignUp() {
     }
     setLegVal(0);
     setArmVal(0);
-    setIsWalking(false);
+    isWalkingRef.current = false;
   }, [walkCycle]);
 
   const playFinale = useCallback(() => {
@@ -626,14 +563,14 @@ export default function AnimatedSignUp() {
       RNAnimated.timing(leftX, {
         toValue: meetX - 25,
         duration: 2000,
-        easing: Easing.inOut(Easing.quad),
-        useNativeDriver: false,
+        easing: Easing.out(Easing.sin),
+        useNativeDriver: true,
       }),
       RNAnimated.timing(rightX, {
         toValue: meetX + 25,
         duration: 2000,
-        easing: Easing.inOut(Easing.quad),
-        useNativeDriver: false,
+        easing: Easing.out(Easing.sin),
+        useNativeDriver: true,
       }),
     ]).start(() => {
       stopWalkCycle();
@@ -650,7 +587,7 @@ export default function AnimatedSignUp() {
           setShowHearts(true);
 
           setTimeout(() => {
-            setShowMessage(true);
+            showMessageRef.current = true;
             // Rotate exactly once
             
             
@@ -720,15 +657,15 @@ export default function AnimatedSignUp() {
     RNAnimated.parallel([
       RNAnimated.timing(leftX, {
         toValue: leftTarget,
-        duration: 800,
+        duration: 1000,
         easing: Easing.inOut(Easing.quad),
-        useNativeDriver: false,
+        useNativeDriver: true,
       }),
       RNAnimated.timing(rightX, {
         toValue: rightTarget,
-        duration: 800,
+        duration: 1000,
         easing: Easing.inOut(Easing.quad),
-        useNativeDriver: false,
+        useNativeDriver: true,
       }),
     ]).start(() => {
       stopWalkCycle();
@@ -1605,7 +1542,7 @@ export default function AnimatedSignUp() {
             showsHorizontalScrollIndicator={false}
             onScroll={RNAnimated.event(
               [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-              { useNativeDriver: false }
+              { useNativeDriver: true }
             )}
             renderItem={({ item: fn }) => <View style={{ width: SW }}>{fn()}</View>}
           />
@@ -1616,23 +1553,23 @@ export default function AnimatedSignUp() {
           <View style={{ height: 80, position: 'relative' }}>
             <View style={{ position: 'absolute', bottom: 35, left: 16, right: 16, height: 2, backgroundColor: C.ground, borderRadius: 1 }} />
 
-                        {Array.from({ length: 30 }).map((_, i) => {
-              const dotX = 16 + i * ((SW - 32) / 30);
-              const isLeftSide = i < 15;
+                        {Array.from({ length: 20 }).map((_, i) => {
+              const dotX = 16 + i * ((SW - 32) / 20);
+              const isLeftSide = i < 10;
 
               if (isLeftSide) {
                 const manOpacity = leftX.interpolate({
-                  inputRange: [dotX - 30, dotX, dotX + 30],
+                  inputRange: [dotX - 25, dotX, dotX + 25],
                   outputRange: [0, 1, 0],
                   extrapolate: 'clamp',
                 });
                 
-                // Continuous shake after man passes
+                // Simplified vibration: fewer interpolation points for smoother perf
                 const manInp = [0, dotX];
                 const manOut = [0, 0];
-                for (let j = 1; j <= 20; j++) {
-                  manInp.push(dotX + j * 10);
-                  manOut.push(j % 2 === 0 ? -2 : 2);
+                for (let j = 1; j <= 8; j++) {
+                  manInp.push(dotX + j * 20);
+                  manOut.push(j % 2 === 0 ? -1.5 : 1.5);
                 }
                 const manVibrate = leftX.interpolate({
                   inputRange: manInp,
@@ -1649,24 +1586,23 @@ export default function AnimatedSignUp() {
                         position: 'absolute', top: 0, left: 0,
                         fontSize: 10, color: C.pri,
                         opacity: manOpacity,
-                        textShadowColor: C.accent, textShadowRadius: 6, textShadowOffset: { width: 0, height: 0 },
+                        textShadowColor: C.accent, textShadowRadius: 4, textShadowOffset: { width: 0, height: 0 },
                       }}>{'✦'}</RNAnimated.Text>
                     </RNAnimated.View>
                   </View>
                 );
               } else {
                 const womanOpacity = rightX.interpolate({
-                  inputRange: [dotX - 30, dotX, dotX + 30],
+                  inputRange: [dotX - 25, dotX, dotX + 25],
                   outputRange: [0, 1, 0],
                   extrapolate: 'clamp',
                 });
                 
-                // Continuous shake after woman passes (she moves right to left, so rightX decreases)
                 const womInp = [dotX];
                 const womOut = [0];
-                for (let j = 1; j <= 20; j++) {
-                  womInp.unshift(dotX - j * 10); // Insert at beginning since inputRange must be monotonically increasing
-                  womOut.unshift(j % 2 === 0 ? -2 : 2);
+                for (let j = 1; j <= 8; j++) {
+                  womInp.unshift(dotX - j * 20);
+                  womOut.unshift(j % 2 === 0 ? -1.5 : 1.5);
                 }
                 womInp.push(9999);
                 womOut.push(0);
@@ -1686,7 +1622,7 @@ export default function AnimatedSignUp() {
                         position: 'absolute', top: 0, left: 0,
                         fontSize: 10, color: '#E0415C',
                         opacity: womanOpacity,
-                        textShadowColor: C.pink, textShadowRadius: 6, textShadowOffset: { width: 0, height: 0 },
+                        textShadowColor: C.pink, textShadowRadius: 4, textShadowOffset: { width: 0, height: 0 },
                       }}>{'✦'}</RNAnimated.Text>
                     </RNAnimated.View>
                   </View>
@@ -1700,32 +1636,17 @@ export default function AnimatedSignUp() {
             {/* Left Figure */}
             <RNAnimated.View style={{
               position: 'absolute',
-              bottom: 37,
-              left: leftX,
+              bottom: 37, left: 0, transform: [{ translateX: leftX }],
             }}>
-              <SideStickFigure
-                color={C.pri}
-                facingLeft={false}
-                legAnim={legVal}
-                armAnim={armVal}
-                scale={0.9}
-              />
+              <SideStickFigure color={C.pri} facingLeft={false} walkCycle={walkCycle} scale={0.9} />
             </RNAnimated.View>
 
             {/* Right Figure */}
             <RNAnimated.View style={{
               position: 'absolute',
-              bottom: 37,
-              left: rightX,
+              bottom: 37, left: 0, transform: [{ translateX: rightX }],
             }}>
-              <SideStickFigure
-                color={C.pink}
-                isFemale={true}
-                facingLeft={true}
-                legAnim={legVal}
-                armAnim={armVal}
-                scale={0.9}
-              />
+              <SideStickFigure color={C.pink} isFemale={true} facingLeft={true} walkCycle={walkCycle} scale={0.9} />
             </RNAnimated.View>
 
             
