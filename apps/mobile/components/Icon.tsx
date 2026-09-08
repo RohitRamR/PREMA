@@ -40,6 +40,10 @@ const iconMap: Record<string, keyof typeof MaterialIcons.glyphMap> = {
   lock_open: 'lock-open',
   lock_open_right: 'lock-open',
   shield: 'shield',
+  visibility: 'visibility',
+  visibility_off: 'visibility-off',
+  check_box: 'check-box',
+  check_box_outline_blank: 'check-box-outline-blank',
   check: 'check',
   check_circle: 'check-circle',
   done_all: 'done-all',
@@ -159,7 +163,6 @@ const iconMap: Record<string, keyof typeof MaterialIcons.glyphMap> = {
   architecture: 'architecture',
   spark: 'auto-awesome',
   'format_image_left': 'image',
-  visibility_off: 'visibility-off',
   add_location: 'add-location',
   work: 'work',
 };

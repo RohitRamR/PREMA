@@ -1,0 +1,3 @@
+{"_e":"root:init","_t":1788850700954,"format":"v0-jsonl","version":"57.0.22"}
+{"_e":"env:mode","_t":1788850700955,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+{"_e":"env:load","_t":1788850700958,"mode":"development","files":[],"env":{}}

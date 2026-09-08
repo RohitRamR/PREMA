@@ -51,16 +51,6 @@ function CustomTab({ name, title, focused, isMeetButton }: { name: string; title
           </View>
         </View>
 
-        {/* Meet Label centered just below floating disk */}
-        <Text style={{
-          position: 'absolute',
-          bottom: -4, 
-          fontSize: 10,
-          fontWeight: '500', // Understated clean typography
-          color: '#9AA0AA', // Muted gray
-        }}>
-          {title}
-        </Text>
       </View>
     );
   }
@@ -158,7 +148,7 @@ export default function TabLayout() {
     >
       <Tabs.Screen name="index" options={{ tabBarIcon: ({ focused }) => <CustomTab name="home" title="Discover" focused={focused} /> }} />
       <Tabs.Screen name="likes" options={{ tabBarIcon: ({ focused }) => <CustomTab name="favorite-border" title="Likes" focused={focused} /> }} />
-      <Tabs.Screen name="meet" options={{ tabBarIcon: ({ focused }) => <CustomTab name="meet" title="Meet" focused={focused} isMeetButton /> }} />
+      <Tabs.Screen name="meet" options={{ tabBarIcon: ({ focused }) => <CustomTab name="meet" title="" focused={focused} isMeetButton /> }} />
       <Tabs.Screen name="chats" options={{ tabBarIcon: ({ focused }) => <CustomTab name="chats" title="Chats" focused={focused} /> }} />
       <Tabs.Screen name="profile" options={{ tabBarIcon: ({ focused }) => <CustomTab name="person-outline" title="Profile" focused={focused} /> }} />
     </Tabs>

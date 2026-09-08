@@ -1,29 +1,20 @@
 import React from 'react';
-import { View, Text, ScrollView, Image, Pressable, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  Image, 
+  Pressable, 
+  ScrollView,
+  Dimensions
+} from 'react-native';
 import { useRouter } from 'expo-router';
+import { colors, spacing, radii } from '../../src/theme/theme';
+const PREMA_THEME = { colors, spacing, radii };
 import Icon from '../../components/Icon';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const PREMA_THEME = {
-  colors: {
-    background: '#F8F7F2',
-    skyBlue: '#A9D8F5',
-    powderBlue: '#DCEFFA',
-    deepNavy: '#172B3A',
-    mutedBlueGrey: '#6F8492',
-    white: '#FFFFFF',
-    error: '#D9534F',
-    success: '#2E7D32',
-  },
-  spacing: {
-    xs: 4,
-    sm: 8,
-    md: 16,
-    lg: 24,
-    xl: 32,
-    xxl: 48,
-  }
-};
+const { width: SW } = Dimensions.get('window');
 
 const SETTINGS = [
   { id: 'preferences', label: 'Discovery Preferences', icon: 'tune' },
@@ -34,266 +25,277 @@ const SETTINGS = [
 
 export default function ProfileTab() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <View style={styles.container}>
       
-      {/* ── Header ── */}
-      <View style={styles.headerContainer}>
-        <Text style={styles.headerTitle}>Profile</Text>
-        <Pressable 
-          style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1, padding: 8 })}
-          onPress={() => {}}
-        >
-          <Icon name="settings" size={24} color={PREMA_THEME.colors.deepNavy} />
-        </Pressable>
+      {/* 1. Bold Brand Header (Inspired by Ref 3 Light Mode) */}
+      <View style={[styles.headerBackground, { paddingTop: Math.max(insets.top, 16) }]}>
+        <View style={styles.headerNav}>
+          <Text style={styles.headerTitle}>Profile</Text>
+          <Pressable 
+            style={({pressed}) => [styles.settingsButton, pressed && { opacity: 0.7 }]}
+          >
+            <Icon name="settings" size={24} color="#FFFFFF" />
+          </Pressable>
+        </View>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+      {/* 2. White Bottom Sheet Content Area */}
+      <View style={styles.contentSheet}>
         
-        {/* ── Profile Hero ── */}
-        <View style={styles.heroContainer}>
-          <View style={styles.imageContainer}>
-            <Image 
-              source={{ uri: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400' }}
-              style={styles.profileImage}
-            />
-            {/* Verified Badge */}
-            <View style={styles.verifiedBadge}>
-              <Icon name="verified" size={18} color={PREMA_THEME.colors.success} />
-            </View>
-          </View>
-
-          <Text style={styles.heroName}>Vikram, 28</Text>
-          <Text style={styles.heroLocation}>Bengaluru • Architect</Text>
-
-          {/* Edit Profile Button */}
-          <Pressable 
-            style={({ pressed }) => [
-              styles.editButton,
-              { opacity: pressed ? 0.7 : 1 }
-            ]}
-          >
-            <Text style={styles.editButtonText}>Edit Profile</Text>
+        {/* Overlapping Avatar Container */}
+        <View style={styles.avatarWrapper}>
+          <Image 
+            source={{ uri: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400' }}
+            style={styles.avatarImage}
+          />
+          {/* Edit / Camera Badge */}
+          <Pressable style={({pressed}) => [styles.editBadge, pressed && { opacity: 0.8 }]}>
+            <Icon name="edit" size={18} color={PREMA_THEME.colors.deepNavy} />
           </Pressable>
         </View>
 
-        {/* ── Archetype Card ── */}
-        <View style={styles.archetypeCard}>
-          <View style={styles.archetypeHeader}>
-            <View style={styles.archetypeIconContainer}>
-              <Icon name="auto_awesome" size={16} color={PREMA_THEME.colors.deepNavy} />
-            </View>
-            <Text style={styles.archetypeLabel}>Your Archetype</Text>
+        <ScrollView 
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* User Info */}
+          <View style={styles.userInfo}>
+            <Text style={styles.userName}>Vikram, 28</Text>
+            <Text style={styles.userLocation}>Bengaluru • Architect</Text>
           </View>
-          <Text style={styles.archetypeTitle}>Vrishchika (Scorpio Water)</Text>
-          <Text style={styles.archetypeDescription}>
-            Deep emotional reserves with a need for profound connection. You seek authenticity over surface-level charm.
-          </Text>
-        </View>
 
-        {/* ── Settings Links ── */}
-        <View style={styles.settingsContainer}>
-          <Text style={styles.settingsSectionTitle}>Account Settings</Text>
-          
-          <View style={styles.settingsList}>
+          {/* Archetype Premium Card */}
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <View style={styles.cardIconBox}>
+                <Icon name="auto_awesome" size={18} color={PREMA_THEME.colors.deepNavy} />
+              </View>
+              <Text style={styles.cardSubtitle}>Your Archetype</Text>
+            </View>
+            <Text style={styles.cardTitle}>Vrishchika (Scorpio)</Text>
+            <Text style={styles.cardBody}>
+              Deep emotional reserves with a need for profound connection. You seek authenticity over surface-level charm.
+            </Text>
+          </View>
+
+          {/* Grouped Settings List (Inspired by Ref 3) */}
+          <Text style={styles.sectionLabel}>Account</Text>
+          <View style={styles.settingsGroup}>
             {SETTINGS.map((item, index) => (
               <Pressable 
                 key={item.id}
-                style={({ pressed }) => [
+                style={({pressed}) => [
                   styles.settingsRow,
-                  { opacity: pressed ? 0.6 : 1 },
-                  index === SETTINGS.length - 1 && { borderBottomWidth: 0 }
+                  index === SETTINGS.length - 1 && { borderBottomWidth: 0 },
+                  pressed && { backgroundColor: 'rgba(0,0,0,0.02)' }
                 ]}
               >
                 <View style={styles.settingsRowLeft}>
-                  <View style={styles.settingsIconWrapper}>
+                  <View style={styles.settingsIconCircle}>
                     <Icon name={item.icon} size={20} color={PREMA_THEME.colors.deepNavy} />
                   </View>
-                  <Text style={styles.settingsRowLabel}>{item.label}</Text>
+                  <Text style={styles.settingsLabel}>{item.label}</Text>
                 </View>
-                <Icon name="chevron_right" size={20} color={PREMA_THEME.colors.mutedBlueGrey} />
+                <Icon name="chevron_right" size={24} color={PREMA_THEME.colors.mutedBlueGrey} />
               </Pressable>
             ))}
           </View>
-        </View>
-
-      </ScrollView>
-    </SafeAreaView>
+          
+          <View style={{ height: 40 }} />
+        </ScrollView>
+      </View>
+      
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
+  container: {
     flex: 1,
-    backgroundColor: PREMA_THEME.colors.background,
+    backgroundColor: PREMA_THEME.colors.deepNavy, // The absolute background is navy
   },
-  headerContainer: {
+  headerBackground: {
+    height: 240, // Tall header for the avatar to overlap
+    backgroundColor: PREMA_THEME.colors.deepNavy,
+  },
+  headerNav: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: PREMA_THEME.spacing.lg,
-    paddingTop: PREMA_THEME.spacing.md,
-    paddingBottom: PREMA_THEME.spacing.lg,
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    height: 56,
   },
   headerTitle: {
-    color: PREMA_THEME.colors.deepNavy,
-    fontSize: 32,
-    fontWeight: '300',
-    letterSpacing: -0.5,
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
-  scrollContent: {
-    paddingBottom: PREMA_THEME.spacing.xxl,
+  settingsButton: {
+    position: 'absolute',
+    right: 24,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'flex-end',
   },
-  heroContainer: {
-    alignItems: 'center',
-    marginBottom: PREMA_THEME.spacing.xxl,
-    paddingHorizontal: PREMA_THEME.spacing.lg,
-  },
-  imageContainer: {
-    position: 'relative',
-    marginBottom: PREMA_THEME.spacing.lg,
-    shadowColor: PREMA_THEME.colors.deepNavy,
+  contentSheet: {
+    flex: 1,
+    backgroundColor: '#FFFFFF', // Clean white background for Prema
+    borderTopLeftRadius: 40, // Huge rounded corners like the reference
+    borderTopRightRadius: 40,
+    marginTop: -40, // Pulls the sheet up over the navy background slightly
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.08,
     shadowRadius: 16,
-    shadowOffset: { width: 0, height: 8 },
+    elevation: 10,
+  },
+  avatarWrapper: {
+    alignSelf: 'center',
+    marginTop: -60, // Exactly straddles the boundary!
+    marginBottom: 16,
+    position: 'relative',
+    zIndex: 20,
+  },
+  avatarImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 6,
+    borderColor: '#FFFFFF', // Seamless cutout effect against the white sheet
+    backgroundColor: '#F0F4F8',
+  },
+  editBadge: {
+    position: 'absolute',
+    bottom: 0,
+    right: 4,
+    backgroundColor: PREMA_THEME.colors.skyBlue, // Brand accent color
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 4,
+    borderColor: '#FFFFFF', // Seamless cutout for the badge
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
     elevation: 4,
   },
-  profileImage: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    borderWidth: 4,
-    borderColor: PREMA_THEME.colors.white,
+  scrollContent: {
+    paddingHorizontal: 24,
+    paddingBottom: 120, // Tab bar clearance
   },
-  verifiedBadge: {
-    position: 'absolute',
-    bottom: 2,
-    right: 6,
-    backgroundColor: PREMA_THEME.colors.white,
-    borderRadius: 16,
-    padding: 4,
-    borderWidth: 2,
-    borderColor: PREMA_THEME.colors.background,
-    justifyContent: 'center',
+  userInfo: {
     alignItems: 'center',
+    marginBottom: 32,
   },
-  heroName: {
+  userName: {
+    fontSize: 28,
+    fontWeight: '800',
     color: PREMA_THEME.colors.deepNavy,
-    fontSize: 26,
-    fontWeight: '600',
     letterSpacing: -0.5,
-    marginBottom: PREMA_THEME.spacing.xs,
+    marginBottom: 6,
   },
-  heroLocation: {
+  userLocation: {
+    fontSize: 16,
+    fontWeight: '500',
     color: PREMA_THEME.colors.mutedBlueGrey,
-    fontSize: 15,
-    fontWeight: '400',
   },
-  editButton: {
-    marginTop: PREMA_THEME.spacing.lg,
-    paddingHorizontal: PREMA_THEME.spacing.xl,
-    paddingVertical: 14,
-    backgroundColor: PREMA_THEME.colors.skyBlue,
-    borderRadius: 9999, // Pill button
-    minHeight: 48,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  editButtonText: {
-    color: PREMA_THEME.colors.deepNavy,
-    fontSize: 14,
-    fontWeight: '600',
-    letterSpacing: 0.5,
-  },
-  archetypeCard: {
-    marginHorizontal: PREMA_THEME.spacing.lg,
-    marginBottom: PREMA_THEME.spacing.xxl,
-    padding: PREMA_THEME.spacing.lg,
-    backgroundColor: PREMA_THEME.colors.white,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: PREMA_THEME.colors.powderBlue,
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 24,
+    marginBottom: 32,
     shadowColor: PREMA_THEME.colors.deepNavy,
+    shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.04,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
+    shadowRadius: 24,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(44,73,106,0.04)',
   },
-  archetypeHeader: {
+  cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: PREMA_THEME.spacing.sm,
-    marginBottom: PREMA_THEME.spacing.md,
+    gap: 12,
+    marginBottom: 16,
   },
-  archetypeIconContainer: {
-    backgroundColor: PREMA_THEME.colors.powderBlue,
-    padding: 6,
-    borderRadius: 12,
+  cardIconBox: {
+    backgroundColor: '#F0F4F8',
+    padding: 8,
+    borderRadius: 14,
   },
-  archetypeLabel: {
+  cardSubtitle: {
     color: PREMA_THEME.colors.mutedBlueGrey,
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: '700',
-    letterSpacing: 1.5,
+    letterSpacing: 1.2,
     textTransform: 'uppercase',
   },
-  archetypeTitle: {
+  cardTitle: {
     color: PREMA_THEME.colors.deepNavy,
     fontSize: 22,
-    fontWeight: '500',
-    marginBottom: PREMA_THEME.spacing.sm,
-  },
-  archetypeDescription: {
-    color: PREMA_THEME.colors.mutedBlueGrey,
-    fontSize: 14,
-    lineHeight: 22,
-  },
-  settingsContainer: {
-    paddingHorizontal: PREMA_THEME.spacing.lg,
-  },
-  settingsSectionTitle: {
-    color: PREMA_THEME.colors.mutedBlueGrey,
-    fontSize: 11,
     fontWeight: '700',
-    letterSpacing: 1.5,
-    textTransform: 'uppercase',
-    marginBottom: PREMA_THEME.spacing.md,
-    paddingLeft: PREMA_THEME.spacing.sm,
+    marginBottom: 10,
   },
-  settingsList: {
-    backgroundColor: PREMA_THEME.colors.white,
-    borderRadius: 20,
+  cardBody: {
+    color: PREMA_THEME.colors.mutedBlueGrey,
+    fontSize: 15,
+    lineHeight: 24,
+  },
+  sectionLabel: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: PREMA_THEME.colors.mutedBlueGrey,
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+    marginBottom: 16,
+    paddingLeft: 8,
+  },
+  settingsGroup: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    shadowColor: PREMA_THEME.colors.deepNavy,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.03,
+    shadowRadius: 24,
+    elevation: 2,
     borderWidth: 1,
-    borderColor: PREMA_THEME.colors.powderBlue,
+    borderColor: 'rgba(44,73,106,0.04)',
     overflow: 'hidden',
   },
   settingsRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: PREMA_THEME.spacing.md,
-    paddingHorizontal: PREMA_THEME.spacing.md,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: PREMA_THEME.colors.powderBlue,
-    minHeight: 56, // Accessible touch target
+    borderBottomColor: 'rgba(44,73,106,0.05)',
   },
   settingsRowLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: PREMA_THEME.spacing.md,
+    flex: 1,
   },
-  settingsIconWrapper: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: PREMA_THEME.colors.background,
+  settingsIconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F0F4F8',
     justifyContent: 'center',
     alignItems: 'center',
+    marginRight: 16,
   },
-  settingsRowLabel: {
-    color: PREMA_THEME.colors.deepNavy,
+  settingsLabel: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '600',
+    color: PREMA_THEME.colors.deepNavy,
   },
 });

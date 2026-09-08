@@ -4,7 +4,7 @@ import Svg, { Path, Circle, Defs, LinearGradient, Stop, Rect } from 'react-nativ
 import { BlurView } from 'expo-blur';
 import { colors, spacing, typography } from '../theme/theme';
 import { Button } from '../components/Button';
-import CelestialBackground from '../components/CelestialBackground';
+import CelestialBackground from '../../components/CelestialBackground';
 
 const { width: SW, height: SH } = Dimensions.get('window');
 
@@ -175,7 +175,6 @@ export const OnboardingScreen = () => {
                   shadowOffset: { width: 0, height: 1 },
                   shadowOpacity: 0.2,
                   shadowRadius: 2,
-                  elevation: 2,
                 }}
               />
             </View>

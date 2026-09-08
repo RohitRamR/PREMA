@@ -6,6 +6,12 @@ export const colors = {
   text: '#172B3A',
   textMuted: '#6F8492',
   white: '#FFFFFF',
+  deepNavy: '#172B3A',
+  mutedBlueGrey: '#6F8492',
+  skyBlue: '#A9D8F5',
+  cardBg: '#FFFFFF',
+  pink: '#FF6B8B',
+  accent: '#74B4F2',
 };
 
 export const spacing = {
@@ -35,3 +41,12 @@ export const typography = {
     xxl: 32,
   }
 };
+
+export const PREMA_THEME = {
+  colors,
+  spacing,
+  radii,
+  typography,
+};
+
+export default PREMA_THEME;
