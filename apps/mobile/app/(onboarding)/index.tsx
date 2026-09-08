@@ -231,7 +231,7 @@ const SideStickFigure = React.memo(function SideStickFigure({
           borderBottomWidth: torsoH, borderBottomColor: color,
           borderLeftWidth: dressFlare / 2 - dressTop / 2, borderLeftColor: 'transparent',
           borderRightWidth: dressFlare / 2 - dressTop / 2, borderRightColor: 'transparent',
-          width: dressTop, zIndex: 2,
+          width: dressTop, height: 0, borderStyle: 'solid', backgroundColor: 'transparent', zIndex: 2,
         }} />
       ) : (
         <View style={{
