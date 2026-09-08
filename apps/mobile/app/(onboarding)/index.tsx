@@ -1523,7 +1523,7 @@ export default function AnimatedSignUp() {
                 
                 const starScale = scrollX.interpolate({
                   inputRange: [(i - 0.6) * SW, i * SW, (i + 0.6) * SW],
-                  outputRange: [0.5, 1, 0.5],
+                  outputRange: [0.7, 1.2, 0.7],
                   extrapolate: 'clamp'
                 });
 
@@ -1541,15 +1541,43 @@ export default function AnimatedSignUp() {
 
                 return (
                   <View key={label} style={{ alignItems: 'center', zIndex: 2, width: 42 }}>
-                    <View style={{ height: 16, justifyContent: 'center', alignItems: 'center' }}>
-                      <RNAnimated.View style={{ position: 'absolute', width: 7, height: 7, borderRadius: 3.5, backgroundColor: '#FFF', borderWidth: 1.5, borderColor: 'rgba(44,73,106,0.3)', opacity: futureDotOpacity }} />
-                      <RNAnimated.View style={{ position: 'absolute', width: 7, height: 7, borderRadius: 3.5, backgroundColor: C.pri, opacity: pastDotOpacity }} />
-                      <RNAnimated.View style={{ position: 'absolute', opacity: starOpacity, transform: [{ scale: starScale }] }}>
-                        <Text style={{ fontSize: 16, color: C.pink, textShadowColor: C.pink, textShadowRadius: 6, marginTop: -2 }}>{'✦'}</Text>
+                    {/* Wire hanging from the line */}
+                    <View style={{ width: 1, height: 6, backgroundColor: 'rgba(44,73,106,0.2)', marginTop: 8 }} />
+                    
+                    {/* Bulb container */}
+                    <View style={{ width: 14, height: 14, borderRadius: 7, justifyContent: 'center', alignItems: 'center' }}>
+                      {/* Future: dim bulb */}
+                      <RNAnimated.View style={{ 
+                        position: 'absolute', width: 10, height: 10, borderRadius: 5, 
+                        backgroundColor: '#E8EEF4', borderWidth: 1, borderColor: 'rgba(44,73,106,0.15)',
+                        opacity: futureDotOpacity 
+                      }} />
+                      {/* Past: lit navy bulb with glow */}
+                      <RNAnimated.View style={{ 
+                        position: 'absolute', width: 10, height: 10, borderRadius: 5, 
+                        backgroundColor: C.pri, opacity: pastDotOpacity,
+                        shadowColor: C.accent, shadowOffset: { width: 0, height: 0 },
+                        shadowOpacity: 0.6, shadowRadius: 4, elevation: 3,
+                      }} />
+                      {/* Current: glowing pink star bulb */}
+                      <RNAnimated.View style={{ 
+                        position: 'absolute', opacity: starOpacity, 
+                        transform: [{ scale: starScale }],
+                      }}>
+                        <View style={{ 
+                          width: 14, height: 14, borderRadius: 7, 
+                          backgroundColor: C.pink,
+                          justifyContent: 'center', alignItems: 'center',
+                          shadowColor: C.pink, shadowOffset: { width: 0, height: 0 },
+                          shadowOpacity: 1, shadowRadius: 8, elevation: 5,
+                        }}>
+                          <Text style={{ fontSize: 9, color: '#FFF', marginTop: -1 }}>{'✦'}</Text>
+                        </View>
                       </RNAnimated.View>
                     </View>
 
-                    <View style={{ position: 'absolute', top: 18, width: 46, alignItems: 'center' }}>
+                    {/* Label below */}
+                    <View style={{ marginTop: 4, width: 46, alignItems: 'center' }}>
                       <RNAnimated.Text style={{ position: 'absolute', fontSize: 7, fontWeight: '700', color: 'rgba(44,73,106,0.4)', letterSpacing: 0.3, textAlign: 'center', opacity: futureDotOpacity }}>
                         {label}
                       </RNAnimated.Text>
@@ -1586,44 +1614,81 @@ export default function AnimatedSignUp() {
         {/* Ground + Stick Figure Animations */}
         {step > 0 && (
           <View style={{ height: 80, position: 'relative' }}>
-            <View style={{ position: 'absolute', bottom: 18, left: 16, right: 16, height: 2, backgroundColor: C.ground, borderRadius: 1 }} />
+            <View style={{ position: 'absolute', bottom: 35, left: 16, right: 16, height: 2, backgroundColor: C.ground, borderRadius: 1 }} />
 
-            {Array.from({ length: 30 }).map((_, i) => {
+                        {Array.from({ length: 30 }).map((_, i) => {
               const dotX = 16 + i * ((SW - 32) / 30);
-              const isLeftSide = i < 15; // Left half = blue, Right half = coral
+              const isLeftSide = i < 15;
 
               if (isLeftSide) {
-                // Man's side: light blue base, darkens when man walks over
                 const manOpacity = leftX.interpolate({
                   inputRange: [dotX - 30, dotX, dotX + 30],
                   outputRange: [0, 1, 0],
                   extrapolate: 'clamp',
                 });
+                
+                // Continuous shake after man passes
+                const manInp = [0, dotX];
+                const manOut = [0, 0];
+                for (let j = 1; j <= 20; j++) {
+                  manInp.push(dotX + j * 10);
+                  manOut.push(j % 2 === 0 ? -2 : 2);
+                }
+                const manVibrate = leftX.interpolate({
+                  inputRange: manInp,
+                  outputRange: manOut,
+                  extrapolate: 'clamp',
+                });
+
                 return (
-                  <View key={`d${i}`} style={{ position: 'absolute', bottom: 14, left: dotX }}>
-                    <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#B8D8F0', opacity: 0.6 }} />
-                    <RNAnimated.View style={{
-                      position: 'absolute', width: 6, height: 6, borderRadius: 3,
-                      backgroundColor: C.pri,
-                      opacity: manOpacity,
-                    }} />
+                  <View key={`d${i}`} style={{ position: 'absolute', bottom: 15, left: dotX - 4, alignItems: 'center' }}>
+                    <View style={{ width: 1, height: 6, backgroundColor: 'rgba(44,73,106,0.15)' }} />
+                    <RNAnimated.View style={{ transform: [{ translateY: manVibrate }] }}>
+                      <Text style={{ fontSize: 10, color: '#B8D8F0', marginTop: -2 }}>{'✦'}</Text>
+                      <RNAnimated.Text style={{
+                        position: 'absolute', top: 0, left: 0,
+                        fontSize: 10, color: C.pri,
+                        opacity: manOpacity,
+                        textShadowColor: C.accent, textShadowRadius: 6, textShadowOffset: { width: 0, height: 0 },
+                      }}>{'✦'}</RNAnimated.Text>
+                    </RNAnimated.View>
                   </View>
                 );
               } else {
-                // Woman's side: light coral base, darkens when woman walks over
                 const womanOpacity = rightX.interpolate({
                   inputRange: [dotX - 30, dotX, dotX + 30],
                   outputRange: [0, 1, 0],
                   extrapolate: 'clamp',
                 });
+                
+                // Continuous shake after woman passes (she moves right to left, so rightX decreases)
+                const womInp = [dotX];
+                const womOut = [0];
+                for (let j = 1; j <= 20; j++) {
+                  womInp.unshift(dotX - j * 10); // Insert at beginning since inputRange must be monotonically increasing
+                  womOut.unshift(j % 2 === 0 ? -2 : 2);
+                }
+                womInp.push(9999);
+                womOut.push(0);
+                
+                const womanVibrate = rightX.interpolate({
+                  inputRange: womInp,
+                  outputRange: womOut,
+                  extrapolate: 'clamp',
+                });
+
                 return (
-                  <View key={`d${i}`} style={{ position: 'absolute', bottom: 14, left: dotX }}>
-                    <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#FFB8C6', opacity: 0.6 }} />
-                    <RNAnimated.View style={{
-                      position: 'absolute', width: 6, height: 6, borderRadius: 3,
-                      backgroundColor: '#E0415C',
-                      opacity: womanOpacity,
-                    }} />
+                  <View key={`d${i}`} style={{ position: 'absolute', bottom: 15, left: dotX - 4, alignItems: 'center' }}>
+                    <View style={{ width: 1, height: 6, backgroundColor: 'rgba(44,73,106,0.15)' }} />
+                    <RNAnimated.View style={{ transform: [{ translateY: womanVibrate }] }}>
+                      <Text style={{ fontSize: 10, color: '#FFB8C6', marginTop: -2 }}>{'✦'}</Text>
+                      <RNAnimated.Text style={{
+                        position: 'absolute', top: 0, left: 0,
+                        fontSize: 10, color: '#E0415C',
+                        opacity: womanOpacity,
+                        textShadowColor: C.pink, textShadowRadius: 6, textShadowOffset: { width: 0, height: 0 },
+                      }}>{'✦'}</RNAnimated.Text>
+                    </RNAnimated.View>
                   </View>
                 );
               }
@@ -1635,7 +1700,7 @@ export default function AnimatedSignUp() {
             {/* Left Figure */}
             <RNAnimated.View style={{
               position: 'absolute',
-              bottom: 20,
+              bottom: 37,
               left: leftX,
             }}>
               <SideStickFigure
@@ -1650,7 +1715,7 @@ export default function AnimatedSignUp() {
             {/* Right Figure */}
             <RNAnimated.View style={{
               position: 'absolute',
-              bottom: 20,
+              bottom: 37,
               left: rightX,
             }}>
               <SideStickFigure
