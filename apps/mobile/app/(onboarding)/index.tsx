@@ -1542,7 +1542,7 @@ export default function AnimatedSignUp() {
             showsHorizontalScrollIndicator={false}
             onScroll={RNAnimated.event(
               [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-              { useNativeDriver: true }
+              { useNativeDriver: false }
             )}
             renderItem={({ item: fn }) => <View style={{ width: SW }}>{fn()}</View>}
           />
