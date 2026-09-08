@@ -15,7 +15,7 @@ import {
   StyleSheet,
   ScrollView,
 } from 'react-native';
-import Svg, { Path, Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
+import Svg, { Path, Defs, LinearGradient, Stop, Rect, Circle } from 'react-native-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Icon from '../../components/Icon';
@@ -168,58 +168,59 @@ const SideStickFigure = React.memo(function SideStickFigure({
   const s = scale;
   
   const headR = 8 * s;
-  const gap = 2 * s;
+  const neckH = 1 * s;       // Tiny neck instead of a big gap
   
   const maleTorsoW = 10 * s;
-  const torsoH = 24 * s;
+  const torsoH = 22 * s;
   
-  const dressTop = 6 * s;
-  const dressFlare = 8 * s;
+  const dressTopW = 4 * s;   // Narrow at shoulders
+  const dressBottomW = 22 * s; // Wide flare at bottom (A-line)
   
-  const limbW = 5.5 * s;
-  const armH = 20 * s;
-  const legH = 22 * s;
+  const limbW = 5 * s;
+  const armH = 18 * s;
+  const legH = 20 * s;
 
-  // If walkCycle isn't provided, use a dummy value that doesn't move
   // Use a stable ref to avoid creating new Animated.Value on every render
   const dummyWalk = useRef(new RNAnimated.Value(0)).current;
   const animValue = walkCycle || dummyWalk;
 
   const frontLegAngle = animValue.interpolate({
     inputRange: [0, 0.25, 0.5, 0.75, 1],
-    outputRange: ['10deg', '45deg', '10deg', '-25deg', '10deg']
+    outputRange: ['10deg', '40deg', '10deg', '-20deg', '10deg']
   });
   const backLegAngle = animValue.interpolate({
     inputRange: [0, 0.25, 0.5, 0.75, 1],
-    outputRange: ['-10deg', '-45deg', '-10deg', '25deg', '-10deg']
+    outputRange: ['-10deg', '-40deg', '-10deg', '20deg', '-10deg']
   });
   const frontArmAngle = animValue.interpolate({
     inputRange: [0, 0.25, 0.5, 0.75, 1],
-    outputRange: ['15deg', '-20deg', '15deg', '50deg', '15deg']
+    outputRange: ['15deg', '-20deg', '15deg', '45deg', '15deg']
   });
   const backArmAngle = animValue.interpolate({
     inputRange: [0, 0.25, 0.5, 0.75, 1],
-    outputRange: ['-15deg', '20deg', '-15deg', '-50deg', '-15deg']
+    outputRange: ['-15deg', '20deg', '-15deg', '-45deg', '-15deg']
   });
 
-  const centerX = 20 * s;
+  const containerW = 44 * s;
+  const centerX = containerW / 2;
+  const bodyTop = headR * 2 + neckH;
 
   return (
     <View style={{
-      width: 40 * s,
-      height: 64 * s,
+      width: containerW,
+      height: 57 * s,
       transform: [{ scaleX: facingLeft ? -1 : 1 }],
     }}>
       {/* Back Arm */}
       <RNAnimated.View style={{
-        position: 'absolute', top: headR * 2 + gap + 2 * s, left: centerX - limbW / 2,
+        position: 'absolute', top: bodyTop + 2 * s, left: centerX - limbW / 2,
         width: limbW, height: armH, backgroundColor: color, borderRadius: limbW / 2,
         transformOrigin: 'top', transform: [{ rotate: backArmAngle }], zIndex: 1,
       }} />
 
       {/* Back Leg */}
       <RNAnimated.View style={{
-        position: 'absolute', top: headR * 2 + gap + torsoH - 2 * s, left: centerX - limbW / 2,
+        position: 'absolute', top: bodyTop + torsoH - 2 * s, left: centerX - limbW / 2,
         width: limbW, height: legH, backgroundColor: color, borderRadius: limbW / 2,
         transformOrigin: 'top', transform: [{ rotate: backLegAngle }], zIndex: 1,
       }} />
@@ -227,15 +228,16 @@ const SideStickFigure = React.memo(function SideStickFigure({
       {/* Torso/Body */}
       {isFemale ? (
         <View style={{
-          position: 'absolute', top: headR * 2 + gap, left: centerX - dressFlare / 2,
+          position: 'absolute', top: bodyTop, left: centerX - dressBottomW / 2,
+          width: dressTopW, height: 0,
           borderBottomWidth: torsoH, borderBottomColor: color,
-          borderLeftWidth: dressFlare / 2 - dressTop / 2, borderLeftColor: 'transparent',
-          borderRightWidth: dressFlare / 2 - dressTop / 2, borderRightColor: 'transparent',
-          width: dressTop, height: 0, borderStyle: 'solid', backgroundColor: 'transparent', zIndex: 2,
+          borderLeftWidth: (dressBottomW - dressTopW) / 2, borderLeftColor: 'transparent',
+          borderRightWidth: (dressBottomW - dressTopW) / 2, borderRightColor: 'transparent',
+          borderStyle: 'solid', backgroundColor: 'transparent', zIndex: 2,
         }} />
       ) : (
         <View style={{
-          position: 'absolute', top: headR * 2 + gap, left: centerX - maleTorsoW / 2,
+          position: 'absolute', top: bodyTop, left: centerX - maleTorsoW / 2,
           width: maleTorsoW, height: torsoH, backgroundColor: color,
           borderRadius: maleTorsoW / 2, zIndex: 2,
         }} />
@@ -249,23 +251,23 @@ const SideStickFigure = React.memo(function SideStickFigure({
       }}>
         {isFemale && (
           <View style={{
-            position: 'absolute', top: 2 * s, right: -4 * s,
-            width: 8 * s, height: 10 * s, borderRadius: 5 * s,
-            backgroundColor: color, transform: [{ rotate: '15deg' }],
+            position: 'absolute', top: 0, right: -5 * s,
+            width: 10 * s, height: 14 * s, borderRadius: 5 * s,
+            backgroundColor: color, transform: [{ rotate: '20deg' }],
           }} />
         )}
       </View>
 
       {/* Front Leg */}
       <RNAnimated.View style={{
-        position: 'absolute', top: headR * 2 + gap + torsoH - 2 * s, left: centerX - limbW / 2,
+        position: 'absolute', top: bodyTop + torsoH - 2 * s, left: centerX - limbW / 2,
         width: limbW, height: legH, backgroundColor: color, borderRadius: limbW / 2,
         transformOrigin: 'top', transform: [{ rotate: frontLegAngle }], zIndex: 3,
       }} />
 
       {/* Front Arm */}
       <RNAnimated.View style={{
-        position: 'absolute', top: headR * 2 + gap + 2 * s, left: centerX - limbW / 2,
+        position: 'absolute', top: bodyTop + 2 * s, left: centerX - limbW / 2,
         width: limbW, height: armH, backgroundColor: color, borderRadius: limbW / 2,
         transformOrigin: 'top', transform: [{ rotate: frontArmAngle }], zIndex: 4,
       }} />
@@ -545,12 +547,6 @@ export default function AnimatedSignUp() {
 
   const stopWalkCycle = useCallback(() => {
     walkCycle.stopAnimation();
-    if (walkListenerId.current) {
-      walkCycle.removeListener(walkListenerId.current);
-      walkListenerId.current = null;
-    }
-    setLegVal(0);
-    setArmVal(0);
     isWalkingRef.current = false;
   }, [walkCycle]);
 
