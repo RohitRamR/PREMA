@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from '../components/Icon';
@@ -5,9 +6,10 @@ import { View, Text, ScrollView, Image, Pressable, TextInput } from 'react-nativ
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 
 export default function CompatibilityBreakdown() {
+  const router = useRouter();
   return (
     <SafeAreaView className="bg-surface text-on-surface font-body-md text-body-md flex flex-1">
-      <View className="bg-surface border-surface-container-highest bg-surface/85"><View className="h-16 px-space-16 max-w-[480px] mx-auto flex items-center justify-between flex-row"><View className="flex items-center gap-space-8 flex-row"><Pressable aria-label="Go Back" className="w-11 h-11 -ml-space-8 flex items-center justify-center text-primary rounded-full flex-row" ><Icon name="arrow_back_ios_new" size={22} className="text-[22px]" /></Pressable><Image alt="PREMA Logo" className="h-7 w-auto" source={require('../assets/images/logo.png')} /><Text className="font-headline-sm text-headline-sm text-primary tracking-tight">Profile Deep Dive</Text></View><View className="flex items-center gap-space-4 flex-row"><Image alt="Profile" className="w-8 h-8 rounded-full" source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBnpv7GVuzd6fs5TliuCiwIlpL0Rt2bVAxsXV2oCjBpVhp4UG2QcSA0fM1E5q0b-Bi3hANo_gxxHA1NjlLrqjE8ohvM6MdNojlI797HuC0AUkvZ0e2I5nz-fDRMdLXKv5aD9DyFmCPwJsDQdw4uv-m2poXm4GRuvfCjVpkLQEOf-1fFeXQOV7jP88Y-BVm6Xpd7_d4ZzQTNKZfgN_NLPKw3_kWAaoVLwLZ_BFzC19ixAfQnTKjdTvg9' }} /></View></View></View><ScrollView className="flex relative w-full max-w-[480px] mx-auto px-margin-mobile pt-16 bg-surface"><View className="flex w-full pb-28">
+      <View className="bg-surface border-surface-container-highest bg-surface/85"><View className="h-16 px-space-16 max-w-[480px] mx-auto flex items-center justify-between flex-row"><View className="flex items-center gap-space-8 flex-row"><Pressable onPress={() => router.back()} aria-label="Go Back" className="w-11 h-11 -ml-space-8 flex items-center justify-center text-primary rounded-full flex-row" ><Icon name="arrow_back_ios_new" size={22} className="text-[22px]" /></Pressable><Image alt="PREMA Logo" className="h-7 w-[67px]" resizeMode="contain" source={require('../assets/images/logo.png')} /><Text className="font-headline-sm text-headline-sm text-primary tracking-tight">Profile Deep Dive</Text></View><View className="flex items-center gap-space-4 flex-row"><Image alt="Profile" className="w-8 h-8 rounded-full" source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBnpv7GVuzd6fs5TliuCiwIlpL0Rt2bVAxsXV2oCjBpVhp4UG2QcSA0fM1E5q0b-Bi3hANo_gxxHA1NjlLrqjE8ohvM6MdNojlI797HuC0AUkvZ0e2I5nz-fDRMdLXKv5aD9DyFmCPwJsDQdw4uv-m2poXm4GRuvfCjVpkLQEOf-1fFeXQOV7jP88Y-BVm6Xpd7_d4ZzQTNKZfgN_NLPKw3_kWAaoVLwLZ_BFzC19ixAfQnTKjdTvg9' }} /></View></View></View><ScrollView className="flex relative w-full max-w-[480px] mx-auto px-margin-mobile pt-16 bg-surface"><View className="flex w-full pb-28">
 
 <View className="flex items-center justify-between py-space-8 mb-space-12 flex-row">
 <View className="flex items-center gap-space-8 flex-row">
@@ -75,7 +77,7 @@ export default function CompatibilityBreakdown() {
 </View>
 <Text className="font-label-sm text-label-sm text-secondary bg-secondary-container/40 px-2 py-0.5 rounded-full">Weighted Analysis</Text>
 </View>
-<View >
+<View className="gap-space-12">
 
 <View>
 <View className="flex justify-between items-center mb-1.5 flex-row">
@@ -207,7 +209,7 @@ export default function CompatibilityBreakdown() {
 <View className="rounded-xl overflow-hidden bg-surface-container-lowest shadow-sm mb-space-20">
 <View className="relative h-36 w-full">
 <Image className="w-full h-full" source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCbgJwDmA1ieAnXC_d2-4z9FjFJJD2TJN1lZSJhvVmCmtzh-S2kKRVUWnt14xFxJbX1n3sivYA2B2TvtTtKps1gMqiIOir-ruKGPZezLVO_HKIZ2adia_bmphGSsumQFQ2m4YD---Co__F1Tb5MTSyJy0qsYWHZ6-55oEYzg4zCeOWQ4sxDyZ3jQFAlarIb15c0hzAQS_cEweJHIhtRAzRsCfuQf2lakDmFEyzOs0IzOQ4PswIJIp06' }} />
-<View className="absolute"></View>
+<View className="absolute inset-0"></View>
 <View className="absolute bottom-3 left-4 flex items-center gap-2 flex-row">
 <Text className="px-2.5 py-1 rounded-full bg-surface-container-lowest/90 text-primary font-label-sm text-label-sm shadow-sm">Chennai Roots · Cosmopolitan Outlook</Text>
 </View>
@@ -226,7 +228,7 @@ export default function CompatibilityBreakdown() {
 </Text>
 <Text className="font-headline-sm text-headline-sm text-primary">3 Strongest Reasons You Align</Text>
 </View>
-<View >
+<View className="gap-space-12">
 <View className="flex items-start gap-space-12 p-space-12 rounded-lg bg-surface-container-low flex-row">
 <View className="w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center mt-0.5 flex-row">
 <Text className="font-label-sm text-label-sm">1</Text>

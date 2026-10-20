@@ -1,7 +1,7 @@
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from '../components/Icon';
-import { View, Text, ScrollView, Image, Pressable, TextInput } from 'react-native';
+import { View, Text, ScrollView, Image, Pressable, TextInput, ImageBackground } from 'react-native';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 
 export default function FirstDateTableModeDialogue() {
@@ -24,8 +24,8 @@ export default function FirstDateTableModeDialogue() {
 </View>
 
 <View className="relative overflow-hidden rounded-3xl bg-surface-container-lowest shadow-sm mb-6">
-<View className="h-44 w-full bg-cover bg-center relative" >
-<View className="absolute"></View>
+<ImageBackground source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDZya28j3Q0rUFokhYXCujebPz5rRzfDwUXQ1lA9NbVJl1yb9t8QC6E8d6iVuDJH6P52QzPMnnW_WoiH8OE82J9LACLKTnPePH0RBhgEGQLlXvrFLtoJuZ4BrZAUh9XuUpHCjsnfV--QgSZpsJS36d1FGV08gOSwGR4z8N_OJ_feZkplyMjUkZCCDGeA0A1WWBvjbRoJN-bTgds57Q2Cf1x9lc-pSNdgqlOPTKoCcd6bvWRzGtQiXSg' }} resizeMode="cover" className="h-44 w-full relative">
+<View className="absolute inset-0"></View>
 <View className="absolute top-3 right-3 px-2.5 py-1 bg-surface-container-lowest/80 rounded-full font-label-sm text-label-sm text-primary flex items-center gap-1 flex-row">
 <Icon name="verified" size={13} className="text-[13px] text-secondary" />
 <Text>Curated Sanctuary</Text>
@@ -38,7 +38,7 @@ export default function FirstDateTableModeDialogue() {
 <Text>The Glasshouse Pavilion • Table 07</Text>
 </View>
 </View>
-</View>
+</ImageBackground>
 
 <View className="p-4 bg-surface-container-low flex items-center justify-between flex-row">
 <View className="flex items-center gap-3 flex-row">

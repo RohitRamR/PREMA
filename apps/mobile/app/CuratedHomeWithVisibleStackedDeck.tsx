@@ -7,7 +7,7 @@ import Svg, { Path, Circle, Rect } from 'react-native-svg';
 export default function CuratedHomeWithVisibleStackedDeck() {
   return (
     <SafeAreaView className="bg-surface text-on-surface font-body-md text-body-md flex flex-1">
-      <View className="bg-surface border-surface-container-highest bg-surface/90 border-surface-container"><View className="h-16 px-space-20 max-w-[480px] mx-auto flex items-center justify-between flex-row"><View className="flex items-center gap-space-12 flex-row"><Image alt="PREMA Logo" className="h-8 w-auto" source={require('../assets/images/logo.png')} /><View className="flex"><Text className="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-bold">PREMA</Text><Text className="font-headline-sm text-headline-sm text-primary tracking-tight font-bold">Home</Text></View></View><View className="flex items-center gap-space-8 flex-row"><Pressable aria-label="Notifications" className="w-10 h-10 flex items-center justify-center rounded-full text-secondary flex-row"><Icon name="notifications" size={22} className="text-[22px]" /></Pressable><View className="relative flex items-center justify-center flex-row"><Image alt="Profile" className="w-8 h-8 rounded-full border border-secondary-container" source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBnpv7GVuzd6fs5TliuCiwIlpL0Rt2bVAxsXV2oCjBpVhp4UG2QcSA0fM1E5q0b-Bi3hANo_gxxHA1NjlLrqjE8ohvM6MdNojlI797HuC0AUkvZ0e2I5nz-fDRMdLXKv5aD9DyFmCPwJsDQdw4uv-m2poXm4GRuvfCjVpkLQEOf-1fFeXQOV7jP88Y-BVm6Xpd7_d4ZzQTNKZfgN_NLPKw3_kWAaoVLwLZ_BFzC19ixAfQnTKjdTvg9' }} /><Text className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-secondary-container rounded-full flex items-center justify-center flex-row"><Icon name="verified" size={10} className="text-[10px] text-primary font-bold" /></Text></View></View></View></View><ScrollView className="flex relative w-full max-w-[480px] mx-auto px-margin-mobile pt-16 pb-28 bg-surface"><View className="flex w-full">
+      <View className="bg-surface border-surface-container-highest bg-surface/90 border-surface-container"><View className="h-16 px-space-20 max-w-[480px] mx-auto flex items-center justify-between flex-row"><View className="flex items-center gap-space-12 flex-row"><Image alt="PREMA Logo" className="h-8 w-[76px]" resizeMode="contain" source={require('../assets/images/logo.png')} /><View className="flex"><Text className="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-bold">PREMA</Text><Text className="font-headline-sm text-headline-sm text-primary tracking-tight font-bold">Home</Text></View></View><View className="flex items-center gap-space-8 flex-row"><Pressable aria-label="Notifications" className="w-10 h-10 flex items-center justify-center rounded-full text-secondary flex-row"><Icon name="notifications" size={22} className="text-[22px]" /></Pressable><View className="relative flex items-center justify-center flex-row"><Image alt="Profile" className="w-8 h-8 rounded-full border border-secondary-container" source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBnpv7GVuzd6fs5TliuCiwIlpL0Rt2bVAxsXV2oCjBpVhp4UG2QcSA0fM1E5q0b-Bi3hANo_gxxHA1NjlLrqjE8ohvM6MdNojlI797HuC0AUkvZ0e2I5nz-fDRMdLXKv5aD9DyFmCPwJsDQdw4uv-m2poXm4GRuvfCjVpkLQEOf-1fFeXQOV7jP88Y-BVm6Xpd7_d4ZzQTNKZfgN_NLPKw3_kWAaoVLwLZ_BFzC19ixAfQnTKjdTvg9' }} /><Text className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-secondary-container rounded-full flex items-center justify-center flex-row"><Icon name="verified" size={10} className="text-[10px] text-primary font-bold" /></Text></View></View></View></View><ScrollView className="flex relative w-full max-w-[480px] mx-auto px-margin-mobile pt-16 pb-28 bg-surface"><View className="flex w-full">
 
 <View className="flex items-center justify-between py-space-12 flex-row">
 <View className="flex">
@@ -38,7 +38,7 @@ export default function CuratedHomeWithVisibleStackedDeck() {
 
 <View className="relative w-full aspect-[4/5] overflow-hidden bg-primary/10">
 <Image alt="Meera profile" className="w-full h-full" source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCeTmkDxAQvAuGyeMNSx65uwaRv5_31UYO1vGZbYE7qYEYYc378EU1weymvieVVG62-U2DoHbW3iPlux2HeHDAm5ZVYREUwI5IaB__lJ_OUwN4_f3gLjmD5YplXb64O6Ez9VgtMdwQ_T9hmfa0AZBu0W8fqcLh8sfUA80C1IJBI9yuCoBorKDMLzRfA5v6YfFccwJG6cz_mXWomxU-SB1dAbkrIpYAUSh8VQ1b97BE5-CsXrrOzeBmM' }} />
-<View className="absolute"></View>
+<View className="absolute inset-0"></View>
 <View className="absolute top-space-12 flex items-center justify-between flex-row">
 <View className="flex items-center gap-space-8 px-space-12 py-space-6 rounded-full bg-secondary-container/95 flex-row">
 <Text className="w-2 h-2 rounded-full bg-secondary"></Text>
@@ -67,7 +67,7 @@ export default function CuratedHomeWithVisibleStackedDeck() {
 
 <View className="relative w-full aspect-[4/5] overflow-hidden bg-primary/10">
 <Image alt="Siddharth profile" className="w-full h-full" source={{ uri: 'https://lh3.googleusercontent.com/aida/AEtjO1Up8qBACfCG-So5T4HAYVS9xkrQzMFadF_MIqIRNfM3adIKQlkkqKXqGbAsn-rW-Wkyr6jCwhbHkK2x6obEMEAIKkEJBjzuUbgn3JjYSUbEs1rikOO0NY11UBIZFhYEHU0du1Y-us_exSA4QX6pfgrcJzCPdNP_pTD7AxScJe7nxO1XPKHxWRxY8zgllEZ6FFDctv9P4wrtNonyhqXXW52wH5zJs_9ZF12-1M-nJMOL9ohtZTmFal3ewY0' }} />
-<View className="absolute"></View>
+<View className="absolute inset-0"></View>
 <View className="absolute top-space-12 flex items-center justify-between flex-row">
 <View className="flex items-center gap-space-8 px-space-12 py-space-6 rounded-full bg-secondary-container/95 flex-row">
 <Text className="w-2 h-2 rounded-full bg-secondary"></Text>
@@ -103,7 +103,7 @@ export default function CuratedHomeWithVisibleStackedDeck() {
 <View className="relative w-full aspect-[4/5] overflow-hidden bg-primary/10">
 <Image alt="Ananya match profile" className="w-full h-full active-profile-img" source={{ uri: 'https://lh3.googleusercontent.com/aida/AEtjO1VGqBJ7JueP0nAn4r78xQjHS-9jw5Szt3jUKl5SwIMfCC4uVeT-F8Fs5sjQbtcDPZqWKQT-8rjQ9paFthPqiAQsmuMVOCqq77L2u_0M921q28KUFYm59LEEbws098ziUFRgfGlsQFgeX0Tj6iCFMZdEW4gJJUAkThrnqhkhb--QxN2wuVkttvUK7fe_-z7YkNtVHpbYSZKySHPL07DWqf47jG5OGK6zw1vnwCs44uPDzrSq4nEpH0zfMz4' }} />
 
-<View className="absolute"></View>
+<View className="absolute inset-0"></View>
 <View className="absolute top-0 h-28"></View>
 
 <View className="absolute top-space-12 flex items-center gap-1.5 active-story-bars flex-row">

@@ -14,6 +14,7 @@ import {
   Image,
   StyleSheet,
   ScrollView,
+  Keyboard,
 } from 'react-native';
 import Svg, { Path, Defs, LinearGradient, Stop, Rect, Circle } from 'react-native-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -168,15 +169,14 @@ const SideStickFigure = React.memo(function SideStickFigure({
   const s = scale;
   
   const headR = 8 * s;
-  const neckH = 1 * s;       // Tiny neck instead of a big gap
+  const neckH = (isFemale ? 2.5 : 1) * s; // Female: visible gap between head and dress
   
   const maleTorsoW = 10 * s;
   const torsoH = 22 * s;
   
-  const dressTopW = 4 * s;   // Narrow at shoulders
-  const dressBottomW = 22 * s; // Wide flare at bottom (A-line)
+  const dressBottomW = 15 * s; // A-line hem width
   
-  const limbW = 5 * s;
+  const limbW = (isFemale ? 4 : 5) * s;
   const armH = 18 * s;
   const legH = 20 * s;
 
@@ -208,15 +208,15 @@ const SideStickFigure = React.memo(function SideStickFigure({
   return (
     <View style={{
       width: containerW,
-      height: 57 * s,
+      height: bodyTop + torsoH - 2 * s + legH,
       transform: [{ scaleX: facingLeft ? -1 : 1 }],
     }}>
-      {/* Back Arm */}
-      <RNAnimated.View style={{
+      {/* Back Arm (female arms are hidden by the dress) */}
+      {!isFemale && <RNAnimated.View style={{
         position: 'absolute', top: bodyTop + 2 * s, left: centerX - limbW / 2,
         width: limbW, height: armH, backgroundColor: color, borderRadius: limbW / 2,
         transformOrigin: 'top', transform: [{ rotate: backArmAngle }], zIndex: 1,
-      }} />
+      }} />}
 
       {/* Back Leg */}
       <RNAnimated.View style={{
@@ -227,14 +227,19 @@ const SideStickFigure = React.memo(function SideStickFigure({
 
       {/* Torso/Body */}
       {isFemale ? (
-        <View style={{
-          position: 'absolute', top: bodyTop, left: centerX - dressBottomW / 2,
-          width: dressTopW, height: 0,
-          borderBottomWidth: torsoH, borderBottomColor: color,
-          borderLeftWidth: (dressBottomW - dressTopW) / 2, borderLeftColor: 'transparent',
-          borderRightWidth: (dressBottomW - dressTopW) / 2, borderRightColor: 'transparent',
-          borderStyle: 'solid', backgroundColor: 'transparent', zIndex: 2,
-        }} />
+        // A-line dress with rounded shoulders (viewBox units = s)
+        <Svg
+          width={dressBottomW}
+          height={torsoH}
+          viewBox="0 0 15 22"
+          style={{ position: 'absolute', top: bodyTop, left: centerX - dressBottomW / 2, zIndex: 2 }}
+          pointerEvents="none"
+        >
+          <Path
+            d="M 7.5 0 C 9.4 0 10.6 1.2 11.1 2.9 C 12 6 13.6 11 14.4 13.2 C 14.8 15 15 18 15 21.2 Q 15 22 14.2 22 L 0.8 22 Q 0 22 0 21.2 C 0 18 0.2 15 0.6 13.2 C 1.4 11 3 6 3.9 2.9 C 4.4 1.2 5.6 0 7.5 0 Z"
+            fill={color}
+          />
+        </Svg>
       ) : (
         <View style={{
           position: 'absolute', top: bodyTop, left: centerX - maleTorsoW / 2,
@@ -251,24 +256,36 @@ const SideStickFigure = React.memo(function SideStickFigure({
       }}>
         {isFemale && (
           <>
-            {/* Hair swoop - curves from top of head outward */}
-            <View style={{
-              position: 'absolute', top: -2 * s, right: -6 * s,
-              width: 12 * s, height: 12 * s, borderRadius: 6 * s,
-              backgroundColor: color,
-            }} />
-            {/* Ponytail flowing down - the curved tail part */}
-            <View style={{
-              position: 'absolute', top: 4 * s, right: -10 * s,
-              width: 8 * s, height: 16 * s, borderRadius: 4 * s,
-              backgroundColor: color, transform: [{ rotate: '15deg' }],
-            }} />
-            {/* Ponytail curl tip at bottom */}
-            <View style={{
-              position: 'absolute', top: 16 * s, right: -8 * s,
-              width: 8 * s, height: 8 * s, borderRadius: 4 * s,
-              backgroundColor: color,
-            }} />
+            {/* Ponytail — tapered S-curve off the BACK of the head (figure faces +x
+                before mirroring, so the back is the left side). viewBox is in
+                head-local units: head circle is centred at (8,8), r=8. */}
+            <Svg
+              width={20 * s}
+              height={28 * s}
+              viewBox="-12 -4 20 28"
+              style={{ position: 'absolute', left: -12 * s, top: -4 * s }}
+              pointerEvents="none"
+            >
+              <Path
+                d="M 0.8 4.4
+                   C -1.2 2.4, -3.4 1.9, -4.8 2.2
+                   C -6.8 2.6, -8.1 4.4, -8 6
+                   C -7.9 7.6, -7 9.2, -6.6 10.6
+                   C -6 12.4, -4.6 13.2, -3.8 14.4
+                   C -3.2 15.6, -3 17.2, -3.4 18.4
+                   C -3.8 19.6, -5.4 20, -8 20.4
+                   C -6.4 21.4, -3.4 21.6, -1.6 21
+                   C -0.2 20.4, 0.7 19.6, 0.8 18.6
+                   C 1.1 17.4, 1.4 15.8, 0.9 15
+                   C 0.4 14, 0.1 13.4, -0.4 12.9
+                   C -1.4 12.2, -2.6 11.8, -3.2 11.2
+                   C -4 10.4, -4.3 9, -4.2 8
+                   C -4.1 7, -3.9 6.2, -3.6 5.8
+                   L -1.4 5.8
+                   C -0.6 5.8, 0.2 5.6, 0.8 5.4 Z"
+                fill={color}
+              />
+            </Svg>
           </>
         )}
       </View>
@@ -281,11 +298,11 @@ const SideStickFigure = React.memo(function SideStickFigure({
       }} />
 
       {/* Front Arm */}
-      <RNAnimated.View style={{
+      {!isFemale && <RNAnimated.View style={{
         position: 'absolute', top: bodyTop + 2 * s, left: centerX - limbW / 2,
         width: limbW, height: armH, backgroundColor: color, borderRadius: limbW / 2,
         transformOrigin: 'top', transform: [{ rotate: frontArmAngle }], zIndex: 4,
-      }} />
+      }} />}
     </View>
   );
 });
@@ -372,9 +389,9 @@ function FloatingCapsule({
     }
 
     // Unique phase/timing calculation based on index for natural desynchronized zero-gravity float
-    const duration = 1200 + (index % 5) * 220;
-    const delay = (index % 7) * 60;
-    const floatDist = 3.0 + (index % 3) * 0.8;
+    const duration = 2200 + (index % 5) * 260;
+    const delay = (index % 7) * 120;
+    const floatDist = 1.6 + (index % 3) * 0.5;
 
     const floatLoopY = RNAnimated.loop(
       RNAnimated.sequence([
@@ -402,13 +419,13 @@ function FloatingCapsule({
     const floatLoopX = RNAnimated.loop(
       RNAnimated.sequence([
         RNAnimated.timing(animX, {
-          toValue: floatDist * 0.5,
+          toValue: floatDist * 0.3,
           duration: duration * 1.25,
           easing: Easing.inOut(Easing.quad),
           useNativeDriver: true,
         }),
         RNAnimated.timing(animX, {
-          toValue: -floatDist * 0.5,
+          toValue: -floatDist * 0.3,
           duration: duration * 1.1,
           easing: Easing.inOut(Easing.quad),
           useNativeDriver: true,
@@ -482,6 +499,19 @@ export default function AnimatedSignUp() {
   const flatListRef = useRef<FlatList>(null);
   const scrollX = useRef(new RNAnimated.Value(0)).current;
   const [step, setStep] = useState(0);
+  const stepRef = useRef(0);
+  const transitioningRef = useRef(false);
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const [slideH, setSlideH] = useState(0);
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
+
+  useEffect(() => {
+    const show = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow', () => setKeyboardOpen(true));
+    const hide = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide', () => setKeyboardOpen(false));
+    return () => { show.remove(); hide.remove(); timersRef.current.forEach(clearTimeout); };
+  }, []);
+
+  const later = (fn: () => void, ms: number) => { timersRef.current.push(setTimeout(fn, ms)); };
 
   // Form States
   const [phone, setPhone] = useState('');
@@ -544,28 +574,35 @@ export default function AnimatedSignUp() {
   const messageOpacity = useRef(new RNAnimated.Value(0)).current;
 
   
+  const walkLoopRef = useRef<RNAnimated.CompositeAnimation | null>(null);
+
   const startWalkCycle = useCallback(() => {
+    walkLoopRef.current?.stop();
     isWalkingRef.current = true;
     walkCycle.setValue(0);
-
-    
-    
     const anim = RNAnimated.loop(
       RNAnimated.timing(walkCycle, {
         toValue: 1,
         duration: 500, easing: Easing.linear, useNativeDriver: true,
       }),
     );
+    walkLoopRef.current = anim;
     anim.start();
     return anim;
   }, [walkCycle]);
 
   const stopWalkCycle = useCallback(() => {
-    walkCycle.stopAnimation();
+    walkLoopRef.current?.stop();
+    walkLoopRef.current = null;
+    // Settle limbs back to a neutral standing pose instead of freezing mid-stride.
+    RNAnimated.timing(walkCycle, { toValue: 0, duration: 180, easing: Easing.out(Easing.quad), useNativeDriver: true }).start();
     isWalkingRef.current = false;
   }, [walkCycle]);
 
   const playFinale = useCallback(() => {
+    if (transitioningRef.current) return;
+    transitioningRef.current = true;
+    Keyboard.dismiss();
     setShowFinale(true);
     startWalkCycle();
     const meetX = SW / 2 - 20;
@@ -586,7 +623,7 @@ export default function AnimatedSignUp() {
     ]).start(() => {
       stopWalkCycle();
 
-      setTimeout(() => {
+      later(() => {
         setShowFlower(true);
         RNAnimated.timing(flowerOpacity, {
           toValue: 1,
@@ -594,10 +631,10 @@ export default function AnimatedSignUp() {
           useNativeDriver: true,
         }).start();
 
-        setTimeout(() => {
+        later(() => {
           setShowHearts(true);
 
-          setTimeout(() => {
+          later(() => {
             showMessageRef.current = true;
             // Rotate exactly once
             
@@ -606,7 +643,8 @@ export default function AnimatedSignUp() {
             // 1. Float, grow, AND rotate simultaneously!
             RNAnimated.parallel([
               RNAnimated.timing(flowerY, {
-                toValue: -290, // Positioned exactly below "have aligned"
+                // Float from the ground up to just below the centred "have aligned" title, on any screen size.
+                toValue: -(SH / 2 - 45 - 90),
                 duration: 3000, // Slow, majestic float
                 easing: Easing.inOut(Easing.sin),
                 useNativeDriver: true,
@@ -637,7 +675,7 @@ export default function AnimatedSignUp() {
                 useNativeDriver: true,
               }).start(() => {
                 // 3. After the second spin finishes, route to home!
-                setTimeout(() => {
+                later(() => {
                   router.replace('/(tabs)');
                 }, 300); // Tiny pause before transitioning
               });
@@ -652,12 +690,19 @@ export default function AnimatedSignUp() {
   }, [leftX, rightX, startWalkCycle, stopWalkCycle, flowerOpacity, messageOpacity, router]);
 
   const goToStep = useCallback((nextStep: number) => {
+    if (transitioningRef.current || nextStep < 0) return;
+    Keyboard.dismiss();
     if (nextStep >= 7) {
       playFinale();
       return;
     }
+    transitioningRef.current = true;
+    later(() => { transitioningRef.current = false; }, 450); // ignore double taps during the slide
 
+    leftX.stopAnimation();
+    rightX.stopAnimation();
     flatListRef.current?.scrollToIndex({ index: nextStep, animated: true });
+    stepRef.current = nextStep;
     setStep(nextStep);
 
     const progressRatio = nextStep / 6;
@@ -669,17 +714,17 @@ export default function AnimatedSignUp() {
       RNAnimated.timing(leftX, {
         toValue: leftTarget,
         duration: 1000,
-        easing: Easing.inOut(Easing.quad),
+        easing: Easing.inOut(Easing.cubic),
         useNativeDriver: true,
       }),
       RNAnimated.timing(rightX, {
         toValue: rightTarget,
         duration: 1000,
-        easing: Easing.inOut(Easing.quad),
+        easing: Easing.inOut(Easing.cubic),
         useNativeDriver: true,
       }),
-    ]).start(() => {
-      stopWalkCycle();
+    ]).start(({ finished }) => {
+      if (finished) stopWalkCycle();
     });
   }, [leftX, rightX, startWalkCycle, stopWalkCycle, playFinale]);
 
@@ -755,7 +800,7 @@ export default function AnimatedSignUp() {
           paddingTop: Platform.OS === 'ios' ? 48 : 24,
           flexDirection: 'row',
           justifyContent: 'space-between',
-          height: SH * 0.94,
+          height: SH,
           overflow: 'hidden',
           zIndex: 2,
         }}>
@@ -879,6 +924,16 @@ export default function AnimatedSignUp() {
     );
   };
 
+  const phoneReady = phone.length === 10;
+  const otpRef = useRef<TextInput>(null);
+
+  // Birth date mask: digits only → DD/MM/YYYY
+  const onDobChange = (t: string) => {
+    const d = t.replace(/\D/g, '').slice(0, 8);
+    setDob([d.slice(0, 2), d.slice(2, 4), d.slice(4, 8)].filter(Boolean).join('/'));
+  };
+  const dobReady = /^\d{2}\/\d{2}\/\d{4}$/.test(dob);
+
   // ─── STEP 1: PHONE & OTP VERIFICATION ───
   const renderVerify = () => (
     <View style={{ width: SW, flex: 1, paddingHorizontal: 28, paddingTop: 16 }}>
@@ -896,7 +951,7 @@ export default function AnimatedSignUp() {
             <Text style={{ fontSize: 16, fontWeight: '700', color: C.pri }}>{'+91'}</Text>
           </View>
           <TextInput 
-            value={phone} onChangeText={setPhone} 
+            value={phone} onChangeText={(t) => setPhone(t.replace(/\D/g, '').slice(0, 10))} maxLength={10}
             placeholder="98765 43210" placeholderTextColor="rgba(44,73,106,0.35)" 
             keyboardType="phone-pad" 
             style={{ flex: 1, fontSize: 18, fontWeight: '600', color: C.pri, letterSpacing: 1 }} 
@@ -906,7 +961,11 @@ export default function AnimatedSignUp() {
 
       <View style={{ marginBottom: 28 }}>
         <Text style={{ fontSize: 11, fontWeight: '700', color: C.pri, letterSpacing: 1.5, marginBottom: 12, textAlign: 'center' }}>{'THE 6-DIGIT ALIGNMENT CODE'}</Text>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', position: 'relative' }}>
+        <Pressable
+          onPress={() => otpRef.current?.focus()}
+          accessibilityLabel="6-digit code"
+          style={{ flexDirection: 'row', justifyContent: 'space-between', position: 'relative' }}
+        >
           {[0,1,2,3,4,5].map(i => {
             const char = otp[i] || '';
             const isActive = otp.length === i;
@@ -922,33 +981,17 @@ export default function AnimatedSignUp() {
               </View>
             );
           })}
-          <TextInput 
-            value={otp} onChangeText={setOtp} 
-            maxLength={6} keyboardType="number-pad"
-            style={{ position: 'absolute', width: '100%', height: '100%', opacity: 0 }} 
+          {/* iOS ignores taps on views with opacity 0, so hide the input's text instead. */}
+          <TextInput
+            ref={otpRef}
+            value={otp} onChangeText={(t) => setOtp(t.replace(/\D/g, '').slice(0, 6))}
+            maxLength={6} keyboardType="number-pad" textContentType="oneTimeCode" autoComplete="sms-otp"
+            caretHidden selectionColor="transparent"
+            style={{ position: 'absolute', width: '100%', height: '100%', color: 'transparent', backgroundColor: 'transparent', fontSize: 1 }}
           />
-        </View>
+        </Pressable>
       </View>
 
-      <Pressable
-        onPress={() => goToStep(2)}
-        style={{
-          backgroundColor: otp.length === 6 ? C.pink : C.pri,
-          height: 54,
-          borderRadius: 28,
-          alignItems: 'center',
-          justifyContent: 'center',
-          shadowColor: C.pri,
-          shadowOffset: { width: 0, height: 6 },
-          shadowOpacity: 0.2,
-          shadowRadius: 12,
-          opacity: otp.length === 6 ? 1 : 0.85,
-        }}
-      >
-        <Text style={{ color: '#FFF', fontSize: 15, fontWeight: '700', letterSpacing: 1.5, textTransform: 'uppercase' }}>
-          {'Verify & Continue'}
-        </Text>
-      </Pressable>
     </View>
   );
 
@@ -975,7 +1018,7 @@ export default function AnimatedSignUp() {
         <View style={{ flex: 1 }}>
           <Text style={{ fontSize: 11, fontWeight: '700', color: C.pri, letterSpacing: 1.5, marginBottom: 6 }}>{'ARRIVAL DATE'}</Text>
           <View style={{ backgroundColor: '#FFFFFF', borderRadius: 18, borderWidth: 1, borderColor: 'rgba(44,73,106,0.15)', paddingHorizontal: 16, height: 50, justifyContent: 'center' }}>
-            <TextInput value={dob} onChangeText={setDob} placeholder="DD/MM/YY" placeholderTextColor="rgba(44,73,106,0.35)" keyboardType="numeric" style={{ fontSize: 14, color: C.pri, fontWeight: '600', letterSpacing: 1 }} />
+            <TextInput value={dob} onChangeText={onDobChange} maxLength={10} placeholder="DD/MM/YYYY" placeholderTextColor="rgba(44,73,106,0.35)" keyboardType="number-pad" style={{ fontSize: 14, color: C.pri, fontWeight: '600', letterSpacing: 1 }} />
           </View>
         </View>
         <View style={{ flex: 1 }}>
@@ -1002,19 +1045,21 @@ export default function AnimatedSignUp() {
         <Text style={{ fontSize: 11, fontWeight: '700', color: C.pri, letterSpacing: 1.5, marginBottom: 6 }}>{'YOUR GENDER IDENTITY'}</Text>
         <View style={{ flexDirection: 'row', gap: 10 }}>
           {[
-            { id: 'Woman', label: 'Woman', icon: '☾' },
-            { id: 'Man', label: 'Man', icon: '☼' },
-            { id: 'Nonbinary', label: 'Nonbinary', icon: '✧' }
+            { id: 'Woman', label: 'Woman', icon: 'bedtime' },
+            { id: 'Man', label: 'Man', icon: 'wb_sunny' },
+            { id: 'Nonbinary', label: 'Nonbinary', icon: 'auto_awesome' }
           ].map(g => {
             const sel = gender === g.id;
             return (
               <Pressable key={g.id} onPress={() => setGender(g.id)} style={{ 
-                flex: 1, paddingVertical: 14, borderRadius: 20, 
+                flex: 1, height: 84, justifyContent: 'center', borderRadius: 20, 
                 backgroundColor: sel ? C.pri : '#FFFFFF', 
                 borderWidth: 1.5, borderColor: sel ? C.pri : 'rgba(44,73,106,0.15)', 
                 alignItems: 'center', shadowColor: sel ? C.pri : 'transparent', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 8
               }}>
-                <Text style={{ fontSize: 20, marginBottom: 4, color: sel ? C.pink : C.pri }}>{g.icon}</Text>
+                <View style={{ height: 24, justifyContent: 'center', marginBottom: 6 }}>
+                  <Icon name={g.icon} size={22} color={sel ? C.pink : C.pri} />
+                </View>
                 <Text style={{ fontSize: 12, fontWeight: '700', color: sel ? '#FFF' : C.pri, letterSpacing: 0.5, textAlign: 'center' }}>{g.label}</Text>
               </Pressable>
             );
@@ -1022,29 +1067,6 @@ export default function AnimatedSignUp() {
         </View>
       </View>
 
-      <Pressable
-        onPress={() => {
-          if (name && dob && gender) {
-            goToStep(3);
-          }
-        }}
-        style={{
-          backgroundColor: (name && dob && gender) ? C.pink : 'rgba(44,73,106,0.35)',
-          height: 54,
-          borderRadius: 28,
-          alignItems: 'center',
-          justifyContent: 'center',
-          shadowColor: (name && dob && gender) ? C.pink : 'transparent',
-          shadowOffset: { width: 0, height: 6 },
-          shadowOpacity: 0.25,
-          shadowRadius: 12,
-          opacity: (name && dob && gender) ? 1 : 0.7,
-        }}
-      >
-        <Text style={{ color: '#FFF', fontSize: 15, fontWeight: '700', letterSpacing: 1.5, textTransform: 'uppercase' }}>
-          {'Continue'}
-        </Text>
-      </Pressable>
     </View>
   );
 
@@ -1118,30 +1140,6 @@ export default function AnimatedSignUp() {
         </View>
 
         {/* Full-Width Action Button */}
-        <Pressable
-          onPress={() => {
-            if (targetGenders.length > 0) {
-              goToStep(4);
-            }
-          }}
-          style={{
-            backgroundColor: targetGenders.length > 0 ? C.pink : 'rgba(44,73,106,0.35)',
-            height: 54,
-            borderRadius: 28,
-            alignItems: 'center',
-            justifyContent: 'center',
-            shadowColor: targetGenders.length > 0 ? C.pink : 'transparent',
-            shadowOffset: { width: 0, height: 6 },
-            shadowOpacity: 0.3,
-            shadowRadius: 12,
-            marginTop: 8,
-            opacity: targetGenders.length > 0 ? 1 : 0.7,
-          }}
-        >
-          <Text style={{ color: '#FFF', fontSize: 15, fontWeight: '700', letterSpacing: 1.5, textTransform: 'uppercase' }}>
-            {'Continue'}
-          </Text>
-        </Pressable>
       </View>
     );
   };
@@ -1195,29 +1193,6 @@ export default function AnimatedSignUp() {
           })}
         </View>
 
-        <Pressable
-          onPress={() => {
-            if (intent) {
-              goToStep(5);
-            }
-          }}
-          style={{
-            backgroundColor: intent ? C.pink : 'rgba(44,73,106,0.35)',
-            height: 54,
-            borderRadius: 28,
-            alignItems: 'center',
-            justifyContent: 'center',
-            shadowColor: intent ? C.pink : 'transparent',
-            shadowOffset: { width: 0, height: 6 },
-            shadowOpacity: 0.3,
-            shadowRadius: 12,
-            opacity: intent ? 1 : 0.7,
-          }}
-        >
-          <Text style={{ color: '#FFF', fontSize: 15, fontWeight: '700', letterSpacing: 1.5, textTransform: 'uppercase' }}>
-            {'Continue'}
-          </Text>
-        </Pressable>
       </View>
     );
   };
@@ -1230,7 +1205,7 @@ export default function AnimatedSignUp() {
     );
 
     return (
-      <View style={{ width: SW, flex: 1, paddingHorizontal: 24, paddingTop: 12, position: 'relative' }}>
+      <View style={{ width: SW, flex: 1, paddingHorizontal: 28, paddingTop: 12, position: 'relative' }}>
         {/* Background Celestial Astrolabe & Orbit Lines Accent */}
         <View style={{ position: 'absolute', top: -40, right: -60, width: 220, height: 220, borderRadius: 110, borderWidth: 1, borderColor: 'rgba(44,73,106,0.08)', borderStyle: 'dashed' }} pointerEvents="none" />
         <View style={{ position: 'absolute', top: 180, left: -50, width: 160, height: 160, borderRadius: 80, borderWidth: 1, borderColor: 'rgba(44,73,106,0.06)' }} pointerEvents="none" />
@@ -1242,7 +1217,7 @@ export default function AnimatedSignUp() {
         </Text>
 
         <Text style={{ fontSize: 13, color: 'rgba(44,73,106,0.7)', lineHeight: 19, marginBottom: 14 }}>
-          Choose up to 3-5 core connection anchors that define how you love, communicate, and bond.
+          Choose up to 5 core connection anchors that define how you love, communicate, and bond.
         </Text>
 
         {/* Refined Search Bar */}
@@ -1343,31 +1318,6 @@ export default function AnimatedSignUp() {
           )}
         </ScrollView>
 
-        {/* Full-Width Prominent Pink Pill CONTINUE Button (Positioned cleanly below capsule options) */}
-        <View style={{
-          paddingTop: 12,
-          paddingBottom: Platform.OS === 'ios' ? 28 : 16,
-        }}>
-          <Pressable
-            onPress={() => goToStep(6)}
-            style={{
-              backgroundColor: C.pink,
-              height: 54,
-              borderRadius: 27,
-              alignItems: 'center',
-              justifyContent: 'center',
-              shadowColor: C.pink,
-              shadowOffset: { width: 0, height: 6 },
-              shadowOpacity: 0.35,
-              shadowRadius: 12,
-              elevation: 6,
-            }}
-          >
-            <Text style={{ color: '#FFFFFF', fontSize: 16, fontWeight: '700', letterSpacing: 1.5, textTransform: 'uppercase' }}>
-              CONTINUE
-            </Text>
-          </Pressable>
-        </View>
       </View>
     );
   };
@@ -1424,26 +1374,21 @@ export default function AnimatedSignUp() {
         />
       </View>
 
-      <Pressable
-        onPress={() => goToStep(7)}
-        style={{
-          backgroundColor: C.pink,
-          height: 54,
-          borderRadius: 28,
-          alignItems: 'center',
-          justifyContent: 'center',
-          shadowColor: C.pink,
-          shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: 0.3,
-          shadowRadius: 16,
-        }}
-      >
-        <Text style={{ color: '#FFF', fontSize: 14, fontWeight: '700', letterSpacing: 2, textTransform: 'uppercase' }}>
-          {'Complete Profile'}
-        </Text>
-      </Pressable>
     </View>
   );
+
+  // One Continue button for every step, pinned above the walking figures so it is never clipped.
+  const cta = (() => {
+    switch (step) {
+      case 1: return { label: 'Verify & Continue', ok: phoneReady && otp.length === 6, next: 2 };
+      case 2: return { label: 'Continue', ok: !!(name.trim() && dobReady && gender), next: 3 };
+      case 3: return { label: 'Continue', ok: targetGenders.length > 0, next: 4 };
+      case 4: return { label: 'Continue', ok: !!intent, next: 5 };
+      case 5: return { label: selectedAnchors.length ? `Continue · ${selectedAnchors.length}/5` : 'Continue', ok: selectedAnchors.length > 0, next: 6 };
+      case 6: return { label: 'Complete Profile', ok: photos.length > 0, next: 7 };
+      default: return null;
+    }
+  })();
 
   const slides = [renderWelcome, renderVerify, renderBasics, renderWhoToMeet, renderIntent, renderResonanceAnchors, renderPhotosAndBio];
 
@@ -1454,12 +1399,23 @@ export default function AnimatedSignUp() {
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         {/* Step Progress Node Map Header */}
         {step > 0 && (
-          <View style={{ paddingHorizontal: 20, paddingTop: 12, paddingBottom: 10 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
-              <View style={{ position: 'absolute', top: 8, left: 10, right: 10, height: 1.5, backgroundColor: 'rgba(44,73,106,0.15)', zIndex: 1 }} />
-              <RNAnimated.View style={{ 
-                position: 'absolute', top: 8, left: 10, height: 1.5, backgroundColor: C.pri, zIndex: 1,
-                width: scrollX.interpolate({ inputRange: [0, SW * 6], outputRange: ['0%', '100%'], extrapolate: 'clamp' })
+          <RNAnimated.View style={{ paddingLeft: 12, paddingRight: 16, paddingTop: 10, paddingBottom: 10, flexDirection: 'row', alignItems: 'flex-start', gap: 4, opacity: messageOpacity.interpolate({ inputRange: [0, 1], outputRange: [1, 0] }) }}>
+            <Pressable
+              onPress={() => goToStep(step - 1)}
+              hitSlop={10}
+              accessibilityRole="button"
+              accessibilityLabel="Back"
+              style={{ width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', marginTop: -2 }}
+            >
+              <Icon name="chevron_left" size={26} color={C.pri} />
+            </Pressable>
+            <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
+              {/* Track spans exactly from the first node's centre to the last (nodes are 42 wide). */}
+              <View style={{ position: 'absolute', top: 8, left: 21, right: 21, height: 1.5, backgroundColor: 'rgba(44,73,106,0.15)', zIndex: 1 }} />
+              <RNAnimated.View style={{
+                position: 'absolute', top: 8, left: 21, right: 21, height: 1.5, backgroundColor: C.pri, zIndex: 1,
+                transformOrigin: 'left',
+                transform: [{ scaleX: scrollX.interpolate({ inputRange: [0, SW * 6], outputRange: [0.0001, 1], extrapolate: 'clamp' }) }],
               }} />
 
               {['WELCOME', 'AUTH', 'COSMIC', 'MATCH', 'INTENT', 'ANCHORS', 'PROFILE'].map((label, i) => {
@@ -1540,11 +1496,11 @@ export default function AnimatedSignUp() {
                 );
               })}
             </View>
-          </View>
+          </RNAnimated.View>
         )}
 
         {/* Slides Container */}
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1 }} onLayout={(e) => setSlideH(e.nativeEvent.layout.height)}>
           <RNAnimated.FlatList
             ref={flatListRef}
             data={slides}
@@ -1553,15 +1509,58 @@ export default function AnimatedSignUp() {
             showsHorizontalScrollIndicator={false}
             onScroll={RNAnimated.event(
               [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-              { useNativeDriver: false }
+              { useNativeDriver: true }
             )}
-            renderItem={({ item: fn }) => <View style={{ width: SW }}>{fn()}</View>}
+            scrollEventThrottle={16}
+            getItemLayout={(_, index) => ({ length: SW, offset: SW * index, index })}
+            keyboardShouldPersistTaps="always"
+            renderItem={({ item: fn, index }) => (
+              <View style={{ width: SW, height: slideH || undefined }}>
+                {/* Welcome is full-bleed and Anchors scrolls itself; other steps scroll so the button is never clipped. */}
+                {index === 0 || index === 5 ? fn() : (
+                  <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="always"
+                    contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
+                  >
+                    {fn()}
+                  </ScrollView>
+                )}
+              </View>
+            )}
           />
         </View>
 
+        {cta ? (
+          <View style={{ paddingHorizontal: 28, paddingTop: 10, paddingBottom: keyboardOpen ? 10 : 2 }}>
+            <Pressable
+              onPress={() => { if (cta.ok) goToStep(cta.next); }}
+              accessibilityRole="button"
+              accessibilityState={{ disabled: !cta.ok }}
+              style={{
+                backgroundColor: cta.ok ? C.pink : 'rgba(44,73,106,0.35)',
+                opacity: cta.ok ? 1 : 0.7,
+                height: 54,
+                borderRadius: 27,
+                alignItems: 'center',
+                justifyContent: 'center',
+                shadowColor: cta.ok ? C.pink : 'transparent',
+                shadowOffset: { width: 0, height: 6 },
+                shadowOpacity: 0.3,
+                shadowRadius: 12,
+                elevation: cta.ok ? 6 : 0,
+              }}
+            >
+              <Text style={{ color: '#FFF', fontSize: 15, fontWeight: '700', letterSpacing: 1.5, textTransform: 'uppercase' }}>
+                {cta.label}
+              </Text>
+            </Pressable>
+          </View>
+        ) : null}
+
         {/* Ground + Stick Figure Animations */}
-        {step > 0 && (
-          <View style={{ height: 80, position: 'relative' }}>
+        {step > 0 && !keyboardOpen && (
+          <View style={{ height: 100, position: 'relative' }}>
             <View style={{ position: 'absolute', bottom: 35, left: 16, right: 16, height: 2, backgroundColor: C.ground, borderRadius: 1 }} />
 
                         {Array.from({ length: 20 }).map((_, i) => {
@@ -1679,9 +1678,10 @@ export default function AnimatedSignUp() {
       {showFinale && (
         <RNAnimated.View style={{
           position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(241,247,253,0.95)',
+          backgroundColor: 'rgba(241,247,253,0.97)',
           justifyContent: 'center', alignItems: 'center',
           opacity: messageOpacity,
+          zIndex: 50, elevation: 50, // above the progress header's raised nodes
         }}>
           <Text style={{ fontFamily: 'Georgia', fontSize: 38, color: C.pri, fontStyle: 'italic', textAlign: 'center', lineHeight: 50 }}>
             {'The stars\nhave aligned'}

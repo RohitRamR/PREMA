@@ -6,6 +6,7 @@ import Icon from '../../components/Icon';
 import { BlurView } from 'expo-blur';
 import CelestialBackground from '../../components/CelestialBackground';
 import Svg, { Path } from 'react-native-svg';
+import { AuraFrame } from '../../components/Aura';
 
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
 
@@ -18,6 +19,7 @@ const PROFILES = [
   {
     id: '1',
     name: 'Ananya',
+    match: 96, // compatibility score → aura colour
     age: 22,
     verified: true,
     occupation: 'Design Student',
@@ -29,12 +31,12 @@ const PROFILES = [
       { id: '2', name: 'Music', icon: 'music-note' },
       { id: '3', name: 'Travel', icon: 'flight' },
       { id: '4', name: 'Dogs', icon: 'pets' },
-    ],
-    overlayText: "Good Conversations\nBrighter Days"
+    ]
   },
   {
     id: '2',
     name: 'Priya',
+    match: 91, // compatibility score → aura colour
     age: 24,
     verified: true,
     occupation: 'Architect',
@@ -44,12 +46,12 @@ const PROFILES = [
     interests: [
       { id: '5', name: 'Art', icon: 'palette' },
       { id: '6', name: 'Hiking', icon: 'landscape' },
-    ],
-    overlayText: "Wanderlust\nAnd City Dust"
+    ]
   },
   {
     id: '3',
     name: 'Neha',
+    match: 87, // compatibility score → aura colour
     age: 23,
     verified: true,
     occupation: 'Software Engineer',
@@ -59,8 +61,7 @@ const PROFILES = [
     interests: [
       { id: '7', name: 'Tech', icon: 'computer' },
       { id: '8', name: 'Reading', icon: 'menu-book' },
-    ],
-    overlayText: "Code & Coffee\nRepeat"
+    ]
   }
 ];
 
@@ -144,11 +145,6 @@ export default function DiscoverScreen() {
             </Pressable>
           </View>
 
-          {/* Text Overlay */}
-          <View style={{ position: 'absolute', top: 32, left: 24, right: 24 }}>
-            <Text style={{ fontFamily: 'Georgia', fontStyle: 'italic', fontSize: 28, color: '#FFFFFF', textShadowColor: 'rgba(0,0,0,0.3)', textShadowRadius: 10, textShadowOffset: { width: 0, height: 2 } }}>{item.overlayText}</Text>
-          </View>
-
           <View className="absolute bottom-0 left-0 right-0 pt-8 pb-5 px-6">
             <View className="flex-row items-center z-10">
               <Text className="text-white text-3xl font-bold" style={{ textShadowColor: "rgba(0,0,0,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 6 }}>{item.name}, {item.age}</Text>
@@ -174,6 +170,8 @@ export default function DiscoverScreen() {
             </View>
           </View>
 
+          {/* Match strength as a colour border (blue → lilac → rose → gold) */}
+          <AuraFrame score={item.match} radius={36} width={5} />
           </Animated.View>
         </Pressable>
       </View>
