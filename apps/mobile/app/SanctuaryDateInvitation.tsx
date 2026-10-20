@@ -28,7 +28,7 @@ export default function SanctuaryDateInvitation() {
         <Pressable onPress={() => router.back()} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
           <Icon name="arrow_back" size={24} color="#021625" />
         </Pressable>
-        <Text style={{ color: '#021625', fontSize: 13, fontWeight: '500', letterSpacing: 1.5, textTransform: 'uppercase' }}>
+        <Text style={{ color: '#021625', fontSize: 13, fontWeight: '500', letterSpacing: 0.2 }}>
           Date Invitation
         </Text>
         <View style={{ width: 24 }} />
@@ -52,7 +52,7 @@ export default function SanctuaryDateInvitation() {
 
         {/* ── Venue Selection ── */}
         <View style={{ marginBottom: 48 }}>
-          <Text style={{ color: '#a0a5ab', fontSize: 10, fontWeight: '500', letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 16 }}>
+          <Text style={{ color: '#a0a5ab', fontSize: 11, fontWeight: '500', letterSpacing: 0.2, marginBottom: 16 }}>
             Sanctuary Venues
           </Text>
           <View style={{ gap: 16 }}>
@@ -87,7 +87,7 @@ export default function SanctuaryDateInvitation() {
 
         {/* ── Time Selection ── */}
         <View style={{ marginBottom: 40 }}>
-          <Text style={{ color: '#a0a5ab', fontSize: 10, fontWeight: '500', letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 16 }}>
+          <Text style={{ color: '#a0a5ab', fontSize: 11, fontWeight: '500', letterSpacing: 0.2, marginBottom: 16 }}>
             Proposed Time
           </Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>

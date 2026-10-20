@@ -1,301 +1,445 @@
-import React from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  Image, 
-  Pressable, 
-  ScrollView,
-  Dimensions
-} from 'react-native';
-import { useRouter } from 'expo-router';
-import { colors, spacing, radii } from '../../src/theme/theme';
-const PREMA_THEME = { colors, spacing, radii };
-import Icon from '../../components/Icon';
+import React, { useState } from 'react';
+import { View, Image, Pressable, ScrollView, Switch, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
+import Text, { NunitoScope } from '../../components/PremaText';
+import { useRouter, type Href } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Icon from '../../components/Icon';
+import Logo from '../../components/Logo';
+import CelestialBackground from '../../components/CelestialBackground';
+import { useProfile, updateProfile, LIFESTYLE_OPTIONS } from '../../src/store/profile';
+import StatusFade from '../../components/StatusFade';
 
-const { width: SW } = Dimensions.get('window');
+// Live app palette (matches MatchDetail / Discover / onboarding)
+const C = {
+  bg: '#F1F7FD',
+  pri: '#2C496A',
+  body: '#3E5C7D',
+  muted: '#8892A3',
+  accent: '#74B4F2',
+  accentSoft: '#E7F0F9',
+  pink: '#FF6B8B',
+  pinkSoft: '#FFE8EE',
+  navy: '#1A2E44',
+  navyRaised: '#243B55',
+  shadow: '#E3EDF7',
+  white: '#FFFFFF',
+};
 
-const SETTINGS = [
-  { id: 'preferences', label: 'Discovery Preferences', icon: 'tune' },
-  { id: 'dna', label: 'Compatibility DNA', icon: 'auto_awesome' },
-  { id: 'safety', label: 'Safety & Verification', icon: 'shield' },
-  { id: 'membership', label: 'PREMA Membership', icon: 'stars' },
+const ME = {
+  vedic: {
+    archetype: 'Vrishabha (Taurus)',
+    nakshatra: 'Rohini Nakshatra · Pada 2',
+    element: 'Earth Core',
+    influence: 'Chandra primary influence',
+    resonance: 31,
+    resonanceMax: 36,
+  },
+};
+
+const PREFERENCES: { icon: string; title: string; sub: string; href?: Href }[] = [
+  { icon: 'shield', title: 'Safety & Verification', sub: 'Aadhaar & work verified', href: '/DateCheckInSafety' },
+  { icon: 'group', title: 'Family Circle', sub: '2 trusted contacts linked', href: '/FamilyMatrimonialCircle' },
+  { icon: 'tune', title: 'Discovery & Distance', sub: '', href: '/DiscoveryPreferences' },
+  { icon: 'notifications_none', title: 'Curated Introductions', sub: 'Daily at 9:00 AM', href: '/DailyReleaseMindfulCadence' },
 ];
 
-export default function ProfileTab() {
+// NativeWind's Pressable interop ignores function-style `style`, so track the
+// pressed state ourselves and always pass a plain, flattened style object.
+function Tap({
+  style, pressedStyle, children, ...rest
+}: React.ComponentProps<typeof Pressable> & {
+  style?: StyleProp<ViewStyle>;
+  pressedStyle?: ViewStyle;
+  children?: React.ReactNode;
+}) {
+  const [pressed, setPressed] = useState(false);
+  return (
+    <Pressable
+      {...rest}
+      onPressIn={(e) => { setPressed(true); rest.onPressIn?.(e); }}
+      onPressOut={(e) => { setPressed(false); rest.onPressOut?.(e); }}
+      style={StyleSheet.flatten([style, pressed ? pressedStyle : null])}
+    >
+      {children}
+    </Pressable>
+  );
+}
+
+function ProfileTabScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const me = useProfile();
+  const paused = me.paused;
+  const setPaused = (v: boolean) => updateProfile({ paused: v });
+  const lifestyle = me.lifestyle.map((label) => ({
+    label, icon: LIFESTYLE_OPTIONS.find((o) => o.label === label)?.icon ?? 'spa',
+  }));
+  // Depth grows as the profile fills in (photos, about, values, rhythm).
+  const depth = Math.min(1, 0.55 + me.photos.length * 0.05 + (me.about ? 0.1 : 0) + me.values.length * 0.03 + Math.min(me.lifestyle.length, 4) * 0.01);
 
   return (
-    <View style={styles.container}>
-      
-      {/* 1. Bold Brand Header (Inspired by Ref 3 Light Mode) */}
-      <View style={[styles.headerBackground, { paddingTop: Math.max(insets.top, 16) }]}>
-        <View style={styles.headerNav}>
-          <Text style={styles.headerTitle}>Profile</Text>
-          <Pressable 
-            style={({pressed}) => [styles.settingsButton, pressed && { opacity: 0.7 }]}
-          >
-            <Icon name="settings" size={24} color="#FFFFFF" />
-          </Pressable>
-        </View>
-      </View>
+    <View style={{ flex: 1, backgroundColor: C.bg }}>
+      <CelestialBackground />
 
-      {/* 2. White Bottom Sheet Content Area */}
-      <View style={styles.contentSheet}>
-        
-        {/* Overlapping Avatar Container */}
-        <View style={styles.avatarWrapper}>
-          <Image 
-            source={{ uri: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400' }}
-            style={styles.avatarImage}
-          />
-          {/* Edit / Camera Badge */}
-          <Pressable style={({pressed}) => [styles.editBadge, pressed && { opacity: 0.8 }]}>
-            <Icon name="edit" size={18} color={PREMA_THEME.colors.deepNavy} />
-          </Pressable>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingTop: insets.top + 8, paddingHorizontal: 20, paddingBottom: 150 }}
+      >
+        {/* ── Header ── */}
+        <View style={s.headerRow}>
+          <View>
+            <Logo width={74} height={31} tintColor="#2C496A" style={{ marginBottom: 2 }} />
+            <Text style={s.pageTitle}>Profile</Text>
+          </View>
+          <Tap onPress={() => router.push('/Settings')} style={s.roundBtn} pressedStyle={{ opacity: 0.7 }} accessibilityLabel="Settings">
+            <Icon name="settings" size={22} color={C.pri} />
+          </Tap>
         </View>
 
-        <ScrollView 
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
-        >
-          {/* User Info */}
-          <View style={styles.userInfo}>
-            <Text style={styles.userName}>Vikram, 28</Text>
-            <Text style={styles.userLocation}>Bengaluru • Architect</Text>
+        {/* ── Identity ── */}
+        <View style={[s.card, { alignItems: 'center', paddingTop: 28 }]}>
+          <View style={s.avatarRing}>
+            <Image source={{ uri: me.photos[0] }} style={s.avatar} />
+            <Tap onPress={() => router.push('/ProfilePhotos')} style={s.cameraBadge} pressedStyle={{ opacity: 0.8 }} accessibilityLabel="Update photos">
+              <Icon name="photo_camera" size={16} color={C.white} />
+            </Tap>
           </View>
 
-          {/* Archetype Premium Card */}
-          <View style={styles.card}>
-            <View style={styles.cardHeader}>
-              <View style={styles.cardIconBox}>
-                <Icon name="auto_awesome" size={18} color={PREMA_THEME.colors.deepNavy} />
-              </View>
-              <Text style={styles.cardSubtitle}>Your Archetype</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 16 }}>
+            <Text style={s.name}>{me.name}, {me.age}</Text>
+            <View style={s.verifiedDot}>
+              <Icon name="check" size={14} color={C.white} />
             </View>
-            <Text style={styles.cardTitle}>Vrishchika (Scorpio)</Text>
-            <Text style={styles.cardBody}>
-              Deep emotional reserves with a need for profound connection. You seek authenticity over surface-level charm.
-            </Text>
+          </View>
+          <View style={s.metaRow}>
+            <Icon name="location_on" size={16} color={C.muted} />
+            <Text style={s.meta}>{me.location}</Text>
+            <Text style={s.metaDot}>•</Text>
+            <Text style={s.meta}>{me.occupation}</Text>
           </View>
 
-          {/* Grouped Settings List (Inspired by Ref 3) */}
-          <Text style={styles.sectionLabel}>Account</Text>
-          <View style={styles.settingsGroup}>
-            {SETTINGS.map((item, index) => (
-              <Pressable 
-                key={item.id}
-                style={({pressed}) => [
-                  styles.settingsRow,
-                  index === SETTINGS.length - 1 && { borderBottomWidth: 0 },
-                  pressed && { backgroundColor: 'rgba(0,0,0,0.02)' }
-                ]}
-              >
-                <View style={styles.settingsRowLeft}>
-                  <View style={styles.settingsIconCircle}>
-                    <Icon name={item.icon} size={20} color={PREMA_THEME.colors.deepNavy} />
-                  </View>
-                  <Text style={styles.settingsLabel}>{item.label}</Text>
-                </View>
-                <Icon name="chevron_right" size={24} color={PREMA_THEME.colors.mutedBlueGrey} />
-              </Pressable>
+          <View style={s.intentPill}>
+            <Icon name="favorite_border" size={16} color={C.pink} />
+            <Text style={s.intentText}>{me.intent}</Text>
+          </View>
+
+          <View style={{ flexDirection: 'row', gap: 12, marginTop: 20, alignSelf: 'stretch' }}>
+            <Tap onPress={() => router.push('/EditProfile')} style={s.btnPrimary} pressedStyle={{ opacity: 0.85 }}>
+              <Icon name="edit" size={18} color={C.white} />
+              <Text style={s.btnPrimaryText}>Edit profile</Text>
+            </Tap>
+            <Tap onPress={() => router.push('/ProfilePhotos')} style={s.btnSoft} pressedStyle={{ opacity: 0.8 }}>
+              <Icon name="image" size={18} color={C.pri} />
+              <Text style={s.btnSoftText}>Photos</Text>
+            </Tap>
+          </View>
+        </View>
+
+        {/* ── About ── */}
+        {me.about ? (
+          <View style={s.card}>
+            <Text style={s.label}>About me</Text>
+            <Text style={s.aboutText}>{me.about}</Text>
+          </View>
+        ) : null}
+
+        {/* ── Profile depth ── */}
+        <View style={s.card}>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+            <View style={{ flex: 1, paddingRight: 12 }}>
+              <Text style={s.label}>Profile depth</Text>
+              <Text style={s.cardTitle}>Exceptional resonance</Text>
+            </View>
+            <Text style={s.bigNumber}>{Math.round(depth * 100)}%</Text>
+          </View>
+          <View style={s.track}>
+            <View style={[s.fill, { width: `${depth * 100}%` }]} />
+          </View>
+          <Text style={s.bodySmall}>
+            {depth >= 1 ? 'Your profile is complete — expect your deepest introductions.' : 'Add more photos or a voice prompt to reach 100% and unlock deeper daily introductions.'}
+          </Text>
+        </View>
+
+        {/* ── Membership ── */}
+        <Tap
+          onPress={() => router.push('/PremaPlusMembership')}
+          style={s.navyCard} pressedStyle={{ opacity: 0.92 }}
+        >
+          <View style={{ flex: 1 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+              <Icon name="auto_awesome" size={14} color={C.accent} />
+              <Text style={[s.label, { color: C.accent, marginBottom: 0 }]}>PREMA Tier I</Text>
+            </View>
+            <Text style={s.navyTitle}>Founding Member</Text>
+            <Text style={s.navyBody}>Unlimited deep-alignment previews & vetted introductions</Text>
+          </View>
+          <View style={s.navyChip}>
+            <Text style={s.navyChipText}>Manage</Text>
+            <Icon name="chevron_right" size={18} color={C.white} />
+          </View>
+        </Tap>
+
+        {/* ── Core pillars ── */}
+        <Text style={s.sectionLabel}>Core relationship pillars</Text>
+        <View style={s.card}>
+          <Text style={s.label}>Core values</Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 22 }}>
+            {me.values.map(v => (
+              <View key={v} style={s.chip}>
+                <View style={s.chipDot} />
+                <Text style={s.chipText}>{v}</Text>
+              </View>
             ))}
           </View>
-          
-          <View style={{ height: 40 }} />
-        </ScrollView>
-      </View>
-      
+
+          <Text style={s.label}>A boundary I firmly hold</Text>
+          <Text style={s.quote}>“{me.boundary}”</Text>
+
+          <Text style={[s.label, { marginTop: 22 }]}>Daily rhythm</Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+            {lifestyle.map(l => (
+              <View key={l.label} style={s.rhythmTile}>
+                <Icon name={l.icon} size={18} color={C.accent} />
+                <Text style={s.rhythmText}>{l.label}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        {/* ── Vedic & Harmony DNA ── */}
+        <Tap
+          onPress={() => router.push('/CompatibilityBreakdown')}
+          style={s.harmonyCard} pressedStyle={{ opacity: 0.95 }}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1, paddingRight: 10 }}>
+              <Icon name="all_inclusive" size={22} color={C.accent} />
+              <Text style={s.harmonyTitle} numberOfLines={1} adjustsFontSizeToFit>Vedic & Harmony DNA</Text>
+            </View>
+            <View style={s.privatePill}>
+              <Icon name="lock" size={12} color={C.pri} />
+              <Text style={s.privateText}>Private</Text>
+            </View>
+          </View>
+
+          <View style={{ flexDirection: 'row', gap: 10 }}>
+            <View style={s.harmonyTile}>
+              <Text style={s.label}>Archetype</Text>
+              <Text style={s.harmonyValue}>{ME.vedic.archetype}</Text>
+              <Text style={s.bodySmall}>{ME.vedic.nakshatra}</Text>
+            </View>
+            <View style={s.harmonyTile}>
+              <Text style={s.label}>Element</Text>
+              <Text style={s.harmonyValue}>{ME.vedic.element}</Text>
+              <Text style={s.bodySmall}>{ME.vedic.influence}</Text>
+            </View>
+          </View>
+
+          <View style={s.resonanceRow}>
+            <View style={{ flex: 1 }}>
+              <Text style={s.label}>Baseline resonance</Text>
+              <Text style={s.resonanceNum}>
+                {ME.vedic.resonance}
+                <Text style={s.resonanceMax}> / {ME.vedic.resonanceMax}</Text>
+              </Text>
+            </View>
+            <View style={s.resonanceIcon}>
+              <Icon name="insights" size={22} color={C.white} />
+            </View>
+          </View>
+
+          <View style={{ flexDirection: 'row', gap: 8, marginTop: 14 }}>
+            <Icon name="enhanced_encryption" size={16} color={C.muted} />
+            <Text style={[s.bodySmall, { flex: 1, marginTop: 0 }]}>
+              Your birth details stay encrypted. Only the harmony summary is shared, and only with mutual connections.
+            </Text>
+          </View>
+        </Tap>
+
+        {/* ── Preferences & safety ── */}
+        <Text style={s.sectionLabel}>Preferences & safety</Text>
+        <View style={[s.card, { paddingVertical: 6, paddingHorizontal: 0 }]}>
+          {PREFERENCES.map((p, i) => (
+            <Tap
+              key={p.title}
+              onPress={p.href ? () => router.push(p.href!) : undefined}
+              style={[s.row, i < PREFERENCES.length - 1 ? s.rowDivider : null]}
+              pressedStyle={{ backgroundColor: 'rgba(116,180,242,0.06)' }}
+            >
+              <View style={s.rowIcon}>
+                <Icon name={p.icon} size={20} color={C.accent} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={s.rowTitle}>{p.title}</Text>
+                <Text style={s.rowSub}>{p.href === '/DiscoveryPreferences' ? `${me.discovery.cities.join(' & ')} · ${me.discovery.distanceKm} km` : p.sub}</Text>
+              </View>
+              <Icon name="chevron_right" size={22} color={C.muted} />
+            </Tap>
+          ))}
+
+          <View style={[s.row, s.rowDividerTop]}>
+            <View style={[s.rowIcon, { backgroundColor: C.pinkSoft }]}>
+              <Icon name="pause" size={20} color={C.pink} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={s.rowTitle}>Pause matching</Text>
+              <Text style={s.rowSub}>{paused ? 'Hidden from new introductions' : 'You’re visible to curated matches'}</Text>
+            </View>
+            <Switch
+              value={paused}
+              onValueChange={setPaused}
+              trackColor={{ false: '#DCE6F0', true: C.pink }}
+              thumbColor={C.white}
+              ios_backgroundColor="#DCE6F0"
+            />
+          </View>
+        </View>
+
+        <Text style={s.footer}>PREMA · Cultivated for meaningful living</Text>
+      </ScrollView>
+
+      {/* Soft backing behind the status bar so content doesn't collide with the clock */}
+      <StatusFade />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: PREMA_THEME.colors.deepNavy, // The absolute background is navy
+const cardShadow = {
+  shadowColor: C.shadow,
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 1,
+  shadowRadius: 8,
+  elevation: 2,
+};
+
+const s = StyleSheet.create({
+  headerRow: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    marginBottom: 20, paddingHorizontal: 4,
   },
-  headerBackground: {
-    height: 240, // Tall header for the avatar to overlap
-    backgroundColor: PREMA_THEME.colors.deepNavy,
+  eyebrow: { color: C.muted, fontSize: 12, fontWeight: '700', letterSpacing: 1.5, textTransform: 'uppercase' },
+  pageTitle: { color: C.pri, fontSize: 34, fontFamily: 'Georgia', fontStyle: 'italic', lineHeight: 42 },
+  roundBtn: {
+    width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.9)',
+    alignItems: 'center', justifyContent: 'center', ...cardShadow,
   },
-  headerNav: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-    height: 56,
+
+  card: { backgroundColor: C.white, borderRadius: 24, padding: 22, marginBottom: 16, ...cardShadow },
+
+  avatarRing: {
+    width: 128, height: 128, borderRadius: 64, padding: 4,
+    borderWidth: 2, borderColor: C.accent, alignItems: 'center', justifyContent: 'center',
   },
-  headerTitle: {
-    color: '#FFFFFF',
-    fontSize: 20,
-    fontWeight: '700',
-    letterSpacing: 0.3,
+  avatar: { width: 116, height: 116, borderRadius: 58, backgroundColor: C.accentSoft },
+  cameraBadge: {
+    position: 'absolute', bottom: 2, right: 2, width: 36, height: 36, borderRadius: 18,
+    backgroundColor: C.pink, alignItems: 'center', justifyContent: 'center',
+    borderWidth: 3, borderColor: C.white,
   },
-  settingsButton: {
-    position: 'absolute',
-    right: 24,
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'flex-end',
+  name: { color: C.pri, fontSize: 30, fontWeight: '700', letterSpacing: -0.5 },
+  verifiedDot: {
+    width: 22, height: 22, borderRadius: 11, backgroundColor: '#3EA9F5',
+    alignItems: 'center', justifyContent: 'center',
   },
-  contentSheet: {
-    flex: 1,
-    backgroundColor: '#FFFFFF', // Clean white background for Prema
-    borderTopLeftRadius: 40, // Huge rounded corners like the reference
-    borderTopRightRadius: 40,
-    marginTop: -40, // Pulls the sheet up over the navy background slightly
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 10,
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 6, flexWrap: 'wrap', justifyContent: 'center' },
+  meta: { color: C.muted, fontSize: 15, fontWeight: '500' },
+  metaDot: { color: C.muted, fontSize: 15, marginHorizontal: 2 },
+  intentPill: {
+    flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 16,
+    backgroundColor: C.pinkSoft, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
   },
-  avatarWrapper: {
-    alignSelf: 'center',
-    marginTop: -60, // Exactly straddles the boundary!
-    marginBottom: 16,
-    position: 'relative',
-    zIndex: 20,
+  intentText: { color: C.pri, fontSize: 13, fontWeight: '600' },
+
+  btnPrimary: {
+    flex: 1.4, height: 50, borderRadius: 25, backgroundColor: C.pink,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    shadowColor: C.pink, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.3, shadowRadius: 12, elevation: 4,
   },
-  avatarImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 6,
-    borderColor: '#FFFFFF', // Seamless cutout effect against the white sheet
-    backgroundColor: '#F0F4F8',
+  btnPrimaryText: { color: C.white, fontSize: 15, fontWeight: '800', letterSpacing: 0.2 },
+  btnSoft: {
+    flex: 1, height: 50, borderRadius: 25, backgroundColor: C.accentSoft,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
   },
-  editBadge: {
-    position: 'absolute',
-    bottom: 0,
-    right: 4,
-    backgroundColor: PREMA_THEME.colors.skyBlue, // Brand accent color
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 4,
-    borderColor: '#FFFFFF', // Seamless cutout for the badge
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  scrollContent: {
-    paddingHorizontal: 24,
-    paddingBottom: 120, // Tab bar clearance
-  },
-  userInfo: {
-    alignItems: 'center',
-    marginBottom: 32,
-  },
-  userName: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: PREMA_THEME.colors.deepNavy,
-    letterSpacing: -0.5,
-    marginBottom: 6,
-  },
-  userLocation: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: PREMA_THEME.colors.mutedBlueGrey,
-  },
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    padding: 24,
-    marginBottom: 32,
-    shadowColor: PREMA_THEME.colors.deepNavy,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.04,
-    shadowRadius: 24,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: 'rgba(44,73,106,0.04)',
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 16,
-  },
-  cardIconBox: {
-    backgroundColor: '#F0F4F8',
-    padding: 8,
-    borderRadius: 14,
-  },
-  cardSubtitle: {
-    color: PREMA_THEME.colors.mutedBlueGrey,
-    fontSize: 13,
-    fontWeight: '700',
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
-  },
-  cardTitle: {
-    color: PREMA_THEME.colors.deepNavy,
-    fontSize: 22,
-    fontWeight: '700',
-    marginBottom: 10,
-  },
-  cardBody: {
-    color: PREMA_THEME.colors.mutedBlueGrey,
-    fontSize: 15,
-    lineHeight: 24,
-  },
+  btnSoftText: { color: C.pri, fontSize: 15, fontWeight: '800', letterSpacing: 0.2 },
+
+  label: { color: C.muted, fontSize: 12, fontWeight: '700', letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 10 },
   sectionLabel: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: PREMA_THEME.colors.mutedBlueGrey,
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
-    marginBottom: 16,
-    paddingLeft: 8,
+    color: C.muted, fontSize: 13, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase',
+    marginTop: 12, marginBottom: 12, marginLeft: 4,
   },
-  settingsGroup: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    shadowColor: PREMA_THEME.colors.deepNavy,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.03,
-    shadowRadius: 24,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: 'rgba(44,73,106,0.04)',
-    overflow: 'hidden',
+  cardTitle: { color: C.pri, fontSize: 20, fontFamily: 'Georgia', fontStyle: 'italic', marginTop: -4 },
+  bigNumber: { color: C.accent, fontSize: 32, fontWeight: '800', letterSpacing: -1 },
+  track: { height: 8, borderRadius: 4, backgroundColor: C.accentSoft, marginTop: 14, overflow: 'hidden' },
+  fill: { height: 8, borderRadius: 4, backgroundColor: C.accent },
+  bodySmall: { color: C.muted, fontSize: 13, lineHeight: 19, marginTop: 12 },
+
+  navyCard: {
+    backgroundColor: C.navy, borderRadius: 24, padding: 22, marginBottom: 16,
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    shadowColor: C.navy, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.25, shadowRadius: 18, elevation: 6,
   },
-  settingsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(44,73,106,0.05)',
+  navyTitle: { color: C.white, fontSize: 22, fontFamily: 'Georgia', fontStyle: 'italic', marginBottom: 4 },
+  navyBody: { color: 'rgba(255,255,255,0.65)', fontSize: 13, lineHeight: 19 },
+  navyChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 2,
+    backgroundColor: 'rgba(255,255,255,0.12)', paddingLeft: 14, paddingRight: 8, paddingVertical: 8, borderRadius: 18,
   },
-  settingsRowLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
+  navyChipText: { color: C.white, fontSize: 13, fontWeight: '700' },
+
+  chip: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: C.accentSoft, paddingHorizontal: 14, paddingVertical: 9, borderRadius: 20,
   },
-  settingsIconCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F0F4F8',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
+  chipDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: C.accent },
+  chipText: { color: C.body, fontSize: 14, fontWeight: '600' },
+  aboutText: { color: C.body, fontSize: 16, lineHeight: 26 },
+  quote: { color: C.pri, fontSize: 19, lineHeight: 28, fontFamily: 'Georgia', fontStyle: 'italic' },
+  rhythmTile: {
+    width: '48%', flexGrow: 1, flexDirection: 'row', alignItems: 'center', gap: 10,
+    backgroundColor: '#F6F9FC', borderRadius: 16, paddingHorizontal: 14, paddingVertical: 14,
   },
-  settingsLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: PREMA_THEME.colors.deepNavy,
+  rhythmText: { color: C.body, fontSize: 13, fontWeight: '600', flex: 1 },
+
+  harmonyCard: {
+    backgroundColor: C.accentSoft, borderRadius: 24, padding: 22, marginBottom: 16, marginTop: 4,
+    shadowColor: '#D4E2F0', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 1, shadowRadius: 12, elevation: 2,
   },
+  harmonyTitle: { flexShrink: 1, color: C.pri, fontSize: 20, fontFamily: 'Georgia', fontStyle: 'italic' },
+  privatePill: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    backgroundColor: C.white, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12,
+  },
+  privateText: { color: C.pri, fontSize: 11, fontWeight: '700', letterSpacing: 0.5 },
+  harmonyTile: { flex: 1, backgroundColor: C.white, borderRadius: 18, padding: 16 },
+  harmonyValue: { color: C.pri, fontSize: 17, fontWeight: '700', marginTop: -2 },
+  resonanceRow: {
+    flexDirection: 'row', alignItems: 'center', marginTop: 10,
+    backgroundColor: C.white, borderRadius: 18, padding: 16,
+  },
+  resonanceNum: { color: C.pri, fontSize: 30, fontWeight: '800', letterSpacing: -0.5 },
+  resonanceMax: { color: C.muted, fontSize: 18, fontWeight: '600' },
+  resonanceIcon: {
+    width: 46, height: 46, borderRadius: 23, backgroundColor: C.accent,
+    alignItems: 'center', justifyContent: 'center',
+  },
+
+  row: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 18, paddingVertical: 14 },
+  rowDivider: { borderBottomWidth: 1, borderBottomColor: '#EEF3F8' },
+  rowDividerTop: { borderTopWidth: 1, borderTopColor: '#EEF3F8' },
+  rowIcon: {
+    width: 42, height: 42, borderRadius: 21, backgroundColor: C.accentSoft,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  rowTitle: { color: C.pri, fontSize: 16, fontWeight: '600' },
+  rowSub: { color: C.muted, fontSize: 13, marginTop: 2 },
+
+  footer: { color: C.muted, fontSize: 12, textAlign: 'center', marginTop: 12, letterSpacing: 0.5 },
 });
+
+export default function ProfileTab() {
+  return (
+    <NunitoScope>
+      <ProfileTabScreen />
+    </NunitoScope>
+  );
+}

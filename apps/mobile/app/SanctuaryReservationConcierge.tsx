@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from '../components/Icon';
@@ -5,13 +6,14 @@ import { View, Text, ScrollView, Image, Pressable, TextInput } from 'react-nativ
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 
 export default function SanctuaryReservationConcierge() {
+  const router = useRouter();
   return (
     <SafeAreaView className="bg-surface font-body-md text-body-md text-on-surface flex flex-1">
       <ScrollView className="flex-1 flex relative w-full max-w-md mx-auto px-margin-mobile bg-surface"><View className="flex w-full pb-12">
 
 <View className="flex items-center justify-between py-3 mb-2 flex-row">
 <View className="flex items-center gap-2 flex-row">
-<Pressable aria-label="Go back" className="flex items-center justify-center w-9 h-9 rounded-full bg-surface-container active:scale-95 text-on-surface flex-row" >
+<Pressable onPress={() => router.back()} aria-label="Go back" className="flex items-center justify-center w-9 h-9 rounded-full bg-surface-container active:scale-95 text-on-surface flex-row" >
 <Icon name="arrow_back_ios_new" size={18} className="text-[18px]" />
 </Pressable>
 <View className="flex">
@@ -45,7 +47,7 @@ export default function SanctuaryReservationConcierge() {
 <View className="relative overflow-hidden rounded-2xl bg-surface-container-lowest shadow-md mb-5">
 <View className="relative h-60 w-full overflow-hidden">
 <Image className="w-full h-full" source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBl1oB7IqNOfm05pfEbdpg9Jav0Xcc-qMHlQBAJbdbn0l-vjUj8hu2Vd49ZMyFIjwqCYMUyEVyP7HCGfECg3zZEJuyZRMRlwxiPhoGaXrbFR7LQHm0cKa_6XM7rV2SrZV28JqAD1wBh_Y03NzbBqZ1V0x9OsI1CijhNWTCwYQ83wrjqExH4T5WkDu4Q2tEu0hhChbwI9o47muhRxUJoOY61g-sX8vRymGk8VYM4ioExXdsakplFnXUj' }} />
-<View className="absolute"></View>
+<View className="absolute inset-0"></View>
 
 <View className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-lowest/90 shadow-sm flex-row">
 <Icon name="graphic_eq" size={16} className="text-secondary text-[16px]" />
@@ -105,7 +107,7 @@ export default function SanctuaryReservationConcierge() {
 <Icon name="shield" size={20} className="text-secondary text-[20px]" />
 <Text className="font-headline-sm text-headline-sm text-primary">Sanctuary Protocols</Text>
 </View>
-<View >
+<View className="gap-space-12">
 <View className="flex items-start gap-3 p-2.5 rounded-xl bg-surface-container-low flex-row">
 <View className="w-7 h-7 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-fixed mt-0.5 flex-row">
 <Icon name="curtains" size={16} className="text-[16px]" />

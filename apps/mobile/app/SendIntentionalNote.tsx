@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from '../components/Icon';
@@ -5,12 +6,13 @@ import { View, Text, ScrollView, Image, Pressable, TextInput } from 'react-nativ
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 
 export default function SendIntentionalNote() {
+  const router = useRouter();
   return (
     <SafeAreaView className="bg-surface text-on-surface font-body-md text-body-md flex flex-1">
-      <View className="bg-surface border-surface-container-highest bg-surface/85"><View className="h-16 px-space-16 max-w-[480px] mx-auto flex items-center justify-between flex-row"><View className="flex items-center gap-space-8 flex-row"><Pressable aria-label="Go Back" className="w-11 h-11 -ml-space-8 flex items-center justify-center text-primary rounded-full flex-row" ><Icon name="arrow_back_ios_new" size={22} className="text-[22px]" /></Pressable><Image alt="PREMA Logo" className="h-7 w-auto" source={require('../assets/images/logo.png')} /><Text className="font-headline-sm text-headline-sm text-primary tracking-tight max-w-[220px]">Prema   Send Intentional Note</Text></View><View className="flex items-center gap-space-4 flex-row"><Image alt="Profile" className="w-8 h-8 rounded-full" source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBnpv7GVuzd6fs5TliuCiwIlpL0Rt2bVAxsXV2oCjBpVhp4UG2QcSA0fM1E5q0b-Bi3hANo_gxxHA1NjlLrqjE8ohvM6MdNojlI797HuC0AUkvZ0e2I5nz-fDRMdLXKv5aD9DyFmCPwJsDQdw4uv-m2poXm4GRuvfCjVpkLQEOf-1fFeXQOV7jP88Y-BVm6Xpd7_d4ZzQTNKZfgN_NLPKw3_kWAaoVLwLZ_BFzC19ixAfQnTKjdTvg9' }} /></View></View></View><ScrollView className="flex relative w-full max-w-[480px] mx-auto px-margin-mobile pt-16 bg-surface"><View className="flex w-full pb-space-32 gap-space-20">
+      <View className="bg-surface border-surface-container-highest bg-surface/85"><View className="h-16 px-space-16 max-w-[480px] mx-auto flex items-center justify-between flex-row"><View className="flex items-center gap-space-8 flex-row"><Pressable onPress={() => router.back()} aria-label="Go Back" className="w-11 h-11 -ml-space-8 flex items-center justify-center text-primary rounded-full flex-row" ><Icon name="arrow_back_ios_new" size={22} className="text-[22px]" /></Pressable><Image alt="PREMA Logo" className="h-7 w-[67px]" resizeMode="contain" source={require('../assets/images/logo.png')} /><Text className="font-headline-sm text-headline-sm text-primary tracking-tight max-w-[220px]">Prema   Send Intentional Note</Text></View><View className="flex items-center gap-space-4 flex-row"><Image alt="Profile" className="w-8 h-8 rounded-full" source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBnpv7GVuzd6fs5TliuCiwIlpL0Rt2bVAxsXV2oCjBpVhp4UG2QcSA0fM1E5q0b-Bi3hANo_gxxHA1NjlLrqjE8ohvM6MdNojlI797HuC0AUkvZ0e2I5nz-fDRMdLXKv5aD9DyFmCPwJsDQdw4uv-m2poXm4GRuvfCjVpkLQEOf-1fFeXQOV7jP88Y-BVm6Xpd7_d4ZzQTNKZfgN_NLPKw3_kWAaoVLwLZ_BFzC19ixAfQnTKjdTvg9' }} /></View></View></View><ScrollView className="flex relative w-full max-w-[480px] mx-auto px-margin-mobile pt-16 bg-surface"><View className="flex w-full pb-space-32 gap-space-20">
 
 <View className="flex items-center justify-between pt-space-4 flex-row">
-<Pressable aria-label="Dismiss note" className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary active:scale-95 flex-row"  >
+<Pressable onPress={() => router.back()} aria-label="Dismiss note" className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary active:scale-95 flex-row"  >
 <Icon name="close" size={20} className="text-[20px]" />
 </Pressable>
 <View className="flex items-center">

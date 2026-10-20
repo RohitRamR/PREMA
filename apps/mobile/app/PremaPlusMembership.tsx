@@ -1,211 +1,335 @@
-import React from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useCallback, useState } from 'react';
+import { View, Text, ScrollView, ImageBackground, StyleSheet, Alert } from 'react-native';
+import { useRouter, useFocusEffect } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { setStatusBarStyle } from 'expo-status-bar';
+import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
+import CelestialBackground from '../components/CelestialBackground';
 import Icon from '../components/Icon';
-import { View, Text, ScrollView, Image, Pressable, TextInput } from 'react-native';
-import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import { C, Tap, cardShadow, serif } from '../components/prema-ui';
+
+const HERO =
+  'https://lh3.googleusercontent.com/aida-public/AB6AXuDd0ZmfZQCdWgNzbOCmxgFC1SiPdZLUfy4sGNgoefXf_JhcRDRuMLFEDsU1U-7KIJ2eFhzhf4ROSgXXzMhDWew6n8ujrL5NyqyiJKqm0XjjQ2YOvTVtmoeiM-uRaqb9IYBWeag9dB_cojfDsqazEizr3FuJkplZCvyBRz02HZci9AksURX0J4wMD_aSkOt-idQB0Dc4gCJDLWDY_c_FN1AH0MnPGYi-vDkrAVLy0CMHAJ05w26zOg8y';
+
+// The member's active subscription (mock until billing is connected).
+const CURRENT = {
+  tier: 'Founding Member',
+  level: 'Tier I',
+  plan: 'quarterly' as const,
+  renews: '14 Jan 2027',
+  since: 'Sep 2026',
+};
+
+const BENEFITS = [
+  { icon: 'filter_vintage', title: 'Up to 5 curated matches daily', body: 'Hand-picked introductions with zero endless swiping.' },
+  { icon: 'psychology', title: 'Full compatibility deep-dives', body: 'All 48 psycho-social and cultural DNA dimensions, before you say hello.' },
+  { icon: 'history', title: 'Revisit past introductions', body: 'Quietly reconsider anyone from the last 14 days — no FOMO.' },
+  { icon: 'local_cafe', title: 'Sanctuary date perks', body: 'Complimentary coffee or dessert at Amethyst, The English Tearoom & Blue Tokai.' },
+  { icon: 'tune', title: 'Advanced intentional filters', body: 'Filter by cultural rhythms, lifestyle cadence and non-negotiables.' },
+];
+
+const PLANS = [
+  {
+    id: 'quarterly', name: 'Quarterly', tagline: 'The recommended rhythm for meaningful conversations',
+    price: '₹1,499', note: 'Billed ₹4,499 every 3 months', badge: 'Most intentional', save: 'Save 25%',
+  },
+  {
+    id: 'monthly', name: 'Monthly', tagline: 'Explore at your own comfortable pace',
+    price: '₹1,999', note: 'Billed monthly · cancel anytime', badge: null, save: null,
+  },
+] as const;
+
+type PlanId = (typeof PLANS)[number]['id'];
 
 export default function PremaPlusMembership() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const [plan, setPlan] = useState<PlanId>(CURRENT.plan);
+  const selected = PLANS.find((p) => p.id === plan)!;
+  const isCurrent = plan === CURRENT.plan;
+
+  // Light status bar over the photo hero, restored to dark when leaving.
+  useFocusEffect(useCallback(() => {
+    setStatusBarStyle('light');
+    return () => setStatusBarStyle('dark');
+  }, []));
+
+  const onCta = () => {
+    if (isCurrent) {
+      Alert.alert('Manage membership', `You’re on ${CURRENT.tier} · ${selected.name}. Renews ${CURRENT.renews}.`, [
+        { text: 'Done', style: 'cancel' },
+        { text: 'Cancel renewal', style: 'destructive' },
+      ]);
+      return;
+    }
+    Alert.alert(
+      `Switch to ${selected.name}?`,
+      `${selected.price}/month — ${selected.note}. The change starts on ${CURRENT.renews}, when your current period ends.`,
+      [{ text: 'Not now', style: 'cancel' }, { text: 'Switch plan' }],
+    );
+  };
+
   return (
-    <SafeAreaView className="bg-surface text-on-surface font-body-md text-body-md flex flex-1">
-      <View className="bg-surface border-surface-container-highest bg-surface/85 shadow-sm"><View className="h-16 px-space-16 max-w-[480px] mx-auto flex items-center justify-between flex-row"><View className="flex items-center gap-space-8 flex-row"><Pressable aria-label="Go Back" className="w-11 h-11 -ml-space-8 flex items-center justify-center text-primary rounded-full active:scale-95 flex-row" ><Icon name="arrow_back_ios_new" size={22} className="text-[22px]" /></Pressable><Image alt="PREMA Logo" className="h-7 w-auto" source={require('../assets/images/logo.png')} /><Text className="font-headline-sm text-headline-sm text-primary tracking-tight">Membership</Text></View><View className="flex items-center gap-space-4 flex-row"><View className="relative flex items-center justify-center min-w-[36px] min-h-[36px] flex-row"><Image alt="Profile" className="w-8 h-8 rounded-full" source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBnpv7GVuzd6fs5TliuCiwIlpL0Rt2bVAxsXV2oCjBpVhp4UG2QcSA0fM1E5q0b-Bi3hANo_gxxHA1NjlLrqjE8ohvM6MdNojlI797HuC0AUkvZ0e2I5nz-fDRMdLXKv5aD9DyFmCPwJsDQdw4uv-m2poXm4GRuvfCjVpkLQEOf-1fFeXQOV7jP88Y-BVm6Xpd7_d4ZzQTNKZfgN_NLPKw3_kWAaoVLwLZ_BFzC19ixAfQnTKjdTvg9' }} /><Text className="absolute -bottom-space-2 -right-space-2 w-3.5 h-3.5 bg-secondary-container rounded-full flex items-center justify-center flex-row"><Icon name="verified" size={10} className="text-[10px] text-primary font-bold" /></Text></View></View></View></View><ScrollView className="flex relative w-full max-w-[480px] mx-auto px-margin-mobile pt-16 bg-surface"><View className="flex w-full pb-space-40">
+    <View style={{ flex: 1, backgroundColor: C.bg }}>
+      <CelestialBackground />
 
-<View className="flex items-center text-center pt-space-8 px-space-8">
-<View className="items-center gap-space-8 px-space-12 py-space-4 rounded-full bg-secondary-container/50 text-on-secondary-fixed-variant">
-<Icon name="spa" size={15} className="text-[15px]" />
-<Text className="font-label-sm text-label-sm tracking-wider uppercase">PREMA Plus Membership</Text>
-</View>
-<Text className="font-headline-lg-mobile text-headline-lg-mobile text-primary tracking-tight max-w-[340px]">
-      Go deeper with PREMA.
-    </Text>
-<Text className="font-body-md text-body-md text-on-surface-variant max-w-[360px] leading-relaxed">
-      Thoughtful tools designed to support your intentional search, with zero artificial urgency or paywalled compatibility scores.
-    </Text>
-</View>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
+        {/* ── Hero ── */}
+        <ImageBackground source={{ uri: HERO }} resizeMode="cover" style={[s.hero, { paddingTop: insets.top + 8 }]}>
+          <Svg style={StyleSheet.absoluteFill} preserveAspectRatio="none">
+            <Defs>
+              <LinearGradient id="veil" x1="0" y1="0" x2="0" y2="1">
+                <Stop offset="0" stopColor="#1A2E44" stopOpacity="0.28" />
+                <Stop offset="0.5" stopColor="#1A2E44" stopOpacity="0.05" />
+                <Stop offset="1" stopColor="#1A2E44" stopOpacity="0.72" />
+              </LinearGradient>
+            </Defs>
+            <Rect width="100%" height="100%" fill="url(#veil)" />
+          </Svg>
 
-<View className="relative w-full rounded-2xl overflow-hidden shadow-sm bg-surface-container-lowest">
-<View className="w-full h-36 bg-cover bg-center" >
-<View className="w-full h-full flex items-end p-space-16 flex-row">
-<View className="flex items-center gap-space-8 text-on-primary flex-row">
-<Icon name="verified_user" size={18} className="text-[18px]" />
-<Text className="font-label-md text-label-md tracking-normal">Built for enduring companionship, not habit-forming loops</Text>
-</View>
-</View>
-</View>
-</View>
+          <View style={s.heroTop}>
+            <Tap onPress={() => router.back()} style={s.glassBtn} accessibilityLabel="Go back">
+              <Icon name="arrow_back" size={22} color={C.white} />
+            </Tap>
+            <View style={s.glassPill}>
+              <Icon name="auto_awesome" size={12} color={C.white} />
+              <Text style={s.glassPillText}>PREMA Plus</Text>
+            </View>
+          </View>
 
-<View >
-<View className="flex items-center justify-between px-space-4 flex-row">
-<Text className="font-label-md text-label-md text-on-surface-variant tracking-wide uppercase">Membership Benefits</Text>
-<Text className="font-label-sm text-label-sm text-secondary">5 Core Pillars</Text>
-</View>
-<View >
+          <View>
+            <Text style={s.heroTitle}>Go deeper with PREMA.</Text>
+            <Text style={s.heroBody}>
+              Thoughtful tools for an intentional search — no artificial urgency, no paywalled compatibility.
+            </Text>
+          </View>
+        </ImageBackground>
 
-<View className="bg-surface-container-lowest p-space-16 rounded-xl shadow-sm flex items-start gap-space-16 flex-row">
-<View className="w-10 h-10 rounded-full bg-secondary-container/40 flex items-center justify-center text-primary flex-row">
-<Icon name="filter_vintage" size={20} className="text-[20px]" />
-</View>
-<View className="flex-1">
-<Text className="font-headline-sm text-headline-sm text-primary">Up to 5 Curated Matches Daily</Text>
-<Text className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
-            Instead of 3, receive up to 5 hand-picked intros daily with zero endless swiping and curated pause intervals.
+        <View style={{ paddingHorizontal: 20, marginTop: -26 }}>
+          {/* ── Current plan ── */}
+          <View style={s.currentCard}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Text style={s.label}>Your current plan</Text>
+              <View style={s.activePill}>
+                <View style={s.activeDot} />
+                <Text style={s.activeText}>Active</Text>
+              </View>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, marginTop: 2 }}>
+              <View style={s.tierIcon}>
+                <Icon name="workspace_premium" size={24} color={C.accent} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={s.currentTitle}>{CURRENT.tier}</Text>
+                <Text style={s.currentSub}>
+                  {CURRENT.level} · {PLANS.find((p) => p.id === CURRENT.plan)!.name} · member since {CURRENT.since}
+                </Text>
+              </View>
+            </View>
+            <View style={s.renewRow}>
+              <Icon name="event_available" size={16} color={C.muted} />
+              <Text style={s.renewText}>Renews on {CURRENT.renews}</Text>
+            </View>
+          </View>
+
+          {/* ── Plans ── */}
+          <Text style={s.sectionLabel}>Choose your cadence</Text>
+          <View style={{ gap: 14 }}>
+            {PLANS.map((p) => {
+              const on = p.id === plan;
+              const current: boolean = (p.id as string) === CURRENT.plan;
+              return (
+                <Tap
+                  key={p.id}
+                  onPress={() => setPlan(p.id)}
+                  style={[s.plan, on ? s.planOn : null]}
+                  pressedStyle={{ opacity: 0.92 }}
+                  accessibilityRole="radio"
+                  accessibilityState={{ checked: on }}
+                >
+                  {current ? (
+                    <View style={[s.ribbon, s.ribbonCurrent]}>
+                      <Icon name="check" size={11} color={C.pri} />
+                      <Text style={[s.ribbonText, { color: C.pri }]}>Current plan</Text>
+                    </View>
+                  ) : p.badge ? (
+                    <View style={s.ribbon}>
+                      <Text style={s.ribbonText}>{p.badge}</Text>
+                    </View>
+                  ) : null}
+                  <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 14 }}>
+                    <View style={[s.radio, on ? s.radioOn : null]}>
+                      {on ? <View style={s.radioDot} /> : null}
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                        <Text style={s.planName}>{p.name}</Text>
+                        {p.save ? (
+                          <View style={s.save}><Text style={s.saveText}>{p.save}</Text></View>
+                        ) : null}
+                      </View>
+                      <Text style={s.planTagline}>{p.tagline}</Text>
+                      <View style={s.planPriceRow}>
+                        <Text style={s.price}>
+                          {p.price}<Text style={s.unit}> / month</Text>
+                        </Text>
+                        <Text style={s.planNote}>{p.note}</Text>
+                      </View>
+                    </View>
+                  </View>
+                </Tap>
+              );
+            })}
+          </View>
+
+          {/* ── Benefits ── */}
+          <Text style={s.sectionLabel}>Included in your membership</Text>
+          <View style={s.card}>
+            {BENEFITS.map((b, i) => (
+              <View key={b.title} style={[s.benefit, i < BENEFITS.length - 1 ? s.benefitDivider : null]}>
+                <View style={s.benefitIcon}>
+                  <Icon name={b.icon} size={19} color={C.accent} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={s.benefitTitle}>{b.title}</Text>
+                  <Text style={s.benefitBody}>{b.body}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+
+          {/* ── Ethics ── */}
+          <View style={s.ethics}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <Icon name="balance" size={18} color={C.accent} />
+              <Text style={s.ethicsTitle}>The PREMA ethics guarantee</Text>
+            </View>
+            <Text style={s.ethicsBody}>
+              We never sell compatibility rankings, promote profiles for money, or manufacture urgency. Membership gives you better tools — never algorithmic privilege.
+            </Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
+              {[['do_not_disturb_on', 'Zero pay-to-rank'], ['visibility_off', 'Zero hidden trackers'], ['lock', 'Private by design']].map(([icon, t]) => (
+                <View key={t} style={s.ethicsChip}>
+                  <Icon name={icon} size={13} color={C.body} />
+                  <Text style={s.ethicsChipText}>{t}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        </View>
+      </ScrollView>
+
+      {/* ── Sticky CTA ── */}
+      <View style={[s.footer, { paddingBottom: Math.max(insets.bottom, 14) }]}>
+        <Tap
+          onPress={onCta}
+          style={[s.cta, isCurrent ? s.ctaQuiet : null]}
+          pressedStyle={{ opacity: 0.88 }}
+          accessibilityRole="button"
+        >
+          <Text style={[s.ctaText, isCurrent ? { color: C.pri } : null]}>
+            {isCurrent ? 'Manage membership' : `Switch to ${selected.name.toLowerCase()} · ${selected.price}/mo`}
           </Text>
-</View>
-</View>
-
-<View className="bg-surface-container-lowest p-space-16 rounded-xl shadow-sm flex items-start gap-space-16 flex-row">
-<View className="w-10 h-10 rounded-full bg-secondary-container/40 flex items-center justify-center text-primary flex-row">
-<Icon name="psychology_alt" size={20} className="text-[20px]" />
-</View>
-<View className="flex-1">
-<Text className="font-headline-sm text-headline-sm text-primary">Full Compatibility Deep-Dives</Text>
-<Text className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
-            Unlimited access to all 48 psycho-social and cultural DNA breakdown dimensions before initiating dialogue.
-          </Text>
-</View>
-</View>
-
-<View className="bg-surface-container-lowest p-space-16 rounded-xl shadow-sm flex items-start gap-space-16 flex-row">
-<View className="w-10 h-10 rounded-full bg-secondary-container/40 flex items-center justify-center text-primary flex-row">
-<Icon name="history" size={20} className="text-[20px]" />
-</View>
-<View className="flex-1">
-<Text className="font-headline-sm text-headline-sm text-primary">Revisit Past Daily Intros</Text>
-<Text className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
-            Quietly reconsider connections from the past 14 days whenever you feel emotionally ready, free from FOMO.
-          </Text>
-</View>
-</View>
-
-<View className="bg-surface-container-lowest p-space-16 rounded-xl shadow-sm flex items-start gap-space-16 flex-row">
-<View className="w-10 h-10 rounded-full bg-secondary-container/40 flex items-center justify-center text-primary flex-row">
-<Icon name="local_cafe" size={20} className="text-[20px]" />
-</View>
-<View className="flex-1">
-<View className="flex items-center gap-space-8 flex-row">
-<Text className="font-headline-sm text-headline-sm text-primary">Extended Safe Date Perks</Text>
-<Text className="px-space-8 py-0.5 rounded-full bg-secondary-container/70 text-on-secondary-fixed-variant font-label-sm text-label-sm">Partner Venues</Text>
-</View>
-<Text className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
-            Complimentary artisanal coffee or dessert at PREMA sanctuary venues including Amethyst, The English Tearoom, and Blue Tokai reserve corners.
-          </Text>
-</View>
-</View>
-
-<View className="bg-surface-container-lowest p-space-16 rounded-xl shadow-sm flex items-start gap-space-16 flex-row">
-<View className="w-10 h-10 rounded-full bg-secondary-container/40 flex items-center justify-center text-primary flex-row">
-<Icon name="tune" size={20} className="text-[20px]" />
-</View>
-<View className="flex-1">
-<Text className="font-headline-sm text-headline-sm text-primary">Advanced Intentional Filters</Text>
-<Text className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
-            Filter with granular poise by cultural harmony rhythms, lifestyle cadences, and personal non-negotiables.
-          </Text>
-</View>
-</View>
-</View>
-</View>
-
-<View className="bg-surface-container-low p-space-20 rounded-2xl shadow-sm">
-<View className="flex items-center gap-space-8 text-primary flex-row">
-<Icon name="balance" size={20} className="text-[20px]" />
-<Text className="font-headline-sm text-headline-sm tracking-tight">PREMA Ethics Guarantee</Text>
-</View>
-<Text className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-      We never sell artificial compatibility rankings, promote profiles for money, or manufacture fake notification urgency. Human alignment is sacred; membership provides spatial tools, not algorithmic privilege.
-    </Text>
-<View className="pt-space-4 flex items-center gap-space-12 text-secondary flex-row">
-<View className="flex items-center gap-space-4 flex-row">
-<Icon name="do_not_disturb_on" size={16} className="text-[16px]" />
-<Text className="font-label-sm text-label-sm">Zero Pay-to-Rank</Text>
-</View>
-<View className="flex items-center gap-space-4 flex-row">
-<Icon name="visibility_off" size={16} className="text-[16px]" />
-<Text className="font-label-sm text-label-sm">Zero Hidden Trackers</Text>
-</View>
-</View>
-</View>
-
-<View >
-<View className="px-space-4">
-<Text className="font-headline-sm text-headline-sm text-primary">Select a Membership Cadence</Text>
-<Text className="font-body-sm text-body-sm text-on-surface-variant">Cancel anytime with total autonomy and zero friction.</Text>
-</View>
-<View className="" id="tier-selection-">
-
-<Pressable className="relative block" id="plan-quarterly">
-<TextInput checked="" className="peer sr-only" name="membership_plan" type="radio" value="quarterly" />
-<View className="p-space-20 rounded-2xl bg-surface-container-lowest peer-checked:bg-secondary-container/20 shadow-sm">
-<View className="flex items-start justify-between flex-row">
-<View >
-<View className="items-center gap-space-4 px-space-8 py-space-2 rounded-full bg-primary text-on-primary">
-<Icon name="favorite" size={12} className="text-[12px]" />
-<Text className="font-label-sm text-label-sm">Most Intentional</Text>
-</View>
-<Text className="font-headline-sm text-headline-sm text-primary">Quarterly Commitment</Text>
-<Text className="font-body-sm text-body-sm text-on-surface-variant">Recommended period for meaningful conversations</Text>
-</View>
-<View className="w-6 h-6 rounded-full bg-surface-container-high peer-checked:-[]:bg-primary flex items-center justify-center flex-row">
-<View className="w-2.5 h-2.5 rounded-full bg-surface -has-[:checked]:bg-on-primary"></View>
-</View>
-</View>
-<View className="mt-space-16 pt-space-12 flex items-baseline justify-between flex-row">
-<View className="flex items-baseline gap-space-4 flex-row">
-<Text className="font-headline-md text-headline-md text-primary font-bold">₹1,499</Text>
-<Text className="font-body-sm text-body-sm text-on-surface-variant">/ month</Text>
-</View>
-<Text className="font-label-md text-label-md text-secondary">Billed ₹4,499 for 3 mos</Text>
-</View>
-</View>
-</Pressable>
-
-<Pressable className="relative block" id="plan-monthly">
-<TextInput className="peer sr-only" name="membership_plan" type="radio" value="monthly" />
-<View className="p-space-20 rounded-2xl bg-surface-container-lowest peer-checked:bg-secondary-container/20 shadow-sm">
-<View className="flex items-start justify-between flex-row">
-<View >
-<Text className="inline-block px-space-8 py-space-2 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">Flexible Rhythm</Text>
-<Text className="font-headline-sm text-headline-sm text-primary">Monthly Reflection</Text>
-<Text className="font-body-sm text-body-sm text-on-surface-variant">Explore at your own comfortable pace</Text>
-</View>
-<View className="w-6 h-6 rounded-full bg-surface-container-high peer-checked:-[]:bg-primary flex items-center justify-center flex-row">
-<View className="w-2.5 h-2.5 rounded-full bg-surface -has-[:checked]:bg-on-primary"></View>
-</View>
-</View>
-<View className="mt-space-16 pt-space-12 flex items-baseline justify-between flex-row">
-<View className="flex items-baseline gap-space-4 flex-row">
-<Text className="font-headline-md text-headline-md text-primary font-bold">₹1,999</Text>
-<Text className="font-body-sm text-body-sm text-on-surface-variant">/ month</Text>
-</View>
-<Text className="font-label-md text-label-md text-on-surface-variant">Cancel anytime</Text>
-</View>
-</View>
-</Pressable>
-</View>
-</View>
-
-<View className="pt-space-8">
-<Pressable className="w-full h-14 rounded-full bg-primary text-on-primary font-label-lg text-label-lg flex items-center justify-center gap-space-8 shadow-md active:scale-[0.98] flex-row" id="cta-button">
-<Text>Begin PREMA Plus Membership</Text>
-<Icon name="arrow_forward" size={18} className="text-[18px]" />
-</Pressable>
-<View className="text-center px-space-8">
-<View className="flex items-center justify-center gap-space-16 text-on-surface-variant text-body-sm flex-row">
-<View className="flex items-center gap-space-4 flex-row">
-<Icon name="lock" size={16} className="text-[16px] text-secondary" />
-<Text className="font-label-sm text-label-sm">256-Bit Encryption</Text>
-</View>
-<View className="flex items-center gap-space-4 flex-row">
-<Icon name="credit_card" size={16} className="text-[16px] text-secondary" />
-<Text className="font-label-sm text-label-sm">Razorpay &amp; Apple Pay</Text>
-</View>
-</View>
-<Text className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
-        Cancel anytime with a single tap in account settings. Zero auto-renewal surprises or hidden charges.
-      </Text>
-</View>
-</View>
-</View>
-</ScrollView>
-    </SafeAreaView>
+        </Tap>
+        <View style={s.trust}>
+          <Icon name="lock" size={12} color={C.muted} />
+          <Text style={s.trustText}>Secure checkout · Razorpay & Apple Pay · Cancel in one tap</Text>
+        </View>
+      </View>
+    </View>
   );
 }
+
+const s = StyleSheet.create({
+  hero: { minHeight: 340, paddingHorizontal: 20, paddingBottom: 48, justifyContent: 'space-between' },
+  heroTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  glassBtn: {
+    width: 42, height: 42, borderRadius: 21, backgroundColor: 'rgba(255,255,255,0.16)',
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)', alignItems: 'center', justifyContent: 'center',
+  },
+  glassPill: {
+    flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.16)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)',
+  },
+  glassPillText: { color: C.white, fontSize: 11, fontWeight: '600', letterSpacing: 1.2, textTransform: 'uppercase' },
+  heroTitle: { color: C.white, fontSize: 32, lineHeight: 38, ...serif },
+  heroBody: { color: 'rgba(255,255,255,0.85)', fontSize: 14.5, lineHeight: 21, marginTop: 8, maxWidth: 320 },
+
+  label: { color: C.muted, fontSize: 11.5, fontWeight: '700', letterSpacing: 1.4, textTransform: 'uppercase', marginBottom: 12 },
+  sectionLabel: { color: C.pri, fontSize: 20, marginTop: 28, marginBottom: 14, marginLeft: 4, ...serif },
+
+  currentCard: {
+    backgroundColor: C.white, borderRadius: 24, padding: 18,
+    shadowColor: '#1A2E44', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.08, shadowRadius: 22, elevation: 6,
+  },
+  activePill: {
+    flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 12,
+    backgroundColor: '#E8F7EF', paddingHorizontal: 9, paddingVertical: 4, borderRadius: 10,
+  },
+  activeDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#3FB37B' },
+  activeText: { color: '#2E8A5D', fontSize: 11, fontWeight: '700' },
+  tierIcon: { width: 48, height: 48, borderRadius: 24, backgroundColor: C.accentSoft, alignItems: 'center', justifyContent: 'center' },
+  currentTitle: { color: C.pri, fontSize: 21, ...serif },
+  currentSub: { color: C.muted, fontSize: 13, marginTop: 2 },
+  renewRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 14, paddingTop: 12,
+    borderTopWidth: 1, borderTopColor: C.line,
+  },
+  renewText: { color: C.body, fontSize: 13, fontWeight: '500' },
+
+  plan: { borderRadius: 22, padding: 18, backgroundColor: C.white, borderWidth: 1, borderColor: '#E6EDF5', ...cardShadow },
+  planOn: {
+    borderColor: C.pri, borderWidth: 1.5, backgroundColor: '#FBFDFF',
+    shadowColor: C.pri, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 4,
+  },
+  ribbon: {
+    position: 'absolute', top: -10, right: 16, flexDirection: 'row', alignItems: 'center', gap: 4,
+    backgroundColor: C.pinkSoft, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 11,
+    borderWidth: 1, borderColor: '#FBD3DD',
+  },
+  ribbonCurrent: { backgroundColor: C.accentSoft, borderColor: '#D3E4F5' },
+  ribbonText: { color: '#D9577A', fontSize: 11, fontWeight: '700', letterSpacing: 0.3 },
+  radio: {
+    width: 22, height: 22, borderRadius: 11, borderWidth: 1.5, borderColor: '#C3D0DE',
+    alignItems: 'center', justifyContent: 'center', marginTop: 3,
+  },
+  radioOn: { borderColor: C.pri },
+  radioDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: C.pri },
+  planName: { color: C.pri, fontSize: 20, ...serif },
+  save: { backgroundColor: '#EAF3FC', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 9 },
+  saveText: { color: '#3B7BBF', fontSize: 11, fontWeight: '700' },
+  planTagline: { color: C.muted, fontSize: 13, lineHeight: 18, marginTop: 3 },
+  planPriceRow: { marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: C.line },
+  price: { color: C.pri, fontSize: 23, fontWeight: '700', letterSpacing: -0.4 },
+  unit: { color: C.muted, fontSize: 13, fontWeight: '500' },
+  planNote: { color: C.muted, fontSize: 12, marginTop: 2 },
+
+  card: { backgroundColor: C.white, borderRadius: 24, paddingHorizontal: 18, paddingVertical: 4, ...cardShadow },
+  benefit: { flexDirection: 'row', gap: 14, paddingVertical: 15, alignItems: 'flex-start' },
+  benefitDivider: { borderBottomWidth: 1, borderBottomColor: C.line },
+  benefitIcon: { width: 38, height: 38, borderRadius: 19, backgroundColor: C.accentSoft, alignItems: 'center', justifyContent: 'center' },
+  benefitTitle: { color: C.pri, fontSize: 15, fontWeight: '600' },
+  benefitBody: { color: C.muted, fontSize: 13.5, lineHeight: 19, marginTop: 3 },
+
+  ethics: { marginTop: 16, backgroundColor: 'rgba(231,240,249,0.7)', borderRadius: 24, padding: 18 },
+  ethicsTitle: { color: C.pri, fontSize: 17, ...serif },
+  ethicsBody: { color: C.body, fontSize: 13.5, lineHeight: 20 },
+  ethicsChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 5,
+    backgroundColor: C.white, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 14,
+  },
+  ethicsChipText: { color: C.body, fontSize: 12, fontWeight: '600' },
+
+  footer: {
+    paddingHorizontal: 20, paddingTop: 12,
+    backgroundColor: 'rgba(241,247,253,0.97)', borderTopWidth: 1, borderTopColor: '#E6EDF5',
+  },
+  cta: {
+    height: 54, borderRadius: 27, backgroundColor: C.pink, alignItems: 'center', justifyContent: 'center',
+    shadowColor: C.pink, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.22, shadowRadius: 12, elevation: 3,
+  },
+  ctaQuiet: { backgroundColor: C.white, borderWidth: 1.5, borderColor: '#D6E2EE', shadowOpacity: 0 },
+  ctaText: { color: C.white, fontSize: 16, fontWeight: '600', letterSpacing: 0.2 },
+  trust: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5, marginTop: 10 },
+  trustText: { color: C.muted, fontSize: 11.5 },
+});

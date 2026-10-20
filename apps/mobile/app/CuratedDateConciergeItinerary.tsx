@@ -1,17 +1,19 @@
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from '../components/Icon';
-import { View, Text, ScrollView, Image, Pressable, TextInput } from 'react-native';
+import { View, Text, ScrollView, Image, Pressable, TextInput, ImageBackground } from 'react-native';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 
 export default function CuratedDateConciergeItinerary() {
+  const router = useRouter();
   return (
     <SafeAreaView className="bg-surface text-on-surface font-body-md text-body-md flex flex-1">
-      <View className="bg-surface border-surface-container-highest bg-surface/85"><View className="h-16 px-space-20 max-w-[480px] mx-auto flex items-center justify-between flex-row"><View className="flex items-center gap-space-12 flex-row"><Image alt="PREMA Logo" className="h-8 w-auto" source={require('../assets/images/logo.png')} /><View className="flex"><Text className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">PREMA</Text><Text className="font-headline-sm text-headline-sm text-primary tracking-tight">Prema   Voice Sanctuary &amp; Audio Prompts</Text></View></View><View className="flex items-center gap-space-8 flex-row"><Pressable aria-label="Notifications" className="w-11 h-11 flex items-center justify-center rounded-full text-secondary flex-row"><Icon name="notifications" size={22} className="text-[22px]" /></Pressable><View className="relative flex items-center justify-center flex-row"><Image alt="Profile" className="w-8 h-8 rounded-full" source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBnpv7GVuzd6fs5TliuCiwIlpL0Rt2bVAxsXV2oCjBpVhp4UG2QcSA0fM1E5q0b-Bi3hANo_gxxHA1NjlLrqjE8ohvM6MdNojlI797HuC0AUkvZ0e2I5nz-fDRMdLXKv5aD9DyFmCPwJsDQdw4uv-m2poXm4GRuvfCjVpkLQEOf-1fFeXQOV7jP88Y-BVm6Xpd7_d4ZzQTNKZfgN_NLPKw3_kWAaoVLwLZ_BFzC19ixAfQnTKjdTvg9' }} /><Text className="absolute -bottom-space-2 -right-space-2 w-3.5 h-3.5 bg-secondary-container rounded-full flex items-center justify-center flex-row"><Icon name="verified" size={10} className="text-[10px] text-primary font-bold" /></Text></View></View></View></View><ScrollView className="flex relative w-full max-w-[480px] mx-auto px-margin-mobile pt-16 pb-28 bg-surface"><View className="flex w-full pb-8">
+      <View className="bg-surface border-surface-container-highest bg-surface/85"><View className="h-16 px-space-20 max-w-[480px] mx-auto flex items-center justify-between flex-row"><View className="flex items-center gap-space-12 flex-row"><Image alt="PREMA Logo" className="h-8 w-[76px]" resizeMode="contain" source={require('../assets/images/logo.png')} /><View className="flex"><Text className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">PREMA</Text><Text className="font-headline-sm text-headline-sm text-primary tracking-tight">Prema   Voice Sanctuary &amp; Audio Prompts</Text></View></View><View className="flex items-center gap-space-8 flex-row"><Pressable aria-label="Notifications" className="w-11 h-11 flex items-center justify-center rounded-full text-secondary flex-row"><Icon name="notifications" size={22} className="text-[22px]" /></Pressable><View className="relative flex items-center justify-center flex-row"><Image alt="Profile" className="w-8 h-8 rounded-full" source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBnpv7GVuzd6fs5TliuCiwIlpL0Rt2bVAxsXV2oCjBpVhp4UG2QcSA0fM1E5q0b-Bi3hANo_gxxHA1NjlLrqjE8ohvM6MdNojlI797HuC0AUkvZ0e2I5nz-fDRMdLXKv5aD9DyFmCPwJsDQdw4uv-m2poXm4GRuvfCjVpkLQEOf-1fFeXQOV7jP88Y-BVm6Xpd7_d4ZzQTNKZfgN_NLPKw3_kWAaoVLwLZ_BFzC19ixAfQnTKjdTvg9' }} /><Text className="absolute -bottom-space-2 -right-space-2 w-3.5 h-3.5 bg-secondary-container rounded-full flex items-center justify-center flex-row"><Icon name="verified" size={10} className="text-[10px] text-primary font-bold" /></Text></View></View></View></View><ScrollView className="flex relative w-full max-w-[480px] mx-auto px-margin-mobile pt-16 pb-28 bg-surface"><View className="flex w-full pb-8">
 
 <View className="flex gap-space-12 pt-space-8 pb-space-16">
 <View className="flex items-center justify-between flex-row">
-<Pressable aria-label="Go back" className="w-10 h-10 -ml-space-8 rounded-full flex items-center justify-center text-primary flex-row" >
+<Pressable onPress={() => router.back()} aria-label="Go back" className="w-10 h-10 -ml-space-8 rounded-full flex items-center justify-center text-primary flex-row" >
 <Icon name="arrow_back" size={24} className="text-[24px]" />
 </Pressable>
 <View className="items-center gap-space-4 px-space-12 py-space-4 rounded-full bg-secondary-container text-on-secondary-container">
@@ -52,7 +54,7 @@ export default function CuratedDateConciergeItinerary() {
 <View className="rounded-xl bg-surface-container-lowest p-space-20 shadow-sm flex gap-space-16">
 <View className="relative w-full h-44 rounded-lg overflow-hidden">
 <Image className="w-full h-full" source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDtD0EJqqXiaT1vEq1q_7SgXv2G2_wDN6slXX3RWuhR9Hh1B2011eUCDr4FM-lIMAsZE68hN18gDyTay9-ri0BJBSgzXWw0cUSpmGfrlln-oORO7VQ7JT83-sAwbt7PrGJTvNYM8NOUKARzZ9Z-ddDaup3NveBXuXn5dZE2zK-bdAfJJ-28EqR64xYWnmdho-qO5WIGotmSJy0tZoH6uSm6aK0azrUhtw2TeLAzl-mcl5GyfGp3c3P6' }} />
-<View className="absolute flex justify-end p-space-16 text-on-primary">
+<View className="absolute inset-0 flex justify-end p-space-16 text-on-primary">
 <Text className="font-label-sm text-label-sm text-secondary-container uppercase tracking-widest">Heritage Sanctuary Venue</Text>
 <Text className="font-headline-sm text-headline-sm text-on-primary mt-space-2">Amethyst Café &amp; Wild Garden</Text>
 <Text className="font-body-sm text-body-sm text-surface-container-high opacity-90">Royapettah, Chennai</Text>
@@ -241,14 +243,14 @@ export default function CuratedDateConciergeItinerary() {
 <Text className="font-label-sm text-label-sm text-primary">Drop-off Zone: Serene Inner Gate</Text>
 <Text className="font-body-sm text-[12px] text-secondary">Avoids busy Whites Road</Text>
 </View>
-<View className="w-full h-32 rounded-lg bg-cover bg-center overflow-hidden relative shadow-inner" data-location="Amethyst, Royapettah, Chennai" >
-<View className="absolute bg-primary/20 flex items-center justify-center flex-row">
+<ImageBackground source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC22GQH79IXYTKFBdfcvJMVN47m7KOZIDoPDaBjfSHorI82Qhp45FMct43XcK1eWSlfjL4pOOtYfmI8eyTT68VLXSyrJ2Y3EHZjgnu8EdVQDtc435Mxg13cPftr7vmmQMWxaCkEERMFi7w8U3BVOmo8wpJySGEnIP_Trbv4QZBAwuu1lMJn1ZK_BZt4SgMJ5u7DN9agOM6updNUhCaouSZ8y2X4cmj-St1KsViWWUdDyV_XPbN4h8Kv' }} resizeMode="cover" className="w-full h-32 rounded-lg overflow-hidden relative shadow-inner">
+<View className="absolute inset-0 bg-primary/20 flex items-center justify-center flex-row">
 <View className="p-space-8 rounded-full bg-surface-container-lowest text-primary shadow-md flex items-center gap-space-4 px-space-12 flex-row">
 <Icon name="pin_drop" size={16} className="text-[16px] text-secondary" />
 <Text className="font-label-sm text-[12px]">Inner Courtyard Gateway</Text>
 </View>
 </View>
-</View>
+</ImageBackground>
 </View>
 </View>
 </View>
