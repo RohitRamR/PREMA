@@ -14,6 +14,7 @@ import { Alert, Share } from 'react-native';
 import { blockPerson } from '../src/store/safety';
 import { useProfile, VITAL_FIELDS, type Profile } from '../src/store/profile';
 import { goBack } from '../components/nav';
+import { useCompatibility, type CompatView } from '../src/features/compatibility';
 
 const { width, height } = Dimensions.get('window');
 // The hero photo sits inset from the screen edges with soft curved corners.
@@ -101,6 +102,31 @@ const vitalList = (v: Profile['vitals']) =>
   VITAL_FIELDS.filter((f) => v[f.key]?.trim()).map((f) => ({ icon: f.icon, k: f.label, v: v[f.key] }));
 
 const sameText = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
+
+/** Real "Why you two click" ring, bars and moon-sign card from the matching engine. */
+function withEngine(view: ProfileView, c: CompatView | null): ProfileView {
+  if (!c) return view;
+  const bar = (label: string, value: number, color: string) => ({ label, value, color });
+  const third = c.everyday.find((x) => x.key === 'preferences') ?? c.stars.find((x) => x.key === 'horoscope');
+  return {
+    ...view,
+    fit: {
+      score: c.score,
+      summary: `${c.headline} ${fmtGuna(c.guna.total)}/36 Guna.`,
+      parts: [
+        bar('Kundli', c.stars[0]!.value, '#FF6B8B'),
+        bar('Numbers', c.numerology.score, '#FF6B8B'),
+        ...(third ? [bar(third.key === 'preferences' ? 'Wants' : 'Sun signs', third.value, '#74B4F2')] : []),
+      ],
+    },
+    archetype: {
+      title: `${c.them.moonSign} · ${c.them.moonSignEnglish} Moon`,
+      desc: `${c.them.nakshatra} nakshatra. ${c.elements}`,
+    },
+  };
+}
+
+const fmtGuna = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
 
 /** Someone else's profile, with interests you both listed marked as shared. */
 /** Someone other than Ananya: built from the shared people list. */
@@ -221,7 +247,8 @@ export default function MatchDetail() {
   const isMe = me === '1';
   const other = person(id);
   const mine = useProfile();
-  const P = isMe ? myView(mine) : other ? personView(mine, other) : matchView(mine);
+  const compat = useCompatibility(isMe ? undefined : other?.id ?? 'ananya');
+  const P = isMe ? myView(mine) : withEngine(other ? personView(mine, other) : matchView(mine), compat);
   const sharedCount = P.interests.filter((t) => t.shared).length;
   const insets = useSafeAreaInsets();
   const [activePhoto, setActivePhoto] = useState(0);

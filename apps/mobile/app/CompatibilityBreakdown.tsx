@@ -1,5 +1,6 @@
 // "Why you match": the compatibility breakdown between you and one person.
 // ?id=<person id> picks who; without it, it shows your strongest match (Ananya).
+// Every number comes from the PREMA matching engine (birth times in IST).
 import React from 'react';
 import { View, ScrollView, Image, StyleSheet, Share, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -12,6 +13,7 @@ import { C, ScreenHeader, Tap, cardShadow } from '../components/prema-ui';
 import { useProfile } from '../src/store/profile';
 import { person } from '../src/store/people';
 import { useConversations } from '../src/store/chats';
+import { useCompatibility } from '../src/features/compatibility';
 
 const ANANYA = {
   id: 'ananya', name: 'Ananya', match: 96,
@@ -19,28 +21,19 @@ const ANANYA = {
   interests: ['Filter coffee', 'Architecture', 'Slow living', 'Carnatic music', 'Heritage walks', 'Sketching'],
 };
 
-// Sample birth-chart data until real charts are computed server-side.
-const ME_CHART = { sign: 'Vrishabha', english: 'Taurus', nakshatra: 'Rohini', element: 'Earth', lifePath: 6 };
-const CHARTS: Record<string, { sign: string; english: string; nakshatra: string; element: string; lifePath: number }> = {
-  ananya: { sign: 'Kanya', english: 'Virgo', nakshatra: 'Hasta', element: 'Earth', lifePath: 9 },
-  riya: { sign: 'Karka', english: 'Cancer', nakshatra: 'Pushya', element: 'Water', lifePath: 2 },
-  priya: { sign: 'Makara', english: 'Capricorn', nakshatra: 'Shravana', element: 'Earth', lifePath: 4 },
-  neha: { sign: 'Meena', english: 'Pisces', nakshatra: 'Revati', element: 'Water', lifePath: 3 },
-  meera: { sign: 'Tula', english: 'Libra', nakshatra: 'Swati', element: 'Air', lifePath: 6 },
-  kavya: { sign: 'Meena', english: 'Pisces', nakshatra: 'Uttara Bhadrapada', element: 'Water', lifePath: 7 },
+// Plain-English meaning of each of the eight kootas (total 36 points).
+const KOOTA_INFO: Record<string, [plain: string, why: string]> = {
+  Varna: ['Work & values', 'How your outlooks on work, duty and growth line up.'],
+  Vashya: ['Mutual pull', 'How naturally you influence and are drawn to each other.'],
+  Tara: ['Health & luck', 'Wellbeing and good fortune you bring each other.'],
+  Yoni: ['Intimacy', 'Physical and emotional closeness.'],
+  'Graha Maitri': ['Friendship', 'Mental compatibility and how well you get along.'],
+  Gana: ['Temperament', 'Whether your natures are calm, lively or intense together.'],
+  Bhakoot: ['Love & family', 'Emotional bond, family life and shared prosperity.'],
+  Nadi: ['Health & children', 'Genetic and health harmony; the most important koota.'],
 };
-// The eight kootas of Ashtakoot milan and their maximum points (total 36).
-// Each with a plain-English meaning so anyone can read it.
-const KOOTAS: [string, number, string, string][] = [
-  ['Varna', 1, 'Work & values', 'How your outlooks on work, duty and growth line up.'],
-  ['Vashya', 2, 'Mutual pull', 'How naturally you influence and are drawn to each other.'],
-  ['Tara', 3, 'Health & luck', 'Wellbeing and good fortune you bring each other.'],
-  ['Yoni', 4, 'Intimacy', 'Physical and emotional closeness.'],
-  ['Graha Maitri', 5, 'Friendship', 'Mental compatibility and how well you get along.'],
-  ['Gana', 6, 'Temperament', 'Whether your natures are calm, lively or intense together.'],
-  ['Bhakoot', 7, 'Love & family', 'Emotional bond, family life and shared prosperity.'],
-  ['Nadi', 8, 'Health & children', 'Genetic and health harmony; the most important koota.'],
-];
+
+const fmt = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
 
 const R = 54, STROKE = 10, CIRC = 2 * Math.PI * R, BOX = 2 * R + STROKE;
 
@@ -67,30 +60,12 @@ function BreakdownInner() {
       : ANANYA;
   const canChat = convos.some((c) => c.id === them.id);
 
-  const score = them.match;
-  const chart = CHARTS[them.id] ?? CHARTS.ananya;
-  // Guna milan points out of 36, scaled from the overall score (sample until charts are live).
-  const guna = Math.max(18, Math.min(35, Math.round((score / 100) * 34)));
-  // Spread the missing points across kootas (bigger ones first) so the parts always add up to the total.
-  const kootas = (() => {
-    const got = KOOTAS.map(([, max]) => max);
-    let missing = 36 - guna;
-    for (let i = KOOTAS.length - 2; missing > 0; i = (i - 1 + KOOTAS.length) % KOOTAS.length) {
-      if (got[i] > 0) { got[i] -= 1; missing -= 1; }
-    }
-    return KOOTAS.map(([k, max, plain, why], i) => ({ k, max, plain, why, got: got[i] }));
-  })();
-  const elements = ME_CHART.element === chart.element
-    ? `Both ${chart.element}: steady and grounding together.`
-    : `${ME_CHART.element} and ${chart.element}: ${ME_CHART.element === 'Earth' && chart.element === 'Water' ? 'nurturing, like soil and rain.' : 'complementary energies.'}`;
-  const lifePathNote = Math.abs(ME_CHART.lifePath - chart.lifePath) % 3 === 0 ? 'Harmonious numbers' : 'Balancing numbers';
-  const parts = [
-    { icon: 'favorite', label: 'Core values', value: Math.min(100, score + 2), note: 'You both put emotional honesty and family first.' },
-    { icon: 'flag', label: 'Relationship intent', value: Math.min(100, score + 4), note: 'Both looking for something lasting, at a similar pace.' },
-    { icon: 'wb_sunny', label: 'Lifestyle rhythm', value: Math.max(60, score - 7), note: 'Early mornings and quiet weekends line up well.' },
-    { icon: 'chat', label: 'Communication', value: Math.max(60, score - 4), note: 'Thoughtful, unhurried replies on both sides.' },
-    { icon: 'home', label: 'Family outlook', value: Math.max(60, score - 10), note: 'Close to family, with room to build your own.' },
-  ];
+  const compat = useCompatibility(them.id);
+  const score = compat?.score ?? them.match;
+  const kootas = (compat?.guna.kootas ?? []).map((x) => {
+    const [plain, why] = KOOTA_INFO[x.name] ?? [x.name, ''];
+    return { ...x, plain, why };
+  });
   const shared = them.interests.filter((t) => me.interests.some((m) => m.toLowerCase() === t.toLowerCase()));
   const different = them.interests.filter((t) => !shared.includes(t)).slice(0, 3);
 
@@ -134,63 +109,72 @@ function BreakdownInner() {
             {them.photo ? <Image source={{ uri: them.photo }} style={s.face} /> : null}
           </View>
           <Text style={s.heroTitle}>You and {them.name}</Text>
-          <Text style={s.heroSub}>A strong match on what matters most.</Text>
+          <Text style={s.heroSub}>{compat?.headline ?? 'A strong match on what matters most.'}</Text>
+          {compat && compat.confidence !== 'strong' ? (
+            <Text style={s.confidence}>
+              {compat.me.hasBirthTime && compat.them.hasBirthTime
+                ? 'Add more profile answers for a sharper score.'
+                : 'Exact birth times (in IST) make the Kundli more precise.'}
+            </Text>
+          ) : null}
         </View>
 
         {/* Stars & numbers first */}
-        <Text style={s.section}>Stars & numbers</Text>
-        <View style={s.astro}>
-          <View style={s.signRow}>
-            <SignTile who="Your moon sign" sign={ME_CHART.sign} english={ME_CHART.english} nakshatra={ME_CHART.nakshatra} />
-            <View style={s.signJoin}><Icon name="favorite" size={16} color={C.white} /></View>
-            <SignTile who={`${them.name}’s`} sign={chart.sign} english={chart.english} nakshatra={chart.nakshatra} />
-          </View>
+        {compat ? (
+          <>
+            <Text style={s.section}>Stars & numbers</Text>
+            <View style={s.astro}>
+              <View style={s.signRow}>
+                <SignTile who="Your moon sign" sign={compat.me.moonSign} english={compat.me.moonSignEnglish} nakshatra={compat.me.nakshatra} />
+                <View style={s.signJoin}><Icon name="favorite" size={16} color={C.white} /></View>
+                <SignTile who={`${them.name}’s`} sign={compat.them.moonSign} english={compat.them.moonSignEnglish} nakshatra={compat.them.nakshatra} />
+              </View>
 
-          <View style={s.gunaHead}>
-            <View style={{ flex: 1 }}>
-              <Text style={s.gunaLabel}>Kundli match <Text style={s.gunaSmall}>(guna milan)</Text></Text>
-              <Text style={s.gunaNote}>{guna >= 28 ? 'Excellent' : guna >= 18 ? 'Good' : 'Needs care'} · 18 or more out of 36 is a good match</Text>
-            </View>
-            <Text style={s.gunaScore}>{guna}<Text style={s.gunaOf}>/36</Text></Text>
-          </View>
-          <View style={s.track}><View style={[s.fill, { width: `${(guna / 36) * 100}%` }]} /></View>
-          <Text style={s.explain}>Vedic astrology compares your moon signs across 8 areas of life. Tap any one to learn more.</Text>
+              <View style={s.gunaHead}>
+                <View style={{ flex: 1 }}>
+                  <Text style={s.gunaLabel}>Kundli match <Text style={s.gunaSmall}>(guna milan)</Text></Text>
+                  <Text style={s.gunaNote}>{compat.guna.verdict} · 18 or more out of 36 is a good match</Text>
+                </View>
+                <Text style={s.gunaScore}>{fmt(compat.guna.total)}<Text style={s.gunaOf}>/36</Text></Text>
+              </View>
+              <View style={s.track}><View style={[s.fill, { width: `${(compat.guna.total / 36) * 100}%` }]} /></View>
+              <Text style={s.explain}>Vedic astrology compares your moon signs across 8 areas of life. Tap any one to learn more.</Text>
 
-          <View style={s.kootaGrid}>
-            {kootas.map((x) => {
-              const full = x.got === x.max;
-              return (
-                <Tap key={x.k} onPress={() => Alert.alert(`${x.plain} (${x.k})`, `${x.why}\n\nYou scored ${x.got} of ${x.max}.`)}
-                  style={s.koota} accessibilityRole="button" accessibilityLabel={`${x.plain}, ${x.got} of ${x.max}`}>
-                  <Text style={s.kootaPlain} numberOfLines={1}>{x.plain}</Text>
-                  <Text style={s.kootaName} numberOfLines={1}>{x.k}</Text>
-                  <View style={s.kootaBar}><View style={[s.kootaFill, { width: `${(x.got / x.max) * 100}%`, backgroundColor: full ? C.pink : '#FFB3C4' }]} /></View>
-                  <Text style={[s.kootaVal, full ? { color: C.pink } : null]}>{x.got}/{x.max}</Text>
-                </Tap>
-              );
-            })}
-          </View>
+              <View style={s.kootaGrid}>
+                {kootas.map((x) => {
+                  const full = x.got === x.max;
+                  const doshaNote = x.dosha === 'active' ? '\n\n⚠️ This is a dosha.' : x.dosha === 'cancelled' ? '\n\n✓ The dosha here is cancelled by a classical exception.' : '';
+                  return (
+                    <Tap key={x.name} onPress={() => Alert.alert(`${x.plain} (${x.name})`, `${x.why}\n\nYou scored ${fmt(x.got)} of ${x.max}. ${x.note}${doshaNote}`)}
+                      style={[s.koota, x.dosha === 'active' ? s.kootaDosha : null]} accessibilityRole="button" accessibilityLabel={`${x.plain}, ${fmt(x.got)} of ${x.max}`}>
+                      <Text style={s.kootaPlain} numberOfLines={1}>{x.plain}</Text>
+                      <Text style={s.kootaName} numberOfLines={1}>{x.name}{x.dosha === 'active' ? ' · dosha' : x.dosha === 'cancelled' ? ' · cancelled' : ''}</Text>
+                      <View style={s.kootaBar}><View style={[s.kootaFill, { width: `${(x.got / x.max) * 100}%`, backgroundColor: full ? C.pink : '#FFB3C4' }]} /></View>
+                      <Text style={[s.kootaVal, full ? { color: C.pink } : null]}>{fmt(x.got)}/{x.max}</Text>
+                    </Tap>
+                  );
+                })}
+              </View>
 
-          <View style={s.astroRow}>
-            <View style={s.astroIcon}><Icon name="eco" size={17} color={C.pink} /></View>
-            <View style={{ flex: 1 }}>
-              <Text style={s.astroTitle}>Elements · {ME_CHART.element} & {chart.element}</Text>
-              <Text style={s.astroBody}>{elements}</Text>
+              <AstroRow icon="spa" title={`Manglik · ${compat.manglik.status === 'no_dosha' ? 'no dosha' : compat.manglik.status === 'mutual_cancellation' ? 'balanced' : compat.manglik.status === 'mismatch' ? 'needs care' : 'unknown'}`} body={compat.manglik.text} />
+              <AstroRow icon="eco" title={`Elements · ${compat.me.element} & ${compat.them.element}`} body={compat.elements} />
+              {compat.horoscope ? (
+                <AstroRow icon="wb_sunny" title={`Sun signs · ${compat.me.sunSign} & ${compat.them.sunSign}`} body={compat.horoscope.text} />
+              ) : null}
+              <AstroRow
+                badge={`${compat.me.moolank}·${compat.them.moolank}`}
+                title={`Numerology · ${compat.numerology.score}%`}
+                body={`${compat.numerology.text} Your life path numbers are ${compat.me.lifePath} and ${compat.them.lifePath}.`}
+                last
+              />
             </View>
-          </View>
-          <View style={[s.astroRow, { borderBottomWidth: 0 }]}>
-            <View style={s.astroIcon}><Text style={s.num}>{ME_CHART.lifePath}·{chart.lifePath}</Text></View>
-            <View style={{ flex: 1 }}>
-              <Text style={s.astroTitle}>Numerology · {lifePathNote.toLowerCase()}</Text>
-              <Text style={s.astroBody}>Your life path numbers ({ME_CHART.lifePath} and {chart.lifePath}, from your birth dates) suggest one brings care, the other brings depth.</Text>
-            </View>
-          </View>
-        </View>
+          </>
+        ) : null}
 
         {/* Breakdown */}
-        <Text style={s.section}>Everyday compatibility</Text>
+        <Text style={s.section}>How the {score}% adds up</Text>
         <View style={s.card}>
-          {parts.map((x, i) => (
+          {[...(compat?.stars ?? []), ...(compat?.everyday ?? [])].map((x, i, parts) => (
             <View key={x.label} style={[s.part, i < parts.length - 1 ? s.divider : null]}>
               <View style={s.partHead}>
                 <View style={s.partIcon}><Icon name={x.icon} size={17} color={C.pink} /></View>
@@ -233,6 +217,18 @@ function BreakdownInner() {
   );
 }
 
+function AstroRow({ icon, badge, title, body, last }: { icon?: string; badge?: string; title: string; body: string; last?: boolean }) {
+  return (
+    <View style={[s.astroRow, last ? { borderBottomWidth: 0 } : null]}>
+      <View style={s.astroIcon}>{badge ? <Text style={s.num}>{badge}</Text> : <Icon name={icon ?? 'star'} size={17} color={C.pink} />}</View>
+      <View style={{ flex: 1 }}>
+        <Text style={s.astroTitle}>{title}</Text>
+        <Text style={s.astroBody}>{body}</Text>
+      </View>
+    </View>
+  );
+}
+
 function SignTile({ who, sign, english, nakshatra }: { who: string; sign: string; english: string; nakshatra: string }) {
   return (
     <View style={s.signTile}>
@@ -255,13 +251,15 @@ const s = StyleSheet.create({
   gunaLabel: { color: C.pri, fontSize: 15.5, fontWeight: '900' },
   gunaSmall: { color: C.muted, fontSize: 13, fontWeight: '700' },
   explain: { color: C.body, fontSize: 13.5, lineHeight: 19, marginTop: 12 },
-  kootaPlain: { color: C.pri, fontSize: 13, fontWeight: '900' },
+  kootaPlain: { color: C.pri, fontSize: 13, fontWeight: '900', paddingRight: 40 },
   kootaBar: { alignSelf: 'stretch', height: 5, borderRadius: 3, backgroundColor: '#EEF2F7', overflow: 'hidden', marginTop: 8 },
   kootaFill: { height: '100%', borderRadius: 3 },
   gunaNote: { color: C.muted, fontSize: 12.5, fontWeight: '600', marginTop: 2 },
   gunaScore: { color: C.pink, fontSize: 28, fontWeight: '900' },
   gunaOf: { color: C.muted, fontSize: 15, fontWeight: '800' },
   kootaGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 14 },
+  kootaDosha: { backgroundColor: '#FFF1F4', borderWidth: 1, borderColor: '#FFD0DB' },
+  confidence: { color: C.muted, fontSize: 12.5, fontWeight: '700', marginTop: 8, textAlign: 'center' },
   koota: { width: '47%', flexGrow: 1, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 14, backgroundColor: '#F6F9FC' },
   kootaName: { color: C.muted, fontSize: 11.5, fontWeight: '700', marginTop: 1 },
   kootaVal: { position: 'absolute', right: 12, top: 10, color: C.pri, fontSize: 14, fontWeight: '900' },

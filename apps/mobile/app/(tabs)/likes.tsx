@@ -9,6 +9,7 @@ import Icon from '../../components/Icon';
 import Logo from '../../components/Logo';
 import { addMatch } from '../../src/store/chats';
 import { useSafety } from '../../src/store/safety';
+import { useScoreOf, scoreOf } from '../../src/features/compatibility';
 import { AuraFrame, AuraRing } from '../../components/Aura';
 import { C, Tap, cardShadow, serif } from '../../components/prema-ui';
 import StatusFade from '../../components/StatusFade';
@@ -58,6 +59,7 @@ const YOU_LIKED: (Like & { status: string })[] = [
 function LikesTabScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const scoreFor = useScoreOf();
   const { width } = useWindowDimensions();
   const [tab, setTab] = useState<'in' | 'out'>('in');
   const [incomingAll, setIncoming] = useState(LIKED_YOU);
@@ -70,7 +72,7 @@ function LikesTabScreen() {
     const l = incoming.find((x) => x.id === id);
     setIncoming((all) => all.filter((x) => x.id !== id));
     if (!l) return;
-    addMatch({ id: l.id, name: l.name, age: l.age, city: l.city, photo: l.photo, match: l.match });
+    addMatch({ id: l.id, name: l.name, age: l.age, city: l.city, photo: l.photo, match: scoreOf(l.id, l.match) });
     router.push({ pathname: '/ItSAMatch', params: { id: l.id, name: l.name, photo: l.photo } });
   };
 
@@ -147,7 +149,7 @@ function LikesTabScreen() {
                         </Tap>
                       </View>
                     </View>
-                    <AuraFrame score={l.match} radius={22} width={4} />
+                    <AuraFrame score={scoreFor(l.id, l.match)} radius={22} width={4} />
                   </View>
                 ))}
               </View>
@@ -164,7 +166,7 @@ function LikesTabScreen() {
                   style={[s.row, i < YOU_LIKED.length - 1 ? s.rowDivider : null]}
                   pressedStyle={{ backgroundColor: 'rgba(116,180,242,0.06)' }}
                 >
-                  <AuraRing score={l.match} size={64} stroke={2.5} gap={2.5}>
+                  <AuraRing score={scoreFor(l.id, l.match)} size={64} stroke={2.5} gap={2.5}>
                     <Image source={{ uri: l.photo }} style={{ width: '100%', height: '100%' }} />
                   </AuraRing>
                   <View style={{ flex: 1 }}>

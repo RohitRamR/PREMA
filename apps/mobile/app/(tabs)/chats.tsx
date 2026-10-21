@@ -9,11 +9,13 @@ import Logo from '../../components/Logo';
 import { AuraLegend, AuraRing } from '../../components/Aura';
 import { C, Tap, cardShadow, serif } from '../../components/prema-ui';
 import { useConversations, NEW_MATCHES, timeLabel } from '../../src/store/chats';
+import { useScoreOf } from '../../src/features/compatibility';
 import StatusFade from '../../components/StatusFade';
 
 function ChatsTabInner() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const scoreFor = useScoreOf();
   const conversations = useConversations();
   const [query, setQuery] = useState('');
 
@@ -60,7 +62,7 @@ function ChatsTabInner() {
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, gap: 16 }}>
           {NEW_MATCHES.filter((m) => !conversations.some((c) => c.id === m.id)).map((m) => (
             <Tap key={m.id} style={{ alignItems: 'center', width: 72 }} onPress={() => router.push({ pathname: '/MatchDetail', params: { id: m.id } })}>
-              <AuraRing score={m.match} size={70}>
+              <AuraRing score={scoreFor(m.id, m.match)} size={70}>
                 <Image source={{ uri: m.photo }} style={{ width: '100%', height: '100%' }} />
               </AuraRing>
               <Text style={s.matchName} numberOfLines={1}>{m.name}</Text>
@@ -88,7 +90,7 @@ function ChatsTabInner() {
                 pressedStyle={{ backgroundColor: 'rgba(116,180,242,0.06)' }}
                 accessibilityLabel={`${c.name}${unread ? `, ${c.unread} unread` : ''}`}
               >
-                <AuraRing score={c.match} size={56} stroke={2.5} gap={2}>
+                <AuraRing score={scoreFor(c.id, c.match)} size={56} stroke={2.5} gap={2}>
                   <Image source={{ uri: c.photo }} style={{ width: '100%', height: '100%' }} />
                 </AuraRing>
                 <View style={{ flex: 1, gap: 3 }}>

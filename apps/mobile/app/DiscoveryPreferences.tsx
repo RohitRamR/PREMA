@@ -36,12 +36,19 @@ function DiscoveryPreferencesInner() {
   const [cities, setCities] = useState(discovery.cities);
   const [intents, setIntents] = useState(discovery.intents);
   const [verifiedOnly, setVerifiedOnly] = useState(discovery.verifiedOnly);
+  const [minGuna18, setMinGuna18] = useState(discovery.kundli.minGuna18);
+  const [avoidManglik, setAvoidManglik] = useState(discovery.kundli.avoidManglikMismatch);
 
   const toggle = (list: string[], set: (v: string[]) => void, v: string) =>
     set(list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
 
   const save = () => {
-    updateProfile({ discovery: { distanceKm, ageMin, ageMax, cities, intents, verifiedOnly } });
+    updateProfile({
+      discovery: {
+        distanceKm, ageMin, ageMax, cities, intents, verifiedOnly,
+        kundli: { minGuna18, avoidManglikMismatch: avoidManglik },
+      },
+    });
     goBack(router);
   };
 
@@ -101,6 +108,13 @@ function DiscoveryPreferencesInner() {
         <Card style={{ paddingVertical: 4, paddingHorizontal: 0 }}>
           <ToggleRow icon="verified_user" title="Verified profiles only" sub="Aadhaar or work-verified members"
             value={verifiedOnly} onValueChange={setVerifiedOnly} last />
+        </Card>
+
+        <Card style={{ paddingVertical: 4, paddingHorizontal: 0 }}>
+          <ToggleRow icon="auto_awesome" title="Kundli match of 18+ Guna" sub="Only show matches at or above the traditional threshold"
+            value={minGuna18} onValueChange={setMinGuna18} />
+          <ToggleRow icon="spa" title="Avoid Manglik mismatch" sub="Hide matches where only one of you is Manglik"
+            value={avoidManglik} onValueChange={setAvoidManglik} last />
         </Card>
 
         <Text style={s.note}>

@@ -59,8 +59,9 @@ const PYTHAGOREAN: Record<string, number> = {
 const VOWELS = new Set(['A', 'E', 'I', 'O', 'U']);
 
 function lettersOf(name: string): string[] {
-  return name
-    .normalize('NFKD')
+  // normalize() strips accents (é → e); guarded for JS engines without it.
+  const base = typeof name.normalize === 'function' ? name.normalize('NFKD') : name;
+  return base
     .replace(/[̀-ͯ]/g, '')
     .toUpperCase()
     .replace(/[^A-Z]/g, '')

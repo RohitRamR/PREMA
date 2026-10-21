@@ -10,12 +10,35 @@ import {
 import Icon from '../components/Icon';
 import {
   useProfile, updateProfile, INTENT_OPTIONS, VALUE_OPTIONS, LIFESTYLE_OPTIONS,
-  VITAL_FIELDS, PROMPT_OPTIONS, VOICE_OPTIONS, INTEREST_SUGGESTIONS, INTEREST_MAX,
+  VITAL_FIELDS, PROMPT_OPTIONS, VOICE_OPTIONS, INTEREST_SUGGESTIONS, INTEREST_MAX, BIRTH_PLACES,
   type Vitals,
 } from '../src/store/profile';
 import { goBack } from '../components/nav';
 
 const MAX_VALUES = 3;
+
+/** A real calendar date in YYYY-MM-DD, not in the future, age 18–100. */
+function validBirthDate(v: string): boolean {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v.trim());
+  if (!m) return false;
+  const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  const date = new Date(Date.UTC(y, mo - 1, d));
+  if (date.getUTCFullYear() !== y || date.getUTCMonth() !== mo - 1 || date.getUTCDate() !== d) return false;
+  const age = ageFrom(v);
+  return age >= 18 && age <= 100;
+}
+
+/** 24-hour HH:mm. */
+const validBirthTime = (v: string) => /^([01]\d|2[0-3]):[0-5]\d$/.test(v.trim());
+
+/** Age today in India (IST), from a YYYY-MM-DD birth date. */
+function ageFrom(date: string): number {
+  const now = new Date(Date.now() + 330 * 60000); // IST
+  const [y, m, d] = date.split('-').map(Number);
+  let age = now.getUTCFullYear() - y;
+  if (now.getUTCMonth() + 1 < m || (now.getUTCMonth() + 1 === m && now.getUTCDate() < d)) age -= 1;
+  return age;
+}
 const ABOUT_MAX = 280;
 
 // Renders in Nunito like the rest of the profile area.
@@ -41,6 +64,11 @@ function EditProfileInner() {
   const [boundary, setBoundary] = useState(p.boundary);
   const [lifestyle, setLifestyle] = useState(p.lifestyle);
   const [vitals, setVitals] = useState<Vitals>(p.vitals);
+  const [birthDate, setBirthDate] = useState(p.birth.date);
+  const [birthTime, setBirthTime] = useState(p.birth.time);
+  const [birthPlace, setBirthPlace] = useState(p.birth.place);
+  const birthDateOk = validBirthDate(birthDate);
+  const birthTimeOk = birthTime.trim() === '' || validBirthTime(birthTime);
   const [prompt, setPrompt] = useState(p.prompt);
   const [interests, setInterests] = useState(p.interests);
   const [newInterest, setNewInterest] = useState('');
@@ -94,10 +122,13 @@ function EditProfileInner() {
   const toggleLifestyle = (l: string) =>
     setLifestyle((cur) => (cur.includes(l) ? cur.filter((x) => x !== l) : [...cur, l]));
 
-  const canSave = name.trim().length > 0 && values.length > 0;
+  const canSave = name.trim().length > 0 && values.length > 0 && birthDateOk && birthTimeOk;
 
   const save = () => {
+    const place = BIRTH_PLACES.find((b) => b.name === birthPlace);
     updateProfile({
+      birth: { date: birthDate.trim(), time: birthTime.trim(), place: birthPlace, lat: place?.lat, lon: place?.lon },
+      age: ageFrom(birthDate.trim()),
       name: name.trim(), location: location.trim(), occupation: occupation.trim(),
       about: about.trim(), intent, values, boundary: boundary.trim(), lifestyle,
       vitals: Object.fromEntries(Object.entries(vitals).map(([k, v]) => [k, v.trim()])) as Vitals,
@@ -134,6 +165,48 @@ function EditProfileInner() {
             <Field label="Given name" value={name} onChangeText={setName} placeholder="e.g. Vikram" />
             <Field label="Where you live" value={location} onChangeText={setLocation} placeholder="e.g. Bengaluru" icon />
             <Field label="What you do" value={occupation} onChangeText={setOccupation} placeholder="e.g. Architect" last />
+          </Card>
+
+          <Card>
+            <Label>Birth details</Label>
+            <Text style={s.sub}>Used privately for your Kundli, numerology and horoscope match. Never shown on your profile.</Text>
+            <View style={s.grid}>
+              <View style={s.gridItem}>
+                <Text style={[s.miniLabel, { marginBottom: 6 }]}>Date of birth</Text>
+                <TextInput
+                  value={birthDate}
+                  onChangeText={(t) => setBirthDate(t.replace(/[^\d-]/g, '').slice(0, 10))}
+                  placeholder="YYYY-MM-DD"
+                  placeholderTextColor="#A9B4C2"
+                  keyboardType="numbers-and-punctuation"
+                  style={[s.input, s.inputSmall, !birthDateOk ? s.inputError : null]}
+                  accessibilityLabel="Date of birth, year month day"
+                />
+              </View>
+              <View style={s.gridItem}>
+                <Text style={[s.miniLabel, { marginBottom: 6 }]}>Birth time (IST)</Text>
+                <TextInput
+                  value={birthTime}
+                  onChangeText={(t) => setBirthTime(t.replace(/[^\d:]/g, '').slice(0, 5))}
+                  placeholder="HH:MM, 24-hour"
+                  placeholderTextColor="#A9B4C2"
+                  keyboardType="numbers-and-punctuation"
+                  style={[s.input, s.inputSmall, !birthTimeOk ? s.inputError : null]}
+                  accessibilityLabel="Birth time in Indian Standard Time, 24 hour"
+                />
+              </View>
+            </View>
+            {!birthDateOk ? <Text style={s.error}>Enter a real date as YYYY-MM-DD (you must be 18 or older).</Text> : null}
+            {!birthTimeOk ? <Text style={s.error}>Enter the time as HH:MM in 24-hour Indian time, e.g. 06:30 or 18:45.</Text> : null}
+            <View style={[s.wrap, { marginTop: 12 }]}>
+              <Chip label="I don’t know my birth time" selected={birthTime.trim() === ''} onPress={() => setBirthTime('')} />
+            </View>
+            <Text style={[s.miniLabel, { marginTop: 16, marginBottom: 8 }]}>Born in</Text>
+            <View style={s.wrap}>
+              {BIRTH_PLACES.map((b) => (
+                <Chip key={b.name} label={b.name} selected={birthPlace === b.name} onPress={() => setBirthPlace(b.name)} />
+              ))}
+            </View>
           </Card>
 
           <Card>
@@ -392,6 +465,8 @@ const s = StyleSheet.create({
   gridItem: { width: '48.5%' },
   miniLabel: { color: C.muted, fontSize: 12, fontWeight: '700' },
   inputSmall: { paddingVertical: 11, fontSize: 15 },
+  inputError: { borderColor: '#F2A3B5', backgroundColor: '#FFF6F8' },
+  error: { color: '#C9406A', fontSize: 12.5, fontWeight: '700', marginTop: 8 },
   interestOn: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     paddingHorizontal: 13, paddingVertical: 8, borderRadius: 18, backgroundColor: '#FF6B8B',

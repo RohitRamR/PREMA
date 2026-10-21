@@ -9,6 +9,7 @@ import CelestialBackground from '../../components/CelestialBackground';
 import Svg, { Path } from 'react-native-svg';
 import { AuraFrame } from '../../components/Aura';
 import { useSafety } from '../../src/store/safety';
+import { useRankedDeck } from '../../src/features/compatibility';
 
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
 
@@ -21,8 +22,8 @@ const PROFILES = [
   {
     id: 'ananya',
     name: 'Ananya',
-    match: 96, // compatibility score → aura colour
-    age: 22,
+    match: 96, // fallback only — the matching engine supplies the real score
+    age: 24,
     verified: true,
     occupation: 'Design Student',
     distance: '3 km away',
@@ -38,7 +39,7 @@ const PROFILES = [
   {
     id: 'priya',
     name: 'Priya',
-    match: 91, // compatibility score → aura colour
+    match: 91, // fallback only — the matching engine supplies the real score
     age: 24,
     verified: true,
     occupation: 'Architect',
@@ -53,7 +54,7 @@ const PROFILES = [
   {
     id: 'neha',
     name: 'Neha',
-    match: 87, // compatibility score → aura colour
+    match: 87, // fallback only — the matching engine supplies the real score
     age: 23,
     verified: true,
     occupation: 'Software Engineer',
@@ -84,7 +85,9 @@ function DiscoverInner() {
   // Profiles you've passed on or liked leave the deck.
   const [deckAll, setDeck] = useState(PROFILES);
   const { blocked } = useSafety();
-  const deck = deckAll.filter((p) => !blocked.includes(p.id));
+  // Real compatibility: people your filters/dealbreakers exclude are hidden, best match first.
+  const ranked = useRankedDeck(deckAll);
+  const deck = ranked.filter((p) => !blocked.includes(p.id));
   const [toast, setToast] = useState('');
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const safeIdx = Math.min(activeIdx, Math.max(deck.length - 1, 0));

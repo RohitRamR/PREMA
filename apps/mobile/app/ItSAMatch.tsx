@@ -14,6 +14,7 @@ import { goBack } from '../components/nav';
 import { useProfile } from '../src/store/profile';
 import { person } from '../src/store/people';
 import { addMatch, hasConversation } from '../src/store/chats';
+import { useCompatibility } from '../src/features/compatibility';
 
 export default function ItSAMatch() {
   return (
@@ -32,7 +33,8 @@ function MatchInner() {
   const them = person(id);
   const theirName = name ?? them?.name ?? 'your match';
   const theirPhoto = photo ?? them?.photos[0];
-  const score = them?.match;
+  const compat = useCompatibility(id);
+  const score = compat?.score ?? them?.match;
 
   // Entrance: photos slide together, heart pops, then a slow heartbeat.
   const enter = useRef(new Animated.Value(0)).current;
@@ -56,7 +58,7 @@ function MatchInner() {
   // Make sure the conversation exists (opened directly, it may not yet), then open it.
   const openChat = () => {
     if (!id) return router.replace('/chats');
-    if (them) addMatch({ id, name: them.name, age: them.age, city: them.city, photo: them.photos[0], match: them.match });
+    if (them) addMatch({ id, name: them.name, age: them.age, city: them.city, photo: them.photos[0], match: score ?? them.match });
     else if (name && photo) addMatch({ id, name, age: 0, city: '', photo, match: 90 });
     if (hasConversation(id)) router.replace({ pathname: '/Chat', params: { id } });
     else router.replace('/chats');

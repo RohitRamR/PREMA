@@ -114,7 +114,7 @@ export default function SendIntentionalNote() {
 </View>
 
 <View className="relative bg-surface-container-lowest rounded-2xl p-space-16 shadow-sm flex gap-space-12 focus-within:shadow-md">
-<TextInput multiline={true} className="w-full bg-transparent text-primary font-body-lg text-body-lg placeholder-on-surface-variant/50 resize-none outline-none leading-relaxed" id="note-composer" maxlength="400" oninput="updateCounter()" placeholder="Pen a considerate thought..." rows="5" value="I noticed your love for tucked-away courtyard cafes in Mylapore. The quiet roaster behind Sanskrit College has been my secret sanctuary for years—the shaded frangipani tree in the back makes it feel timeless. Would love to share notes on artisanal roasters over a quiet brew." />
+<TextInput multiline={true} className="w-full bg-transparent text-primary font-body-lg text-body-lg placeholder-on-surface-variant/50 resize-none outline-none leading-relaxed" maxLength={400} numberOfLines={5} placeholder="Pen a considerate thought..." defaultValue="I noticed your love for tucked-away courtyard cafes in Mylapore. The quiet roaster behind Sanskrit College has been my secret sanctuary for years—the shaded frangipani tree in the back makes it feel timeless. Would love to share notes on artisanal roasters over a quiet brew." />
 
 <View className="flex items-center justify-between pt-space-8 text-on-surface-variant flex-row">
 <View className="flex items-center gap-space-4 text-secondary flex-row">
@@ -146,7 +146,6 @@ export default function SendIntentionalNote() {
 </View>
 
 <Text className="relative items-center">
-<TextInput checked="" className="sr-only peer" id="sanctuary-toggle" onchange="toggleSanctuary()" type="checkbox" />
 <View className="w-11 h-6 bg-surface-container-highest peer- rounded-full peer peer-checked:after: peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after: peer-checked:bg-primary"></View>
 </Text>
 </View>
