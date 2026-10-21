@@ -1,0 +1,56 @@
+# Type-checks and tests the matching engine and the mobile app on every pull
+# request and on every push to main.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# A new push to the same PR cancels the run that's still going.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Type-check and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v5
+
+      - name: Set up Node 24
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      # package.json pins npm 11.6.2 in devEngines.
+      - name: Use npm 11.6.2
+        run: npm install -g npm@11.6.2
+
+      - name: Install dependencies
+        run: npm ci
+
+      # The engine's package "main" points at dist/, which isn't committed.
+      # Build it first so the mobile app's tests can import it.
+      - name: Build matching engine
+        run: npm run build -w @prema/compatibility
+
+      - name: Type-check matching engine
+        run: npm run check-types -w @prema/compatibility
+
+      - name: Test matching engine
+        run: npm test -w @prema/compatibility
+
+      - name: Type-check mobile app
+        run: npm run check-types -w mobile
+
+      - name: Test mobile app
+        run: npm test -w mobile
