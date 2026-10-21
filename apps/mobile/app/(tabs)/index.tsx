@@ -39,6 +39,7 @@ const ANANYA_CARD = {
   occupation: 'Design Student',
   distance: '3 km away',
   image: 'https://images.unsplash.com/photo-1524250502761-1ac6f2e30d43?q=80&w=800&auto=format&fit=crop',
+  photoCount: 3, // her profile page (MatchDetail) shows 3 photos
   quote: '"Coffee, good people and a better tomorrow"',
   interests: [
     { id: '1', name: 'Coffee', icon: 'local-cafe' },
@@ -59,6 +60,7 @@ const PROFILES = [
     occupation: p.job,
     distance: p.city,
     image: p.photos[0]!,
+    photoCount: p.photos.length,
     quote: `"${p.prompt.answer}"`,
     interests: p.interests.slice(0, 4).map((name, i) => ({ id: `${p.id}-${i}`, name, icon: iconFor(name) })),
   })),
@@ -199,11 +201,14 @@ function DiscoverInner() {
               <Text className="text-white text-base font-medium ml-1.5" style={{ textShadowColor: "rgba(0,0,0,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4 }}>{item.distance}</Text>
             </View>
             
-            <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: 12, zIndex: 10 }}>
-              {[0, 1, 2, 3].map((_, i) => (
-                <View key={i} style={{ width: i === 0 ? 20 : 6, height: 6, borderRadius: 3, backgroundColor: i === 0 ? '#FFFFFF' : 'rgba(255,255,255,0.4)', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.3, shadowRadius: 2 }} />
-              ))}
-            </View>
+            {/* One dot per real photo on their profile; hidden when there's only one. */}
+            {item.photoCount > 1 ? (
+              <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: 12, zIndex: 10 }}>
+                {Array.from({ length: item.photoCount }, (_, i) => (
+                  <View key={i} style={{ width: i === 0 ? 20 : 6, height: 6, borderRadius: 3, backgroundColor: i === 0 ? '#FFFFFF' : 'rgba(255,255,255,0.4)', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.3, shadowRadius: 2 }} />
+                ))}
+              </View>
+            ) : null}
           </View>
 
           {/* Match strength as a colour border (blue → lilac → rose → gold) */}
