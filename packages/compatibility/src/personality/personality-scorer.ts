@@ -3,6 +3,7 @@
 // =============================================================================
 
 import type { PersonalityProfile } from '../types';
+import { unit } from '../utils/sanitize';
 import type { 
   TraitDimensionConfig, 
   TraitComparisonResult, 
@@ -87,12 +88,10 @@ export function calculatePersonalityCompatibility(
   let totalWeight = 0;
 
   for (const config of dimensionConfigs) {
-    const valueA = (profileA as any)[config.name] as number;
-    const valueB = (profileB as any)[config.name] as number;
-    
-    // Fallback to 0.5 if values are missing
-    const safeValueA = typeof valueA === 'number' ? valueA : 0.5;
-    const safeValueB = typeof valueB === 'number' ? valueB : 0.5;
+    // Unusable answers (missing / NaN / ±Infinity) skip the dimension; others are clamped to 0–1.
+    const safeValueA = unit((profileA as unknown as Record<string, unknown>)[config.name]);
+    const safeValueB = unit((profileB as unknown as Record<string, unknown>)[config.name]);
+    if (safeValueA === null || safeValueB === null) continue;
 
     const score = Math.round(scoreTrait(safeValueA, safeValueB, config.comparisonMode));
     const interpretation = interpretTrait(config.displayName, config.comparisonMode, score);
@@ -117,7 +116,7 @@ export function calculatePersonalityCompatibility(
     }
   }
 
-  const finalScore = totalWeight > 0 ? Math.round(totalScore / totalWeight) : 0;
+  const finalScore = totalWeight > 0 ? Math.round(totalScore / totalWeight) : 50;
 
   return {
     score: Math.min(100, Math.max(0, finalScore)),

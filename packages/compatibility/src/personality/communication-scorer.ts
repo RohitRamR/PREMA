@@ -3,6 +3,7 @@
 // =============================================================================
 
 import type { CommunicationProfile } from '../types';
+import { unit } from '../utils/sanitize';
 import type { CommunicationDimensionResult, CommunicationCompatibilityResult } from './personality-types';
 
 interface CommDimension {
@@ -55,13 +56,12 @@ export function calculateCommunicationCompatibility(
   const frictionPoints: string[] = [];
   
   let totalScore = 0;
+  let usedWeight = 0;
 
   for (const dim of DIMENSIONS) {
-    const valueA = profileA[dim.name] as number;
-    const valueB = profileB[dim.name] as number;
-    
-    const safeValueA = typeof valueA === 'number' ? valueA : 0.5;
-    const safeValueB = typeof valueB === 'number' ? valueB : 0.5;
+    const safeValueA = unit(profileA[dim.name]);
+    const safeValueB = unit(profileB[dim.name]);
+    if (safeValueA === null || safeValueB === null) continue;
     
     const score = Math.round((1 - Math.abs(safeValueA - safeValueB)) * 100);
     const interpretation = interpretDimension(dim.displayName, score);
@@ -76,6 +76,7 @@ export function calculateCommunicationCompatibility(
     });
     
     totalScore += score * DIMENSION_WEIGHT;
+    usedWeight += DIMENSION_WEIGHT;
     
     if (score > 80) {
       strengths.push(`Compatible ${dim.displayName}`);
@@ -84,7 +85,7 @@ export function calculateCommunicationCompatibility(
     }
   }
 
-  const finalScore = Math.round(totalScore);
+  const finalScore = usedWeight > 0 ? Math.round(totalScore / usedWeight) : 50;
   
   let overallInterpretation = '';
   if (finalScore >= 80) {

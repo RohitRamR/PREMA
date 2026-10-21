@@ -4,6 +4,7 @@
  */
 
 import type { LifestyleProfile } from '../types';
+import { unit } from '../utils/sanitize';
 
 export interface LifestyleDimensionResult {
   dimension: string;
@@ -46,10 +47,13 @@ export function calculateLifestyleCompatibility(profileA: LifestyleProfile, prof
   const addDimension = (
     dimension: string,
     displayName: string,
-    valA: number,
-    valB: number,
+    rawA: number,
+    rawB: number,
     weight: number
   ) => {
+    const valA = unit(rawA);
+    const valB = unit(rawB);
+    if (valA === null || valB === null) return { score: 0, weight: 0 };
     const score = (1 - Math.abs(valA - valB)) * 100;
     const interpretation = generateInterpretation(dimension, score);
     
@@ -89,7 +93,7 @@ export function calculateLifestyleCompatibility(profileA: LifestyleProfile, prof
   }
 
   return {
-    score: Math.round(totalScore / totalWeight),
+    score: totalWeight > 0 ? Math.round(totalScore / totalWeight) : 50,
     dimensions,
     strengths,
     frictionPoints,

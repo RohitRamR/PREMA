@@ -39,6 +39,22 @@ import { calculateMutualPreferenceFit, type MutualPreferenceResult } from '../pr
 import { applyHardFilters, applyAstroDealbreakers } from '../filters/hard-filters';
 import { calculateConfidence } from './confidence-engine';
 import { generateExplanation } from './explanation-engine';
+import { usableShare, clampScore } from '../utils/sanitize';
+
+const LAYER_KEYS = {
+  personality: ['communicationDirectness', 'socialEnergy', 'independence', 'conflictAvoidance', 'emotionalOpenness', 'adventurePreference', 'routinePreference', 'decisionMaking', 'affectionStyle'],
+  communication: ['directness', 'frequencyPreference', 'conflictStyle', 'responseExpectation', 'emotionalOpenness', 'reassuranceNeed', 'affectionCommunication', 'disagreementHandling'],
+  values: ['familyImportance', 'marriageExpectation', 'childrenExpectation', 'careerPriority', 'financialAttitude', 'lifestylePriority', 'religionSpirituality', 'socialValues', 'personalIndependence'],
+  lifestyle: ['foodPreference', 'travelFrequency', 'sleepSchedule', 'exerciseFrequency', 'socialActivity', 'alcoholPreference', 'smokingPreference', 'workStyle', 'weekendStyle', 'spendingStyle'],
+  goals: ['intention', 'marriageTimeline', 'childrenPreference', 'familyInvolvement', 'relocationWillingness', 'longDistanceWillingness'],
+} as const;
+
+/** Both profiles present AND at least half of their answers usable. */
+function usable<T>(a: T | undefined, b: T | undefined, keys: readonly string[]): [T, T] | null {
+  const pair = both(a, b);
+  if (!pair) return null;
+  return usableShare(pair[0], keys) >= 0.5 && usableShare(pair[1], keys) >= 0.5 ? pair : null;
+}
 
 /**
  * Input for the full compatibility pipeline.
@@ -183,19 +199,22 @@ export function calculateFullCompatibility(
   }
   preferenceScore = Math.max(0, preferenceScore);
 
-  const p = both(input.personalityA, input.personalityB);
-  const c = both(input.communicationA, input.communicationB);
-  const v = both(input.valuesA, input.valuesB);
-  const l = both(input.lifestyleA, input.lifestyleB);
-  const g = both(input.goalsA, input.goalsB);
+  const p = usable(input.personalityA, input.personalityB, LAYER_KEYS.personality);
+  const c = usable(input.communicationA, input.communicationB, LAYER_KEYS.communication);
+  const v = usable(input.valuesA, input.valuesB, LAYER_KEYS.values);
+  const l = usable(input.lifestyleA, input.lifestyleB, LAYER_KEYS.lifestyle);
+  const g = usable(input.goalsA, input.goalsB, LAYER_KEYS.goals);
   const i = both(input.interestsA, input.interestsB);
 
-  const personality = p ? calculatePersonalityCompatibility(p[0], p[1]) : null;
-  const communication = c ? calculateCommunicationCompatibility(c[0], c[1]) : null;
-  const values = v ? calculateValuesCompatibility(v[0], v[1]) : null;
-  const lifestyle = l ? calculateLifestyleCompatibility(l[0], l[1]) : null;
-  const relationshipGoals = g ? calculateRelationshipGoalsCompatibility(g[0], g[1]) : null;
-  const interests = i ? calculateInterestsCompatibility(i[0], i[1]) : null;
+  const personalityRaw = p ? calculatePersonalityCompatibility(p[0], p[1]) : null;
+  // Final guard: every layer score is a finite integer 0–100.
+  const safe = <T extends { score: number }>(r: T | null): T | null => (r ? { ...r, score: clampScore(r.score) } : null);
+  const personality = safe(personalityRaw);
+  const communication = safe(c ? calculateCommunicationCompatibility(c[0], c[1]) : null);
+  const values = safe(v ? calculateValuesCompatibility(v[0], v[1]) : null);
+  const lifestyle = safe(l ? calculateLifestyleCompatibility(l[0], l[1]) : null);
+  const relationshipGoals = safe(g ? calculateRelationshipGoalsCompatibility(g[0], g[1]) : null);
+  const interests = safe(i ? calculateInterestsCompatibility(i[0], i[1]) : null);
 
   // 5. Weighted score over the layers that have data
   const layers: Array<[keyof CompatibilityBreakdown, number | null, number]> = [
@@ -241,20 +260,20 @@ export function calculateFullCompatibility(
   };
 
   // 6. Confidence
-  const has = (x: unknown) => (x != null ? 1 : 0);
+  const has = (x: unknown, keys?: readonly string[]) => (x == null ? 0 : keys ? usableShare(x, keys) : 1);
   const confidence = calculateConfidence({
     hasBirthTimeA: input.astroProfileA.hasBirthTime,
     hasBirthTimeB: input.astroProfileB.hasBirthTime,
-    personalityCompletenessA: has(input.personalityA),
-    personalityCompletenessB: has(input.personalityB),
-    communicationCompletenessA: has(input.communicationA),
-    communicationCompletenessB: has(input.communicationB),
-    valuesCompletenessA: has(input.valuesA),
-    valuesCompletenessB: has(input.valuesB),
-    lifestyleCompletenessA: has(input.lifestyleA),
-    lifestyleCompletenessB: has(input.lifestyleB),
-    goalsCompletenessA: has(input.goalsA),
-    goalsCompletenessB: has(input.goalsB),
+    personalityCompletenessA: has(input.personalityA, LAYER_KEYS.personality),
+    personalityCompletenessB: has(input.personalityB, LAYER_KEYS.personality),
+    communicationCompletenessA: has(input.communicationA, LAYER_KEYS.communication),
+    communicationCompletenessB: has(input.communicationB, LAYER_KEYS.communication),
+    valuesCompletenessA: has(input.valuesA, LAYER_KEYS.values),
+    valuesCompletenessB: has(input.valuesB, LAYER_KEYS.values),
+    lifestyleCompletenessA: has(input.lifestyleA, LAYER_KEYS.lifestyle),
+    lifestyleCompletenessB: has(input.lifestyleB, LAYER_KEYS.lifestyle),
+    goalsCompletenessA: has(input.goalsA, LAYER_KEYS.goals),
+    goalsCompletenessB: has(input.goalsB, LAYER_KEYS.goals),
     astrologyConfidence: astrology.confidence,
     algorithmVersion: config.algorithmVersion,
   });
