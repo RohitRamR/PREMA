@@ -8,6 +8,7 @@ import Icon from '../components/Icon';
 import Text, { NunitoScope } from '../components/PremaText';
 import { C, Card, Chip, ScreenHeader, Tap, cardShadow } from '../components/prema-ui';
 import { updateProfile, useProfile } from '../src/store/profile';
+import { goBack } from '../components/nav';
 
 const REASONS = ['I met someone', 'Taking a break', 'Not enough matches', 'Too expensive', 'Privacy concerns', 'Something else'];
 
@@ -29,7 +30,7 @@ function DeleteInner() {
 
   const pauseInstead = () => {
     updateProfile({ paused: true });
-    router.back();
+    goBack(router);
   };
 
   return (
@@ -94,7 +95,7 @@ function DeleteInner() {
             accessibilityRole="button" accessibilityState={{ disabled: !ok }}>
             <Text style={s.deleteText}>Delete my account</Text>
           </Tap>
-          <Tap onPress={() => router.back()} style={{ paddingVertical: 12 }}>
+          <Tap onPress={() => goBack(router)} style={{ paddingVertical: 12 }}>
             <Text style={s.keep}>Keep my account</Text>
           </Tap>
         </View>

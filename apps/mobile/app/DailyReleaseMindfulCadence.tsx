@@ -8,6 +8,7 @@ import Icon from '../components/Icon';
 import Text, { NunitoScope } from '../components/PremaText';
 import { C, Card, Chip, PrimaryButton, ScreenHeader, Tap, cardShadow } from '../components/prema-ui';
 import { updateProfile, useProfile } from '../src/store/profile';
+import { goBack } from '../components/nav';
 
 const RHYTHMS = [
   { id: 'slow', title: 'The Slow Horizon', sub: '2 deeply aligned matches a day', icon: 'spa' },
@@ -36,7 +37,7 @@ function CadenceInner() {
   const save = () => {
     updateProfile((p) => ({ settings: { ...p.settings, pushIntros: true } }));
     Alert.alert('Rhythm saved', `${RHYTHMS.find((r) => r.id === rhythm)!.sub}${rhythm === 'weekend' ? '' : `, arriving at ${time}`}.`);
-    router.back();
+    goBack(router);
   };
 
   const pauseFor = (days: number) => {

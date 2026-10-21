@@ -9,6 +9,7 @@ import {
   C, Card, Label, Chip, ScreenHeader, PrimaryButton, ToggleRow, Tap, serif,
 } from '../components/prema-ui';
 import { useProfile, updateProfile, INTENT_OPTIONS } from '../src/store/profile';
+import { goBack } from '../components/nav';
 
 const DISTANCES = [10, 25, 50, 100];
 const CITIES = ['Bengaluru', 'Chennai', 'Hyderabad', 'Mumbai', 'Pune', 'Delhi NCR', 'Kochi'];
@@ -41,7 +42,7 @@ function DiscoveryPreferencesInner() {
 
   const save = () => {
     updateProfile({ discovery: { distanceKm, ageMin, ageMax, cities, intents, verifiedOnly } });
-    router.back();
+    goBack(router);
   };
 
   return (

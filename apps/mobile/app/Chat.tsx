@@ -10,6 +10,7 @@ import { C, Tap, cardShadow, serif } from '../components/prema-ui';
 import {
   useConversation, sendMessage, markRead, timeLabel, removeConversation, type Message,
 } from '../src/store/chats';
+import { goBack } from '../components/nav';
 
 const GROUP_GAP_MS = 10 * 60_000;
 
@@ -61,7 +62,7 @@ function ChatScreenInner() {
     { text: 'Plan a date', onPress: () => router.push({ pathname: '/date/plan', params: { match: convo.id } }) },
     { text: 'Unmatch', style: 'destructive', onPress: () => Alert.alert(`Unmatch ${convo.name}?`, 'Your chat will be removed for both of you. This can’t be undone.', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Unmatch', style: 'destructive', onPress: () => { removeConversation(convo.id); router.back(); } },
+      { text: 'Unmatch', style: 'destructive', onPress: () => { removeConversation(convo.id); goBack(router); } },
     ]) },
     { text: 'Report', style: 'destructive', onPress: () => router.push({ pathname: '/Report', params: { id: convo.id } }) },
     { text: 'Cancel', style: 'cancel' },
@@ -75,7 +76,7 @@ function ChatScreenInner() {
 
       {/* Header */}
       <View style={[s.header, { paddingTop: insets.top + 6 }]}>
-        <Tap onPress={() => router.back()} style={s.roundBtn} accessibilityLabel="Go back">
+        <Tap onPress={() => goBack(router)} style={s.roundBtn} accessibilityLabel="Go back">
           <Icon name="arrow_back" size={22} color={C.pri} />
         </Tap>
         <Tap style={s.headerId} onPress={() => router.push({ pathname: '/MatchDetail', params: { id: convo.id } })} pressedStyle={{ opacity: 0.8 }}>

@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from '../components/Icon';
 import { View, Text, ScrollView, Image, Pressable, TextInput, ImageBackground } from 'react-native';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import { goBack } from '../components/nav';
 
 export default function CuratedDateConciergeItinerary() {
   const router = useRouter();
@@ -13,7 +14,7 @@ export default function CuratedDateConciergeItinerary() {
 
 <View className="flex gap-space-12 pt-space-8 pb-space-16">
 <View className="flex items-center justify-between flex-row">
-<Pressable onPress={() => router.back()} aria-label="Go back" className="w-10 h-10 -ml-space-8 rounded-full flex items-center justify-center text-primary flex-row" >
+<Pressable onPress={() => goBack(router)} aria-label="Go back" className="w-10 h-10 -ml-space-8 rounded-full flex items-center justify-center text-primary flex-row" >
 <Icon name="arrow_back" size={24} className="text-[24px]" />
 </Pressable>
 <View className="items-center gap-space-4 px-space-12 py-space-4 rounded-full bg-secondary-container text-on-secondary-container">

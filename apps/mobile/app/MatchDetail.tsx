@@ -13,6 +13,7 @@ import { person, type Person } from '../src/store/people';
 import { Alert, Share } from 'react-native';
 import { blockPerson } from '../src/store/safety';
 import { useProfile, VITAL_FIELDS, type Profile } from '../src/store/profile';
+import { goBack } from '../components/nav';
 
 const { width, height } = Dimensions.get('window');
 // The hero photo sits inset from the screen edges with soft curved corners.
@@ -264,7 +265,7 @@ export default function MatchDetail() {
   const reportProfile = () => router.push({ pathname: '/Report', params: { id: targetId } });
   const hideProfile = () => Alert.alert(`Hide ${P.name}?`, 'You won’t see each other in Discover again.', [
     { text: 'Cancel', style: 'cancel' },
-    { text: 'Hide', style: 'destructive', onPress: () => { blockPerson(targetId); router.back(); } },
+    { text: 'Hide', style: 'destructive', onPress: () => { blockPerson(targetId); goBack(router); } },
   ]);
   const openMenu = () => Alert.alert(P.name, undefined, [
     { text: 'Share profile', onPress: shareProfile },
@@ -320,7 +321,7 @@ export default function MatchDetail() {
 
             {/* Top controls */}
             <View style={s.topRow}>
-              <Tap onPress={() => router.back()} style={s.glassBtn} pressedStyle={{ opacity: 0.7 }} accessibilityLabel="Go back">
+              <Tap onPress={() => goBack(router)} style={s.glassBtn} pressedStyle={{ opacity: 0.7 }} accessibilityLabel="Go back">
                 <Icon name="arrow_back" size={22} color="#FFFFFF" />
               </Tap>
               {isMe ? (

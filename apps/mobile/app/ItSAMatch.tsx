@@ -22,6 +22,7 @@ import { colors, spacing, radii } from '../src/theme/theme';
 import Icon from '../components/Icon';
 import CelestialBackground from '../components/CelestialBackground';
 import { useProfile } from '../src/store/profile';
+import { goBack } from '../components/nav';
 
 const PREMA_THEME = { colors, spacing, radii };
 
@@ -67,7 +68,7 @@ export default function ItSAMatch() {
         {/* Dismiss Button */}
         <Pressable 
           style={styles.dismissButton} 
-          onPress={() => router.back()}
+          onPress={() => goBack(router)}
         >
           <Icon name="close" size={20} color={PREMA_THEME.colors.deepNavy} />
         </Pressable>

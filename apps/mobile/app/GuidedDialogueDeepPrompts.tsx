@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from '../components/Icon';
 import { View, Text, ScrollView, Image, Pressable, TextInput } from 'react-native';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import { goBack } from '../components/nav';
 
 export default function GuidedDialogueDeepPrompts() {
   const router = useRouter();
@@ -12,7 +13,7 @@ export default function GuidedDialogueDeepPrompts() {
       <View className="bg-surface border-surface-container-highest bg-surface/85"><View className="h-16 px-space-20 max-w-[480px] mx-auto flex items-center justify-between flex-row"><View className="flex items-center gap-space-12 flex-row"><Image alt="PREMA Logo" className="h-8 w-[76px]" resizeMode="contain" source={require('../assets/images/logo.png')} /><View className="flex"><Text className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">PREMA</Text><Text className="font-headline-sm text-headline-sm text-primary tracking-tight">Prema   Voice Sanctuary &amp; Audio Prompts</Text></View></View><View className="flex items-center gap-space-8 flex-row"><Pressable aria-label="Notifications" className="w-11 h-11 flex items-center justify-center rounded-full text-secondary flex-row"><Icon name="notifications" size={22} className="text-[22px]" /></Pressable><View className="relative flex items-center justify-center flex-row"><Image alt="Profile" className="w-8 h-8 rounded-full" source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBnpv7GVuzd6fs5TliuCiwIlpL0Rt2bVAxsXV2oCjBpVhp4UG2QcSA0fM1E5q0b-Bi3hANo_gxxHA1NjlLrqjE8ohvM6MdNojlI797HuC0AUkvZ0e2I5nz-fDRMdLXKv5aD9DyFmCPwJsDQdw4uv-m2poXm4GRuvfCjVpkLQEOf-1fFeXQOV7jP88Y-BVm6Xpd7_d4ZzQTNKZfgN_NLPKw3_kWAaoVLwLZ_BFzC19ixAfQnTKjdTvg9' }} /><Text className="absolute -bottom-space-2 -right-space-2 w-3.5 h-3.5 bg-secondary-container rounded-full flex items-center justify-center flex-row"><Icon name="verified" size={10} className="text-[10px] text-primary font-bold" /></Text></View></View></View></View><ScrollView className="flex relative w-full max-w-[480px] mx-auto px-margin-mobile pt-16 pb-28 bg-surface"><View className="flex w-full pb-8">
 
 <View className="flex items-center justify-between py-space-12 mb-space-4 flex-row">
-<Pressable onPress={() => router.back()} aria-label="Go back" className="w-10 h-10 -ml-2 rounded-full flex items-center justify-center text-primary flex-row" >
+<Pressable onPress={() => goBack(router)} aria-label="Go back" className="w-10 h-10 -ml-2 rounded-full flex items-center justify-center text-primary flex-row" >
 <Icon name="arrow_back_ios_new" size={20} className="text-[20px]" />
 </Pressable>
 <View className="flex items-center gap-space-4 px-space-12 py-space-4 rounded-full bg-secondary-container/40 flex-row">

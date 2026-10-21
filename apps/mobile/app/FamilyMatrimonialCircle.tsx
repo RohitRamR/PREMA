@@ -7,6 +7,7 @@ import CelestialBackground from '../components/CelestialBackground';
 import Icon from '../components/Icon';
 import Text, { NunitoScope } from '../components/PremaText';
 import { C, Card, PrimaryButton, ScreenHeader, Tap, cardShadow } from '../components/prema-ui';
+import { goBack } from '../components/nav';
 
 type Member = { name: string; relation: string };
 
@@ -49,7 +50,7 @@ function FamilyInner() {
 
   const save = () => {
     Alert.alert('Family circle saved', `${members.length} trusted ${members.length === 1 ? 'person' : 'people'} · ${Object.values(scopes).filter(Boolean).length} permissions on.`);
-    router.back();
+    goBack(router);
   };
 
   return (

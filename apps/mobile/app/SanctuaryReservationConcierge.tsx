@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from '../components/Icon';
 import { View, Text, ScrollView, Image, Pressable, TextInput } from 'react-native';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import { goBack } from '../components/nav';
 
 export default function SanctuaryReservationConcierge() {
   const router = useRouter();
@@ -13,7 +14,7 @@ export default function SanctuaryReservationConcierge() {
 
 <View className="flex items-center justify-between py-3 mb-2 flex-row">
 <View className="flex items-center gap-2 flex-row">
-<Pressable onPress={() => router.back()} aria-label="Go back" className="flex items-center justify-center w-9 h-9 rounded-full bg-surface-container active:scale-95 text-on-surface flex-row" >
+<Pressable onPress={() => goBack(router)} aria-label="Go back" className="flex items-center justify-center w-9 h-9 rounded-full bg-surface-container active:scale-95 text-on-surface flex-row" >
 <Icon name="arrow_back_ios_new" size={18} className="text-[18px]" />
 </Pressable>
 <View className="flex">

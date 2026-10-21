@@ -3,6 +3,7 @@ import { View, Text, ScrollView, Pressable, Image } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Icon from '../components/Icon';
+import { goBack } from '../components/nav';
 
 const VENUES = [
   { id: '1', name: 'Amethyst Cafe', area: 'Royapettah', mood: 'Garden & Coffee', image: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&q=80&w=400' },
@@ -25,7 +26,7 @@ export default function SanctuaryDateInvitation() {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
         paddingHorizontal: 24, paddingTop: insets.top + 16, paddingBottom: 16 
       }}>
-        <Pressable onPress={() => router.back()} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
+        <Pressable onPress={() => goBack(router)} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
           <Icon name="arrow_back" size={24} color="#021625" />
         </Pressable>
         <Text style={{ color: '#021625', fontSize: 13, fontWeight: '500', letterSpacing: 0.2 }}>

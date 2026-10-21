@@ -8,6 +8,7 @@ import Icon from '../components/Icon';
 import Text, { NunitoScope } from '../components/PremaText';
 import { C, Card, PrimaryButton, ScreenHeader, Tap } from '../components/prema-ui';
 import { updateProfile, useProfile } from '../src/store/profile';
+import { goBack } from '../components/nav';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -46,7 +47,7 @@ function AccountInner() {
   const save = () => {
     updateProfile({ phone, email: email.trim() });
     Alert.alert('Saved', 'Your account details are up to date.');
-    router.back();
+    goBack(router);
   };
 
   return (
