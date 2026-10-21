@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { View, Image, Dimensions, Pressable, FlatList, Animated, Share } from 'react-native';
 import Text, { NunitoScope } from '../../components/PremaText';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -85,7 +85,7 @@ function DiscoverInner() {
   const { blocked } = useSafety();
   // Real compatibility: people your filters/dealbreakers exclude are hidden, best match first.
   const ranked = useRankedDeck(deckAll);
-  const deck = ranked.filter((p) => !blocked.includes(p.id));
+  const deck = useMemo(() => ranked.filter((p) => !blocked.includes(p.id)), [ranked, blocked]);
   const [toast, setToast] = useState('');
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const safeIdx = Math.min(activeIdx, Math.max(deck.length - 1, 0));
@@ -119,7 +119,8 @@ function DiscoverInner() {
     }
   }).current;
 
-  const renderProfileCard = ({ item, index }: { item: (typeof PROFILES)[number]; index: number }) => {
+  // Memoised so swiping (which updates activeIdx) doesn't rebuild every card.
+  const renderProfileCard = useCallback(({ item, index }: { item: (typeof PROFILES)[number]; index: number }) => {
     const inputRange = [
       (index - 1) * SNAP_INTERVAL,
       index * SNAP_INTERVAL,
@@ -211,7 +212,8 @@ function DiscoverInner() {
         </Pressable>
       </View>
     );
-  };
+  }, [scrollX, router]);
+
 
   return (
     <SafeAreaView className="flex-1 bg-[#F1F7FD]" edges={['top']}>
@@ -266,6 +268,10 @@ function DiscoverInner() {
             onViewableItemsChanged={onViewableItemsChanged}
             viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
             renderItem={renderProfileCard}
+            getItemLayout={(_, index) => ({ length: SNAP_INTERVAL, offset: SNAP_INTERVAL * index, index })}
+            initialNumToRender={3}
+            windowSize={5}
+            maxToRenderPerBatch={3}
           />
         </View>
 
@@ -277,13 +283,14 @@ function DiscoverInner() {
 
         {/* User Info Section - Fixed Height */}
         <View className="px-6 mt-2 z-20" style={{ opacity: deck.length ? 1 : 0 }}>
-          <View className="bg-[#E7F0F9] rounded-3xl py-3 px-4 items-center">
-            <Text className="text-[#3E5C7D] text-sm font-medium mb-2 text-center">{currentProfile?.quote}</Text>
-            <View className="flex-row flex-wrap justify-center gap-2 w-full">
-              {currentProfile?.interests.map((interest) => (
+          {/* Fixed height (2-line quote + one row of chips) so the cards above never jump while you scroll. */}
+          <View className="bg-[#E7F0F9] rounded-3xl py-3 px-4 items-center justify-center" style={{ height: 96 }}>
+            <Text numberOfLines={2} className="text-[#3E5C7D] text-sm font-medium mb-2 text-center">{currentProfile?.quote}</Text>
+            <View className="flex-row justify-center gap-2 w-full" style={{ height: 28, overflow: 'hidden' }}>
+              {currentProfile?.interests.slice(0, 3).map((interest) => (
                 <View key={interest.id} className="flex-row items-center bg-white rounded-full px-3 py-1.5 gap-1.5 shadow-sm shadow-surface-variant">
                   <Icon name={interest.icon} size={12} color="#3E5C7D" />
-                  <Text className="text-[#3E5C7D] font-medium text-xs">{interest.name}</Text>
+                  <Text numberOfLines={1} className="text-[#3E5C7D] font-medium text-xs">{interest.name}</Text>
                 </View>
               ))}
             </View>
