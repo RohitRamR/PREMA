@@ -1,6 +1,6 @@
 // Who you've blocked or reported (mock until the trust & safety API lands).
 // Blocked people never appear again in Discover, Likes or Chats.
-import { useSyncExternalStore } from 'react';
+import { createStore } from './create-store';
 import { removeConversation } from './chats';
 
 export type ReportReason =
@@ -17,24 +17,23 @@ export const REPORT_REASONS: { id: ReportReason; label: string; icon: string }[]
 ];
 
 type State = { blocked: string[]; reports: { id: string; reason: ReportReason; note: string; at: number }[] };
-let state: State = { blocked: [], reports: [] };
-const listeners = new Set<() => void>();
-const set = (next: Partial<State>) => { state = { ...state, ...next }; listeners.forEach((l) => l()); };
-const subscribe = (l: () => void) => { listeners.add(l); return () => listeners.delete(l); };
-const get = () => state;
+const store = createStore<State>({ blocked: [], reports: [] });
+const set = (next: Partial<State>) => store.set((s) => ({ ...s, ...next }));
 
-export const useSafety = () => useSyncExternalStore(subscribe, get, get);
+export const useSafety = () => store.use();
+/** Current blocks and reports (outside React). */
+export const getSafety = () => store.get();
 
 export function blockPerson(id: string) {
-  if (!state.blocked.includes(id)) set({ blocked: [...state.blocked, id] });
+  if (!store.get().blocked.includes(id)) set({ blocked: [...store.get().blocked, id] });
   removeConversation(id);
 }
 
 export function unblockPerson(id: string) {
-  set({ blocked: state.blocked.filter((x) => x !== id) });
+  set({ blocked: store.get().blocked.filter((x) => x !== id) });
 }
 
 export function reportPerson(id: string, reason: ReportReason, note: string, alsoBlock: boolean) {
-  set({ reports: [...state.reports, { id, reason, note, at: Date.now() }] });
+  set({ reports: [...store.get().reports, { id, reason, note, at: Date.now() }] });
   if (alsoBlock) blockPerson(id);
 }

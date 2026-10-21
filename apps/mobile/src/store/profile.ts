@@ -1,7 +1,7 @@
-// Tiny in-memory store for the signed-in user's profile and preferences.
+// In-memory store for the signed-in user's profile and preferences.
 // Screens read with useProfile() and write with updateProfile(); every
 // subscriber re-renders. Swap the body for Supabase calls when the API lands.
-import { useSyncExternalStore } from 'react';
+import { createStore } from './create-store';
 import type { QuizAnswers } from '../features/compatibility/quiz';
 
 export type Profile = {
@@ -156,7 +156,7 @@ export const LIFESTYLE_OPTIONS: { label: string; icon: string }[] = [
   { label: 'Architecture walks', icon: 'architecture' },
 ];
 
-let state: Profile = {
+const store = createStore<Profile>({
   name: 'Vikram',
   phone: '9876543210',
   email: '',
@@ -211,25 +211,16 @@ let state: Profile = {
     incognito: false,
   },
   paused: false,
-};
-
-const listeners = new Set<() => void>();
+});
 
 export function getProfile() {
-  return state;
+  return store.get();
 }
 
 export function updateProfile(patch: Partial<Profile> | ((p: Profile) => Partial<Profile>)) {
-  const next = typeof patch === 'function' ? patch(state) : patch;
-  state = { ...state, ...next };
-  listeners.forEach((l) => l());
-}
-
-function subscribe(l: () => void) {
-  listeners.add(l);
-  return () => listeners.delete(l);
+  store.set((prev) => ({ ...prev, ...(typeof patch === 'function' ? patch(prev) : patch) }));
 }
 
 export function useProfile() {
-  return useSyncExternalStore(subscribe, getProfile, getProfile);
+  return store.use();
 }

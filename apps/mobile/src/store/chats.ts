@@ -1,5 +1,5 @@
 // In-memory conversations store (mock data until the messaging API lands).
-import { useSyncExternalStore } from 'react';
+import { createStore } from './create-store';
 import { PEOPLE, thumb } from './people';
 
 export type Message = {
@@ -31,7 +31,7 @@ const basics = (id: keyof typeof PEOPLE) => {
   return { id: p.id, name: p.name, age: p.age, city: p.city, match: p.match, photo: thumb(p.photos[0]!) };
 };
 
-let conversations: Conversation[] = [
+const store = createStore<Conversation[]>([
   {
     ...basics('ananya'), online: true,
     prompt: 'What does a perfect slow Sunday look like for you?',
@@ -60,19 +60,15 @@ let conversations: Conversation[] = [
       { id: 'k1', from: 'them', text: 'Morning walk, no phone, one podcast. Yours?', at: now - 3 * 24 * 60 * min },
     ],
   },
-];
+]);
 
 export const NEW_MATCHES: NewMatch[] = [
   basics('tara'),
 ];
 
-const listeners = new Set<() => void>();
-const emit = () => listeners.forEach((l) => l());
-const subscribe = (l: () => void) => { listeners.add(l); return () => listeners.delete(l); };
-const getAll = () => conversations;
 
 export function useConversations() {
-  return useSyncExternalStore(subscribe, getAll, getAll);
+  return store.use();
 }
 
 export function useConversation(id: string | undefined) {
@@ -81,12 +77,11 @@ export function useConversation(id: string | undefined) {
 }
 
 function patch(id: string, fn: (c: Conversation) => Conversation) {
-  conversations = conversations.map((c) => (c.id === id ? fn(c) : c));
-  emit();
+  store.set((all) => all.map((c) => (c.id === id ? fn(c) : c)));
 }
 
 export function markRead(id: string) {
-  const c = conversations.find((x) => x.id === id);
+  const c = store.get().find((x) => x.id === id);
   if (c && c.unread > 0) patch(id, (x) => ({ ...x, unread: 0 }));
 }
 
@@ -115,21 +110,21 @@ export function useUnreadCount() {
 
 /** A new mutual match opens an empty conversation (no-op if one already exists). */
 export function addMatch(p: { id: string; name: string; age: number; city: string; photo: string; match: number }) {
-  if (conversations.some((c) => c.id === p.id)) return;
-  conversations = [{
+  if (store.get().some((c) => c.id === p.id)) return;
+  store.set((all) => [{
     ...p, online: false, unread: 0, messages: [],
     prompt: 'What made you smile this week?',
-  }, ...conversations];
-  emit();
+  }, ...all]);
 }
 
 /** Unmatch or block: the conversation disappears for both people. */
 export function removeConversation(id: string) {
-  conversations = conversations.filter((c) => c.id !== id);
-  emit();
+  store.set((all) => all.filter((c) => c.id !== id));
 }
 
-export const hasConversation = (id: string) => conversations.some((c) => c.id === id);
+export const hasConversation = (id: string) => store.get().some((c) => c.id === id);
+/** All conversations (outside React). */
+export const getConversations = () => store.get();
 
 export function timeLabel(at: number) {
   const diff = Date.now() - at;
