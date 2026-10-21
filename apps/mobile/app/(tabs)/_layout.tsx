@@ -3,8 +3,9 @@ import { View, Platform, Text } from 'react-native';
 import React from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from '../../components/Icon';
-import { Ionicons } from '@expo/vector-icons';
+import HandshakeHeart from '../../components/HandshakeHeart';
 import Svg, { Path } from 'react-native-svg';
+import { Ionicons } from '@expo/vector-icons';
 import { useUnreadCount } from '../../src/store/chats';
 import { Dimensions } from 'react-native';
 
@@ -41,20 +42,8 @@ function CustomTab({ name, title, focused, isMeetButton }: { name: string; title
             alignItems: 'center',
             justifyContent: 'center',
           }}>
-            {/* LAYER 3: Meet symbol — two hearts coming together */}
-            <Svg width="34" height="30" viewBox="0 0 34 30" fill="none">
-              <Path
-                d="M12 26 C5 20.5 1.5 16.5 1.5 11.6 C1.5 7.9 4.3 5 7.8 5 C9.7 5 11.2 5.9 12 7.3 C12.8 5.9 14.3 5 16.2 5 C19.7 5 22.5 7.9 22.5 11.6 C22.5 16.5 19 20.5 12 26 Z"
-                fill="#FFFFFF"
-              />
-              <Path
-                d="M22 23 C16.8 19 14.2 16 14.2 12.4 C14.2 9.7 16.3 7.6 18.8 7.6 C20.2 7.6 21.4 8.3 22 9.3 C22.6 8.3 23.8 7.6 25.2 7.6 C27.7 7.6 29.8 9.7 29.8 12.4 C29.8 16 27.2 19 22 23 Z"
-                fill="#FF6685"
-                stroke="#FFFFFF"
-                strokeWidth="2.2"
-                strokeLinejoin="round"
-              />
-            </Svg>
+            {/* LAYER 3: Meet symbol — a heart made of two hands shaking */}
+            <HandshakeHeart size={40} cut="#FF6685" />
           </View>
         </View>
 
