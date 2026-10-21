@@ -89,7 +89,8 @@ export function toCompatView(
   discover: { output: FullCompatibilityOutput } | null
 ): CompatView {
   const { output, me, them } = display;
-  const d = output.detailedBreakdown!;
+  const d = output.detailedBreakdown;
+  if (!d) throw new Error(`No breakdown for an excluded pair: ${output.result.reasons.join('; ')}`);
   const r = output.result;
   const g = d.astrology.gunaMilan;
   const total = g.totalScore;

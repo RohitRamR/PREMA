@@ -58,7 +58,15 @@ export function compatibilityFor(me: Profile, id: string | undefined): CompatVie
   if (cache.has(id)) return cache.get(id)!;
   const display = run(me, id, 'display');
   const discover = run(me, id, 'discover');
-  const view = display ? toCompatView(display, discover) : null;
+  let view: CompatView | null = null;
+  // An excluded pair has no detailed breakdown; screens then fall back to their stored %.
+  if (display?.output.detailedBreakdown) {
+    try {
+      view = toCompatView(display, discover);
+    } catch {
+      view = null;
+    }
+  }
   cache.set(id, view);
   return view;
 }

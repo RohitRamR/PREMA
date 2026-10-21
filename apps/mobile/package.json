@@ -27,7 +27,8 @@
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
-    "typescript": "~6.0.3"
+    "typescript": "~6.0.3",
+    "vitest": "^3.2.1"
   },
   "scripts": {
     "dev": "EXPO_NO_TELEMETRY=1 expo start",
@@ -35,7 +36,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "test": "vitest run src"
   },
   "private": true
 }

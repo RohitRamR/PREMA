@@ -12,7 +12,11 @@ import type { Profile } from '../../store/profile';
 import { person } from '../../store/people';
 import { SAMPLE_BIRTHS, EXTRA_BASICS } from './sample-births';
 
-/** 'display' scores the couple; 'discover' also applies your filters and dealbreakers. */
+/**
+ * 'display' scores the couple — always produces a score, so account status
+ * (e.g. a paused profile) and intent filters never hide a %.
+ * 'discover' applies your filters, intent and dealbreakers to decide who appears.
+ */
 export type Mode = 'display' | 'discover';
 
 const OPEN_PREFS: Omit<UserPreferences, 'userId'> = {
@@ -84,9 +88,9 @@ export function buildMyProfile(me: Profile, mode: Mode): MatchProfile {
       firstName: me.name || 'You',
       age: me.age,
       gender: me.gender,
-      relationshipIntention: parseIntention(me.intent),
+      relationshipIntention: mode === 'display' ? 'open_to_either' : parseIntention(me.intent),
       isVerified: true,
-      isActive: !me.paused,
+      isActive: mode === 'display' ? true : !me.paused,
       isSafetyRestricted: false,
       blockedUserIds: [],
       attributes: {
@@ -124,7 +128,7 @@ export function buildTheirProfile(id: string, mode: Mode, given?: PersonBasics):
       firstName: name,
       age,
       gender: b.gender,
-      relationshipIntention: parseIntention(p?.lookingFor ?? fallback?.lookingFor ?? 'Long-term relationship'),
+      relationshipIntention: mode === 'display' ? 'open_to_either' : parseIntention(p?.lookingFor ?? fallback?.lookingFor ?? 'Long-term relationship'),
       isVerified: true,
       isActive: true,
       isSafetyRestricted: false,
