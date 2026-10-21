@@ -20,6 +20,9 @@ const { width, height } = Dimensions.get('window');
 // The hero photo sits inset from the screen edges with soft curved corners.
 const HERO_GAP = 10;
 const HERO_W = width - HERO_GAP * 2;
+// Pink gradient frame drawn around each profile photo.
+const FRAME = 4;
+const PHOTO_W = HERO_W - FRAME * 2;
 
 const C = {
   bg: '#F1F7FD',
@@ -67,16 +70,14 @@ const sameText = (a: string, b: string) => a.trim().toLowerCase() === b.trim().t
 function withEngine(view: ProfileView, c: CompatView | null): ProfileView {
   if (!c) return view;
   const bar = (label: string, value: number, color: string) => ({ label, value, color });
-  const third = c.everyday.find((x) => x.key === 'preferences') ?? c.stars.find((x) => x.key === 'horoscope');
   return {
     ...view,
     fit: {
       score: c.score,
-      summary: `${c.headline} ${fmtGuna(c.guna.total)}/36 Guna.`,
+      summary: c.headline,
       parts: [
-        bar('Kundli', c.stars[0]!.value, '#FF6B8B'),
-        bar('Numbers', c.numerology.score, '#FF6B8B'),
-        ...(third ? [bar(third.key === 'preferences' ? 'Wants' : 'Sun signs', third.value, '#74B4F2')] : []),
+        bar('Cosmo', c.ratings.cosmo.value, '#FF6B8B'),
+        ...(c.ratings.heart ? [bar('Heart', c.ratings.heart.value, '#74B4F2')] : []),
       ],
     },
     archetype: {
@@ -86,7 +87,6 @@ function withEngine(view: ProfileView, c: CompatView | null): ProfileView {
   };
 }
 
-const fmtGuna = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
 
 /** Someone else's profile, with interests you both listed marked as shared. */
 function personView(mine: Profile, p: Person): ProfileView {
@@ -168,6 +168,25 @@ function ScoreRing({ score, size = 64, stroke = 7 }: { score: number; size?: num
       <View style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]}>
         <Text style={{ color: C.ink, fontSize: 17, fontWeight: '900' }}>{score}%</Text>
       </View>
+    </View>
+  );
+}
+
+/** Rounded pink gradient frame that sits behind a photo card. */
+function PinkFrame({ id, radius, style, children }: { id: string; radius: number; style?: object; children: React.ReactNode }) {
+  return (
+    <View style={[{ width: HERO_W, borderRadius: radius, padding: FRAME, overflow: 'hidden' }, style]}>
+      <Svg style={StyleSheet.absoluteFill} pointerEvents="none">
+        <Defs>
+          <LinearGradient id={id} x1="0" y1="0" x2="1" y2="1">
+            <Stop offset="0" stopColor="#FFB3C6" />
+            <Stop offset="0.5" stopColor="#FF8FAB" />
+            <Stop offset="1" stopColor="#FF5C80" />
+          </LinearGradient>
+        </Defs>
+        <Rect x="0" y="0" width="100%" height="100%" fill={`url(#${id})`} />
+      </Svg>
+      {children}
     </View>
   );
 }
@@ -271,16 +290,17 @@ export default function MatchDetail() {
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 150 }}>
 
           {/* ── Hero photo, framed ── */}
-          <View style={[s.hero, { height: heroH, marginTop: insets.top + 4 }]}>
+          <PinkFrame id="heroFrame" radius={36 + FRAME} style={{ marginHorizontal: HERO_GAP, marginTop: insets.top + 4 }}>
+          <View style={[s.hero, { height: heroH - FRAME * 2 }]}>
             <ScrollView
               horizontal
               pagingEnabled
               showsHorizontalScrollIndicator={false}
-              onScroll={(e) => setActivePhoto(Math.round(e.nativeEvent.contentOffset.x / HERO_W))}
+              onScroll={(e) => setActivePhoto(Math.round(e.nativeEvent.contentOffset.x / PHOTO_W))}
               scrollEventThrottle={16}
             >
               {P.photos.map((uri, i) => (
-                <Image key={i} source={{ uri }} style={{ width: HERO_W, height: heroH }} resizeMode="cover" />
+                <Image key={i} source={{ uri }} style={{ width: PHOTO_W, height: heroH - FRAME * 2 }} resizeMode="cover" />
               ))}
             </ScrollView>
 
@@ -322,6 +342,7 @@ export default function MatchDetail() {
               </View>
             </View>
           </View>
+          </PinkFrame>
 
           {/* ── Why you two click ── */}
           {fit ? (
@@ -387,6 +408,7 @@ export default function MatchDetail() {
 
           {/* ── Photo 2 ── */}
           {P.photos[1] ? (
+            <PinkFrame id="photo2Frame" radius={30 + FRAME} style={{ marginTop: 12, marginHorizontal: HERO_GAP }}>
             <View style={s.photo2}>
               <Image source={{ uri: P.photos[1] }} style={StyleSheet.absoluteFill} resizeMode="cover" />
               {P.photoCaption ? <View style={s.caption}><Text style={s.captionText}>{P.photoCaption}</Text></View> : null}
@@ -401,6 +423,7 @@ export default function MatchDetail() {
                 </Tap>
               )}
             </View>
+            </PinkFrame>
           ) : null}
 
           {/* ── Voice answer ── */}
@@ -522,9 +545,8 @@ export default function MatchDetail() {
 const s = StyleSheet.create({
   fill: { position: 'absolute', left: 0, right: 0, top: 0 },
   hero: {
-    width: HERO_W, marginHorizontal: HERO_GAP,
+    width: PHOTO_W,
     borderRadius: 36, overflow: 'hidden', backgroundColor: C.navy,
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)',
   },
   bars: { position: 'absolute', top: 14, left: 20, right: 20, flexDirection: 'row', gap: 5 },
   bar: { flex: 1, height: 3, borderRadius: 2 },
@@ -586,7 +608,7 @@ const s = StyleSheet.create({
     width: 48, height: 48, borderRadius: 24, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center',
     shadowColor: C.navy, shadowOpacity: 0.3, shadowRadius: 10, shadowOffset: { width: 0, height: 6 },
   },
-  photo2: { marginTop: 12, marginHorizontal: HERO_GAP, height: 430, borderRadius: 30, overflow: 'hidden', backgroundColor: C.navy },
+  photo2: { height: 430, borderRadius: 30, overflow: 'hidden', backgroundColor: C.navy },
   photoEdit: {
     position: 'absolute', right: 14, bottom: 14, flexDirection: 'row', alignItems: 'center', gap: 6,
     paddingHorizontal: 14, height: 40, borderRadius: 20, backgroundColor: '#FFFFFF',

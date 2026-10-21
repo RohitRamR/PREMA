@@ -87,3 +87,21 @@ describe('profile text parsers', () => {
     expect(parseIntention('Taking it slow')).toBe('open_to_either');
   });
 });
+
+describe('Cosmo & Heart ratings', () => {
+  it('are bounded, carry a friendly line, and Cosmo follows the stars', () => {
+    for (const id of IDS) {
+      const v = compatibilityFor(getProfile(), id);
+      if (!v) continue;
+      for (const r of [v.ratings.cosmo, v.ratings.heart]) {
+        if (!r) continue;
+        expect(r.value).toBeGreaterThanOrEqual(0);
+        expect(r.value).toBeLessThanOrEqual(100);
+        expect(r.line.length).toBeGreaterThan(0);
+      }
+      const stars = v.stars.map((p) => p.value);
+      expect(v.ratings.cosmo.value).toBeGreaterThanOrEqual(Math.min(...stars));
+      expect(v.ratings.cosmo.value).toBeLessThanOrEqual(Math.max(...stars));
+    }
+  });
+});
