@@ -1,20 +1,28 @@
 // =============================================================================
 // PREMA Compatibility Engine — Numerology Compatibility
 // =============================================================================
+// Score = Moolank 35% + Life Path 35% + Expression 20% + Soul Urge 10%.
+// Missing name-based numbers are dropped and the weights re-normalised.
+//
+// Moolank uses Indian (Vedic) numerology: each number is ruled by a planet
+// (1 Sun, 2 Moon, 3 Jupiter, 4 Rahu, 5 Mercury, 6 Venus, 7 Ketu, 8 Saturn,
+// 9 Mars) and compatibility follows planetary friendship (as in Graha Maitri).
+// Life Path / Expression / Soul Urge use the Western 9×9 harmony table.
+// =============================================================================
 
-import type { NumerologyProfile, NumerologyCompatibilityResult } from './numerology-types';
+import type { Planet } from '../astrology/astrology-types';
+import { getGrahaMaitriPoints } from '../astrology/data/planetary-relationships';
+import type {
+  NumerologyProfile,
+  NumerologyCompatibilityResult,
+  NumerologyComponentResult,
+  NumerologyCategory,
+} from './numerology-types';
 
-type CompatibilityCategory = 'natural_match' | 'compatible' | 'neutral' | 'challenging';
+const METHODOLOGY = 'numerology_v2';
 
-interface ComponentResult {
-  numberA: number;
-  numberB: number;
-  compatibility: CompatibilityCategory;
-  score: number;
-  interpretation: string;
-}
-
-const matrix: Record<number, Record<number, number>> = {
+/** Western number-harmony table. Must stay symmetric (enforced by tests). */
+export const NUMBER_HARMONY_MATRIX: Record<number, Record<number, number>> = {
   1: { 1: 80, 2: 65, 3: 75, 4: 55, 5: 90, 6: 60, 7: 85, 8: 50, 9: 70 },
   2: { 1: 65, 2: 80, 3: 70, 4: 85, 5: 55, 6: 90, 7: 50, 8: 80, 9: 65 },
   3: { 1: 75, 2: 70, 3: 75, 4: 50, 5: 80, 6: 90, 7: 60, 8: 45, 9: 85 },
@@ -23,92 +31,114 @@ const matrix: Record<number, Record<number, number>> = {
   6: { 1: 60, 2: 90, 3: 90, 4: 75, 5: 55, 6: 85, 7: 45, 8: 65, 9: 90 },
   7: { 1: 85, 2: 50, 3: 60, 4: 60, 5: 85, 6: 45, 7: 80, 8: 45, 9: 55 },
   8: { 1: 50, 2: 80, 3: 45, 4: 85, 5: 60, 6: 65, 7: 45, 8: 75, 9: 50 },
-  9: { 1: 70, 2: 65, 3: 85, 4: 50, 5: 70, 6: 90, 7: 55, 8: 50, 9: 80 }
+  9: { 1: 70, 2: 65, 3: 85, 4: 50, 5: 70, 6: 90, 7: 55, 8: 50, 9: 80 },
 };
 
-/**
- * Helper to determine category based on score.
- */
-function getCategory(score: number): CompatibilityCategory {
+export const NUMBER_PLANETS: Record<number, Planet> = {
+  1: 'Sun', 2: 'Moon', 3: 'Jupiter', 4: 'Rahu', 5: 'Mercury',
+  6: 'Venus', 7: 'Ketu', 8: 'Saturn', 9: 'Mars',
+};
+
+/** How Rahu (4) and Ketu (7) relate to the other planets (classical Jyotish view). */
+const SHADOW_RELATIONS: Record<'Rahu' | 'Ketu', { friends: Planet[]; enemies: Planet[] }> = {
+  Rahu: { friends: ['Mercury', 'Venus', 'Saturn'], enemies: ['Sun', 'Moon', 'Mars'] },
+  Ketu: { friends: ['Mars', 'Venus', 'Saturn'], enemies: ['Sun', 'Moon'] },
+};
+
+/** Planetary friendship points 0–5 between two Moolank numbers. Symmetric. */
+export function moolankFriendshipPoints(a: number, b: number): number {
+  const pa = NUMBER_PLANETS[a]!;
+  const pb = NUMBER_PLANETS[b]!;
+  if (pa === pb) return 5;
+  const shadow = pa === 'Rahu' || pa === 'Ketu' ? pa : pb === 'Rahu' || pb === 'Ketu' ? pb : null;
+  if (shadow) {
+    const other = shadow === pa ? pb : pa;
+    if (other === 'Rahu' || other === 'Ketu') return 3; // Rahu–Ketu: neutral axis
+    const rel = SHADOW_RELATIONS[shadow];
+    if (rel.friends.includes(other)) return 5;
+    if (rel.enemies.includes(other)) return 0;
+    return 3;
+  }
+  return getGrahaMaitriPoints(pa, pb);
+}
+
+function getCategory(score: number): NumerologyCategory {
   if (score >= 85) return 'natural_match';
   if (score >= 70) return 'compatible';
-  if (score >= 60) return 'neutral';
+  if (score >= 58) return 'neutral';
   return 'challenging';
 }
 
-/**
- * Calculates Life Path Compatibility between two numbers.
- * @param numA - First life path number.
- * @param numB - Second life path number.
- * @returns ComponentResult containing score and interpretation.
- */
-export function calculateLifePathCompatibility(numA: number, numB: number): ComponentResult {
-  const baseA = [11, 22, 33].includes(numA) ? (numA === 11 ? 2 : numA === 22 ? 4 : 6) : numA;
-  const baseB = [11, 22, 33].includes(numB) ? (numB === 11 ? 2 : numB === 22 ? 4 : 6) : numB;
+function toBase(n: number): number {
+  if (n === 11) return 2;
+  if (n === 22) return 4;
+  if (n === 33) return 6;
+  return n;
+}
 
-  let score = matrix[baseA]?.[baseB] ?? 50;
-
-  if ([11, 22, 33].includes(numA) || [11, 22, 33].includes(numB)) {
-    score = Math.min(100, score + 5);
-  }
-
-  const category = getCategory(score);
+function harmonyComponent(label: string, numA: number, numB: number): NumerologyComponentResult {
+  let score = NUMBER_HARMONY_MATRIX[toBase(numA)]?.[toBase(numB)] ?? 50;
+  if (numA > 9 || numB > 9) score = Math.min(100, score + 5); // master-number bonus
+  const compatibility = getCategory(score);
   return {
     numberA: numA,
     numberB: numB,
-    compatibility: category,
+    compatibility,
     score,
-    interpretation: `Life Path Numbers ${numA} and ${numB} have a ${category.replace('_', ' ')} connection.`
+    interpretation: `${label} ${numA} and ${numB}: ${compatibility.replace('_', ' ')}.`,
   };
 }
 
-/**
- * Calculates Expression Compatibility between two numbers.
- * @param numA - First expression number.
- * @param numB - Second expression number.
- * @returns ComponentResult containing score and interpretation.
- */
-export function calculateExpressionCompatibility(numA: number, numB: number): ComponentResult {
-  const baseA = [11, 22, 33].includes(numA) ? (numA === 11 ? 2 : numA === 22 ? 4 : 6) : numA;
-  const baseB = [11, 22, 33].includes(numB) ? (numB === 11 ? 2 : numB === 22 ? 4 : 6) : numB;
-
-  let score = matrix[baseA]?.[baseB] ?? 50;
-
-  if ([11, 22, 33].includes(numA) || [11, 22, 33].includes(numB)) {
-    score = Math.min(100, score + 5);
-  }
-
-  const category = getCategory(score);
+export function calculateMoolankCompatibility(numA: number, numB: number): NumerologyComponentResult {
+  const points = moolankFriendshipPoints(numA, numB);
+  const score = Math.round(40 + points * 12); // 0 → 40, 5 → 100
+  const compatibility = getCategory(score);
   return {
     numberA: numA,
     numberB: numB,
-    compatibility: category,
+    compatibility,
     score,
-    interpretation: `Expression Numbers ${numA} and ${numB} show a ${category.replace('_', ' ')} dynamic.`
+    interpretation: `Moolank ${numA} (${NUMBER_PLANETS[numA]}) and ${numB} (${NUMBER_PLANETS[numB]}): ${compatibility.replace('_', ' ')}.`,
   };
 }
 
-/**
- * Calculates overall numerology compatibility between two profiles.
- * @param profileA - The first user's numerology profile.
- * @param profileB - The second user's numerology profile.
- * @returns The overall numerology compatibility result.
- */
+export function calculateLifePathCompatibility(numA: number, numB: number): NumerologyComponentResult {
+  return harmonyComponent('Life Path', numA, numB);
+}
+
+export function calculateExpressionCompatibility(numA: number, numB: number): NumerologyComponentResult {
+  return harmonyComponent('Expression', numA, numB);
+}
+
 export function calculateNumerologyCompatibility(
   profileA: NumerologyProfile,
   profileB: NumerologyProfile
 ): NumerologyCompatibilityResult {
-  const lpComp = calculateLifePathCompatibility(profileA.lifePathNumber, profileB.lifePathNumber);
-  const expComp = calculateExpressionCompatibility(profileA.expressionNumber, profileB.expressionNumber);
+  const moolank = calculateMoolankCompatibility(profileA.moolank, profileB.moolank);
+  const lifePath = calculateLifePathCompatibility(profileA.lifePathNumber, profileB.lifePathNumber);
+  const expression = profileA.expressionNumber != null && profileB.expressionNumber != null
+    ? calculateExpressionCompatibility(profileA.expressionNumber, profileB.expressionNumber)
+    : null;
+  const soulUrge = profileA.soulUrgeNumber != null && profileB.soulUrgeNumber != null
+    ? harmonyComponent('Soul Urge', profileA.soulUrgeNumber, profileB.soulUrgeNumber)
+    : null;
 
-  // Combines life path (60%) and expression (40%)
-  const overallScore = Math.round(lpComp.score * 0.6 + expComp.score * 0.4);
+  const parts: Array<[number, number]> = [
+    [moolank.score, 0.35],
+    [lifePath.score, 0.35],
+    ...(expression ? [[expression.score, 0.20] as [number, number]] : []),
+    ...(soulUrge ? [[soulUrge.score, 0.10] as [number, number]] : []),
+  ];
+  const weight = parts.reduce((s, [, w]) => s + w, 0);
+  const score = Math.round(parts.reduce((s, [v, w]) => s + v * w, 0) / weight);
 
   return {
-    score: overallScore,
-    lifePathCompatibility: lpComp,
-    expressionCompatibility: expComp,
-    overallInterpretation: `Overall numerology connection is ${getCategory(overallScore).replace('_', ' ')}.`,
-    methodologyVersion: 'numerology_v1'
+    score,
+    moolankCompatibility: moolank,
+    lifePathCompatibility: lifePath,
+    expressionCompatibility: expression,
+    soulUrgeCompatibility: soulUrge,
+    overallInterpretation: `Overall numerology connection is ${getCategory(score).replace('_', ' ')}.`,
+    methodologyVersion: METHODOLOGY,
   };
 }

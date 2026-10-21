@@ -2,12 +2,19 @@
 // Screens read with useProfile() and write with updateProfile(); every
 // subscriber re-renders. Swap the body for Supabase calls when the API lands.
 import { useSyncExternalStore } from 'react';
+import type { QuizAnswers } from '../features/compatibility/quiz';
 
 export type Profile = {
   name: string;
   phone: string; // 10 digits, +91
   email: string; // recovery email, '' if not added
   age: number;
+  gender: Gender;
+  interestedIn: Gender[];
+  /** Birth details for the Kundli. Time is local Indian Standard Time (IST). */
+  birth: BirthDetails;
+  /** Compatibility quiz answers (question id → answer). */
+  answers: QuizAnswers;
   location: string;
   occupation: string;
   intent: string;
@@ -29,6 +36,10 @@ export type Profile = {
     cities: string[];
     intents: string[];
     verifiedOnly: boolean;
+    /** Kundli preferences used by the matching engine. */
+    kundli: KundliPrefs;
+    /** Dealbreakers: people who don't meet these are never shown. */
+    mustHaves: MustHaves;
   };
   settings: {
     pushIntros: boolean;
@@ -40,6 +51,47 @@ export type Profile = {
   };
   paused: boolean;
 };
+
+export type Gender = 'male' | 'female' | 'non_binary';
+
+export type BirthDetails = {
+  date: string;   // YYYY-MM-DD
+  time: string;   // HH:mm in IST, '' if unknown
+  place: string;  // city name
+  lat?: number;
+  lon?: number;
+};
+
+export type MustHaves = {
+  vegetarianOnly: boolean;
+  nonSmokersOnly: boolean;
+  nonDrinkersOnly: boolean;
+  sameReligionOnly: boolean;
+};
+
+export type KundliPrefs = {
+  /** Only show matches with at least 18 of 36 Guna (the traditional threshold). */
+  minGuna18: boolean;
+  /** Hide matches where only one partner is Manglik. */
+  avoidManglikMismatch: boolean;
+};
+
+/** Birthplaces with coordinates (used for the Lagna / ascendant). */
+export const BIRTH_PLACES: { name: string; lat: number; lon: number }[] = [
+  { name: 'Chennai', lat: 13.0827, lon: 80.2707 },
+  { name: 'Bengaluru', lat: 12.9716, lon: 77.5946 },
+  { name: 'Mumbai', lat: 19.076, lon: 72.8777 },
+  { name: 'Delhi', lat: 28.6139, lon: 77.209 },
+  { name: 'Hyderabad', lat: 17.385, lon: 78.4867 },
+  { name: 'Kolkata', lat: 22.5726, lon: 88.3639 },
+  { name: 'Pune', lat: 18.5204, lon: 73.8567 },
+  { name: 'Kochi', lat: 9.9312, lon: 76.2673 },
+  { name: 'Coimbatore', lat: 11.0168, lon: 76.9558 },
+  { name: 'Madurai', lat: 9.9252, lon: 78.1198 },
+  { name: 'Ahmedabad', lat: 23.0225, lon: 72.5714 },
+  { name: 'Jaipur', lat: 26.9124, lon: 75.7873 },
+  { name: 'Lucknow', lat: 26.8467, lon: 80.9462 },
+];
 
 export type Vitals = {
   height: string;
@@ -109,6 +161,10 @@ let state: Profile = {
   phone: '9876543210',
   email: '',
   age: 28,
+  gender: 'male',
+  interestedIn: ['female'],
+  birth: { date: '1998-02-14', time: '06:20', place: 'Chennai', lat: 13.0827, lon: 80.2707 },
+  answers: {},
   location: 'Bengaluru & Chennai',
   occupation: 'Senior Architect',
   intent: INTENT_OPTIONS[0],
@@ -143,6 +199,8 @@ let state: Profile = {
     cities: ['Bengaluru', 'Chennai'],
     intents: ['Intentional life partnership', 'Marriage within 1–2 years'],
     verifiedOnly: true,
+    kundli: { minGuna18: false, avoidManglikMismatch: false },
+    mustHaves: { vegetarianOnly: false, nonSmokersOnly: false, nonDrinkersOnly: false, sameReligionOnly: false },
   },
   settings: {
     pushIntros: true,

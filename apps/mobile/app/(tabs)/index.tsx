@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { View, Image, Dimensions, Pressable, FlatList, Animated, Share } from 'react-native';
 import Text, { NunitoScope } from '../../components/PremaText';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,6 +9,8 @@ import CelestialBackground from '../../components/CelestialBackground';
 import Svg, { Path } from 'react-native-svg';
 import { AuraFrame } from '../../components/Aura';
 import { useSafety } from '../../src/store/safety';
+import { useRankedDeck } from '../../src/features/compatibility';
+import { PEOPLE } from '../../src/store/people';
 
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
 
@@ -17,54 +19,51 @@ const CARD_WIDTH = width * 0.74; // Smaller card to show more of side cards
 const CARD_SPACING = 20;
 const SNAP_INTERVAL = CARD_WIDTH + CARD_SPACING;
 
+// Icons for interest chips on the deck (MaterialIcons names).
+const INTEREST_ICONS: [RegExp, string][] = [
+  [/coffee|chai/i, 'local-cafe'], [/music|ghazal|carnatic|song/i, 'music-note'], [/travel|road trip/i, 'flight'],
+  [/hik|trek|nature/i, 'landscape'], [/art|sketch|paint|pottery|ceramic/i, 'palette'], [/read|book|writ/i, 'menu-book'],
+  [/tech|code/i, 'computer'], [/cook|bak|biryani|food/i, 'restaurant'], [/yoga|slow|spa/i, 'self-improvement'],
+  [/photo/i, 'photo-camera'], [/dance/i, 'music-note'], [/garden|plant/i, 'local-florist'], [/game/i, 'casino'],
+  [/temple|heritage|architecture/i, 'account-balance'], [/family/i, 'home'], [/volunteer/i, 'volunteer-activism'],
+];
+const iconFor = (interest: string) => INTEREST_ICONS.find(([re]) => re.test(interest))?.[1] ?? 'favorite-border';
+
+// Ananya is the hand-made demo card; everyone else comes from the shared people list.
+const ANANYA_CARD = {
+  id: 'ananya',
+  name: 'Ananya',
+  match: 96, // fallback only — the matching engine supplies the real score
+  age: 24,
+  verified: true,
+  occupation: 'Design Student',
+  distance: '3 km away',
+  image: 'https://images.unsplash.com/photo-1524250502761-1ac6f2e30d43?q=80&w=800&auto=format&fit=crop',
+  photoCount: 3, // her profile page (MatchDetail) shows 3 photos
+  quote: '"Coffee, good people and a better tomorrow"',
+  interests: [
+    { id: '1', name: 'Coffee', icon: 'local-cafe' },
+    { id: '2', name: 'Music', icon: 'music-note' },
+    { id: '3', name: 'Travel', icon: 'flight' },
+    { id: '4', name: 'Dogs', icon: 'pets' },
+  ]
+};
+
 const PROFILES = [
-  {
-    id: 'ananya',
-    name: 'Ananya',
-    match: 96, // compatibility score → aura colour
-    age: 22,
+  ANANYA_CARD,
+  ...Object.values(PEOPLE).map((p) => ({
+    id: p.id,
+    name: p.name,
+    match: p.match, // fallback only — the matching engine supplies the real score
+    age: p.age,
     verified: true,
-    occupation: 'Design Student',
-    distance: '3 km away',
-    image: 'https://images.unsplash.com/photo-1524250502761-1ac6f2e30d43?q=80&w=800&auto=format&fit=crop',
-    quote: '"Coffee, good people and a better tomorrow"',
-    interests: [
-      { id: '1', name: 'Coffee', icon: 'local-cafe' },
-      { id: '2', name: 'Music', icon: 'music-note' },
-      { id: '3', name: 'Travel', icon: 'flight' },
-      { id: '4', name: 'Dogs', icon: 'pets' },
-    ]
-  },
-  {
-    id: 'priya',
-    name: 'Priya',
-    match: 91, // compatibility score → aura colour
-    age: 24,
-    verified: true,
-    occupation: 'Architect',
-    distance: '5 km away',
-    image: 'https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?q=80&w=800&auto=format&fit=crop',
-    quote: '"Looking for my next adventure"',
-    interests: [
-      { id: '5', name: 'Art', icon: 'palette' },
-      { id: '6', name: 'Hiking', icon: 'landscape' },
-    ]
-  },
-  {
-    id: 'neha',
-    name: 'Neha',
-    match: 87, // compatibility score → aura colour
-    age: 23,
-    verified: true,
-    occupation: 'Software Engineer',
-    distance: '10 km away',
-    image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&auto=format&fit=crop',
-    quote: '"Debugging life one coffee at a time"',
-    interests: [
-      { id: '7', name: 'Tech', icon: 'computer' },
-      { id: '8', name: 'Reading', icon: 'menu-book' },
-    ]
-  }
+    occupation: p.job,
+    distance: p.city,
+    image: p.photos[0]!,
+    photoCount: p.photos.length,
+    quote: `"${p.prompt.answer}"`,
+    interests: p.interests.slice(0, 4).map((name, i) => ({ id: `${p.id}-${i}`, name, icon: iconFor(name) })),
+  })),
 ];
 
 export default function DiscoverScreen() {
@@ -82,9 +81,13 @@ function DiscoverInner() {
   const flatListRef = useRef<any>(null);
 
   // Profiles you've passed on or liked leave the deck.
-  const [deckAll, setDeck] = useState(PROFILES);
+  // Remember only who you've passed/liked, so the deck always reflects the current people list.
+  const [doneIds, setDoneIds] = useState<string[]>([]);
+  const deckAll = useMemo(() => PROFILES.filter((p) => !doneIds.includes(p.id)), [doneIds]);
   const { blocked } = useSafety();
-  const deck = deckAll.filter((p) => !blocked.includes(p.id));
+  // Real compatibility: people your filters/dealbreakers exclude are hidden, best match first.
+  const ranked = useRankedDeck(deckAll);
+  const deck = useMemo(() => ranked.filter((p) => !blocked.includes(p.id)), [ranked, blocked]);
   const [toast, setToast] = useState('');
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const safeIdx = Math.min(activeIdx, Math.max(deck.length - 1, 0));
@@ -100,7 +103,7 @@ function DiscoverInner() {
   const act = (kind: 'pass' | 'like' | 'star') => {
     const p = currentProfile;
     if (!p) return;
-    setDeck((d) => d.filter((x) => x.id !== p.id));
+    setDoneIds((d) => [...d, p.id]);
     const nextIdx = Math.min(safeIdx, deck.length - 2);
     setActiveIdx(Math.max(nextIdx, 0));
     requestAnimationFrame(() => flatListRef.current?.scrollToOffset({ offset: Math.max(nextIdx, 0) * SNAP_INTERVAL, animated: true }));
@@ -118,7 +121,8 @@ function DiscoverInner() {
     }
   }).current;
 
-  const renderProfileCard = ({ item, index }: { item: (typeof PROFILES)[number]; index: number }) => {
+  // Memoised so swiping (which updates activeIdx) doesn't rebuild every card.
+  const renderProfileCard = useCallback(({ item, index }: { item: (typeof PROFILES)[number]; index: number }) => {
     const inputRange = [
       (index - 1) * SNAP_INTERVAL,
       index * SNAP_INTERVAL,
@@ -197,11 +201,14 @@ function DiscoverInner() {
               <Text className="text-white text-base font-medium ml-1.5" style={{ textShadowColor: "rgba(0,0,0,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4 }}>{item.distance}</Text>
             </View>
             
-            <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: 12, zIndex: 10 }}>
-              {[0, 1, 2, 3].map((_, i) => (
-                <View key={i} style={{ width: i === 0 ? 20 : 6, height: 6, borderRadius: 3, backgroundColor: i === 0 ? '#FFFFFF' : 'rgba(255,255,255,0.4)', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.3, shadowRadius: 2 }} />
-              ))}
-            </View>
+            {/* One dot per real photo on their profile; hidden when there's only one. */}
+            {item.photoCount > 1 ? (
+              <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: 12, zIndex: 10 }}>
+                {Array.from({ length: item.photoCount }, (_, i) => (
+                  <View key={i} style={{ width: i === 0 ? 20 : 6, height: 6, borderRadius: 3, backgroundColor: i === 0 ? '#FFFFFF' : 'rgba(255,255,255,0.4)', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.3, shadowRadius: 2 }} />
+                ))}
+              </View>
+            ) : null}
           </View>
 
           {/* Match strength as a colour border (blue → lilac → rose → gold) */}
@@ -210,7 +217,8 @@ function DiscoverInner() {
         </Pressable>
       </View>
     );
-  };
+  }, [scrollX, router]);
+
 
   return (
     <SafeAreaView className="flex-1 bg-[#F1F7FD]" edges={['top']}>
@@ -244,7 +252,7 @@ function DiscoverInner() {
               <Icon name="favorite" size={40} color="#FF6B8B" />
               <Text style={{ marginTop: 12, fontSize: 22, fontWeight: '800', color: '#2C496A', textAlign: 'center' }}>That’s everyone for today</Text>
               <Text style={{ marginTop: 6, fontSize: 15, color: '#8892A3', textAlign: 'center' }}>New introductions arrive tomorrow morning.</Text>
-              <Pressable onPress={() => { setDeck(PROFILES); setActiveIdx(0); }} style={{ marginTop: 18, paddingHorizontal: 20, height: 44, borderRadius: 22, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' }}>
+              <Pressable onPress={() => { setDoneIds([]); setActiveIdx(0); }} style={{ marginTop: 18, paddingHorizontal: 20, height: 44, borderRadius: 22, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' }}>
                 <Text style={{ color: '#2C496A', fontWeight: '700' }}>Start over (preview)</Text>
               </Pressable>
             </View>
@@ -265,6 +273,10 @@ function DiscoverInner() {
             onViewableItemsChanged={onViewableItemsChanged}
             viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
             renderItem={renderProfileCard}
+            getItemLayout={(_, index) => ({ length: SNAP_INTERVAL, offset: SNAP_INTERVAL * index, index })}
+            initialNumToRender={3}
+            windowSize={5}
+            maxToRenderPerBatch={3}
           />
         </View>
 
@@ -276,13 +288,14 @@ function DiscoverInner() {
 
         {/* User Info Section - Fixed Height */}
         <View className="px-6 mt-2 z-20" style={{ opacity: deck.length ? 1 : 0 }}>
-          <View className="bg-[#E7F0F9] rounded-3xl py-3 px-4 items-center">
-            <Text className="text-[#3E5C7D] text-sm font-medium mb-2 text-center">{currentProfile?.quote}</Text>
-            <View className="flex-row flex-wrap justify-center gap-2 w-full">
-              {currentProfile?.interests.map((interest) => (
-                <View key={interest.id} className="flex-row items-center bg-white rounded-full px-3 py-1.5 gap-1.5 shadow-sm shadow-[#E3EDF7]">
+          {/* Fixed height (2-line quote + one row of chips) so the cards above never jump while you scroll. */}
+          <View className="bg-[#E7F0F9] rounded-3xl py-3 px-4 items-center justify-center" style={{ height: 96 }}>
+            <Text numberOfLines={2} className="text-[#3E5C7D] text-sm font-medium mb-2 text-center">{currentProfile?.quote}</Text>
+            <View className="flex-row justify-center gap-2 w-full" style={{ height: 28, overflow: 'hidden' }}>
+              {currentProfile?.interests.slice(0, 3).map((interest) => (
+                <View key={interest.id} className="flex-row items-center bg-white rounded-full px-3 py-1.5 gap-1.5 shadow-sm shadow-surface-variant">
                   <Icon name={interest.icon} size={12} color="#3E5C7D" />
-                  <Text className="text-[#3E5C7D] font-medium text-xs">{interest.name}</Text>
+                  <Text numberOfLines={1} className="text-[#3E5C7D] font-medium text-xs">{interest.name}</Text>
                 </View>
               ))}
             </View>
@@ -294,7 +307,7 @@ function DiscoverInner() {
           <Pressable 
             onPress={() => act('pass')}
             accessibilityLabel="Pass"
-            className="w-16 h-16 bg-white rounded-full items-center justify-center shadow-md shadow-[#E3EDF7]"
+            className="w-16 h-16 bg-white rounded-full items-center justify-center shadow-md shadow-surface-variant"
           >
             <Icon name="close" size={28} color="#8892A3" />
           </Pressable>
@@ -302,7 +315,7 @@ function DiscoverInner() {
           <Pressable 
             onPress={() => act('like')}
             accessibilityLabel="Like"
-            className="w-20 h-20 bg-[#FF6B8B] rounded-full items-center justify-center shadow-lg shadow-[#FF6B8B]/50"
+            className="w-20 h-20 bg-[#FF6B8B] rounded-full items-center justify-center shadow-lg shadow-coral/50"
           >
             <Icon name="favorite" size={38} color="white" />
           </Pressable>
@@ -310,7 +323,7 @@ function DiscoverInner() {
           <Pressable 
             onPress={() => act('star')}
             accessibilityLabel="Super like"
-            className="w-16 h-16 bg-white rounded-full items-center justify-center shadow-md shadow-[#E3EDF7]"
+            className="w-16 h-16 bg-white rounded-full items-center justify-center shadow-md shadow-surface-variant"
           >
             <Icon name="star" size={28} color="#FF6B8B" />
           </Pressable>

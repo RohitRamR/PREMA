@@ -1,7 +1,9 @@
 /**
  * @file scoring-engine.ts
  * @description Central orchestrator for the PREMA compatibility pipeline.
- * Runs hard filters, computes per-dimension scores, and produces the final weighted result.
+ *
+ *   hard filters → Kundli → astro dealbreakers → every other layer
+ *   → weighted score (missing layers re-normalised) → confidence → explanation
  */
 
 import type {
@@ -17,12 +19,15 @@ import type {
   InterestsProfile,
   CompatibilityBreakdown,
   MatchingConfig,
+  Importance,
 } from '../types';
 import { DEFAULT_MATCHING_CONFIG } from '../config/matching-config';
 import type { AstroProfile, AstrologyCompatibilityResult } from '../astrology/astrology-types';
 import { calculateAstrologyScore } from '../astrology/astrology-scorer';
 import type { NumerologyProfile, NumerologyCompatibilityResult } from '../numerology/numerology-types';
 import { calculateNumerologyCompatibility } from '../numerology/numerology-compatibility';
+import type { SunSignProfile } from '../horoscope/sun-sign';
+import { calculateSunSignCompatibility, type SunSignCompatibilityResult } from '../horoscope/sun-sign-compatibility';
 import type { PersonalityCompatibilityResult, CommunicationCompatibilityResult } from '../personality/personality-types';
 import { calculatePersonalityCompatibility } from '../personality/personality-scorer';
 import { calculateCommunicationCompatibility } from '../personality/communication-scorer';
@@ -30,10 +35,32 @@ import { calculateValuesCompatibility, type ValuesCompatibilityResult } from '..
 import { calculateLifestyleCompatibility, type LifestyleCompatibilityResult } from '../lifestyle/lifestyle-scorer';
 import { calculateRelationshipGoalsCompatibility, type RelationshipGoalsResult } from '../relationship-goals/relationship-goals-scorer';
 import { calculateInterestsCompatibility, type InterestsCompatibilityResult } from '../interests/interests-scorer';
-import { applyHardFilters } from '../filters/hard-filters';
+import { calculateMutualPreferenceFit, type MutualPreferenceResult } from '../preferences/preference-scorer';
+import { applyHardFilters, applyAstroDealbreakers } from '../filters/hard-filters';
+import { calculateConfidence } from './confidence-engine';
+import { generateExplanation } from './explanation-engine';
+import { usableShare, clampScore } from '../utils/sanitize';
+
+const LAYER_KEYS = {
+  personality: ['communicationDirectness', 'socialEnergy', 'independence', 'conflictAvoidance', 'emotionalOpenness', 'adventurePreference', 'routinePreference', 'decisionMaking', 'affectionStyle'],
+  communication: ['directness', 'frequencyPreference', 'conflictStyle', 'responseExpectation', 'emotionalOpenness', 'reassuranceNeed', 'affectionCommunication', 'disagreementHandling'],
+  values: ['familyImportance', 'marriageExpectation', 'childrenExpectation', 'careerPriority', 'financialAttitude', 'lifestylePriority', 'religionSpirituality', 'socialValues', 'personalIndependence'],
+  lifestyle: ['foodPreference', 'travelFrequency', 'sleepSchedule', 'exerciseFrequency', 'socialActivity', 'alcoholPreference', 'smokingPreference', 'workStyle', 'weekendStyle', 'spendingStyle'],
+  goals: ['intention', 'marriageTimeline', 'childrenPreference', 'familyInvolvement', 'relocationWillingness', 'longDistanceWillingness'],
+} as const;
+
+/** Both profiles present AND at least half of their answers usable. */
+function usable<T>(a: T | undefined, b: T | undefined, keys: readonly string[]): [T, T] | null {
+  const pair = both(a, b);
+  if (!pair) return null;
+  return usableShare(pair[0], keys) >= 0.5 && usableShare(pair[1], keys) >= 0.5 ? pair : null;
+}
 
 /**
  * Input for the full compatibility pipeline.
+ * Kundli + numerology are required (they come from the date of birth).
+ * Every other layer is optional: if either user hasn't filled it in, the
+ * layer is skipped and its weight is shared among the layers that exist.
  */
 export interface FullCompatibilityInput {
   userA: UserProfile;
@@ -44,173 +71,241 @@ export interface FullCompatibilityInput {
   astroProfileB: AstroProfile;
   numerologyProfileA: NumerologyProfile;
   numerologyProfileB: NumerologyProfile;
-  personalityA: PersonalityProfile;
-  personalityB: PersonalityProfile;
-  communicationA: CommunicationProfile;
-  communicationB: CommunicationProfile;
-  valuesA: ValuesProfile;
-  valuesB: ValuesProfile;
-  lifestyleA: LifestyleProfile;
-  lifestyleB: LifestyleProfile;
-  goalsA: RelationshipGoalsProfile;
-  goalsB: RelationshipGoalsProfile;
-  interestsA: InterestsProfile;
-  interestsB: InterestsProfile;
+  sunSignA?: SunSignProfile;
+  sunSignB?: SunSignProfile;
+  personalityA?: PersonalityProfile;
+  personalityB?: PersonalityProfile;
+  communicationA?: CommunicationProfile;
+  communicationB?: CommunicationProfile;
+  valuesA?: ValuesProfile;
+  valuesB?: ValuesProfile;
+  lifestyleA?: LifestyleProfile;
+  lifestyleB?: LifestyleProfile;
+  goalsA?: RelationshipGoalsProfile;
+  goalsB?: RelationshipGoalsProfile;
+  interestsA?: InterestsProfile;
+  interestsB?: InterestsProfile;
 }
 
-/**
- * Output of the full compatibility pipeline.
- */
+export interface DetailedBreakdown {
+  astrology: AstrologyCompatibilityResult;
+  numerology: NumerologyCompatibilityResult;
+  horoscope: SunSignCompatibilityResult | null;
+  preferences: MutualPreferenceResult;
+  personality: PersonalityCompatibilityResult | null;
+  communication: CommunicationCompatibilityResult | null;
+  values: ValuesCompatibilityResult | null;
+  lifestyle: LifestyleCompatibilityResult | null;
+  relationshipGoals: RelationshipGoalsResult | null;
+  interests: InterestsCompatibilityResult | null;
+}
+
 export interface FullCompatibilityOutput {
   result: CompatibilityResult;
   hardFilterResult: HardFilterResult;
-  detailedBreakdown: {
-    astrology: AstrologyCompatibilityResult;
-    numerology: NumerologyCompatibilityResult;
-    personality: PersonalityCompatibilityResult;
-    communication: CommunicationCompatibilityResult;
-    values: ValuesCompatibilityResult;
-    lifestyle: LifestyleCompatibilityResult;
-    relationshipGoals: RelationshipGoalsResult;
-    interests: InterestsCompatibilityResult;
-  } | null;
+  detailedBreakdown: DetailedBreakdown | null;
+  /** Layer weights actually applied after re-normalising for missing data. */
+  appliedWeights: Partial<Record<keyof CompatibilityBreakdown, number>>;
+}
+
+const EMPTY_BREAKDOWN: CompatibilityBreakdown = {
+  astrology: 0, horoscope: 0, numerology: 0, preferences: 0, personality: 0,
+  communication: 0, values: 0, lifestyle: 0, relationshipGoals: 0, interests: 0,
+};
+
+const SOFT_PENALTY: Record<Importance, number> = { dealbreaker: 0, important: 12, nice_to_have: 6 };
+
+function both<T>(a: T | undefined, b: T | undefined): [T, T] | null {
+  return a != null && b != null ? [a, b] : null;
+}
+
+function excluded(
+  input: FullCompatibilityInput,
+  config: MatchingConfig,
+  filter: HardFilterResult
+): FullCompatibilityOutput {
+  return {
+    result: {
+      userAId: input.userA.id,
+      userBId: input.userB.id,
+      score: 0,
+      isEligible: false,
+      breakdown: { ...EMPTY_BREAKDOWN },
+      confidence: 'insufficient_data',
+      strengths: [],
+      frictionPoints: [],
+      reasons: filter.rejectionReasons,
+      algorithmVersion: config.algorithmVersion,
+      astrologyMethodologyVersion: 'vedic_v2',
+      numerologyMethodologyVersion: 'numerology_v2',
+      weightsVersion: config.weightsVersion,
+      generatedAt: new Date(),
+    },
+    hardFilterResult: filter,
+    detailedBreakdown: null,
+    appliedWeights: {},
+  };
 }
 
 /**
  * Calculates full compatibility between two users.
- * Pipeline: hard filters → per-dimension scores → weighted combination → clamped output.
  */
 export function calculateFullCompatibility(
   input: FullCompatibilityInput,
   config: MatchingConfig = DEFAULT_MATCHING_CONFIG
 ): FullCompatibilityOutput {
-  const {
-    userA, userB, prefsA, prefsB,
-    astroProfileA, astroProfileB,
-    numerologyProfileA, numerologyProfileB,
-    personalityA, personalityB,
-    communicationA, communicationB,
-    valuesA, valuesB,
-    lifestyleA, lifestyleB,
-    goalsA, goalsB,
-    interestsA, interestsB,
-  } = input;
+  const { userA, userB, prefsA, prefsB } = input;
 
-  // 1. Apply hard filters
+  // 1. Hard filters
   const filterResult = applyHardFilters(userA, userB, prefsA, prefsB);
-  if (!filterResult.pass) {
-    return {
-      result: {
-        userAId: userA.id,
-        userBId: userB.id,
-        score: 0,
-        breakdown: {
-          astrology: 0,
-          numerology: 0,
-          personality: 0,
-          communication: 0,
-          values: 0,
-          lifestyle: 0,
-          relationshipGoals: 0,
-          interests: 0,
-        },
-        confidence: 'insufficient_data',
-        strengths: [],
-        frictionPoints: [],
-        reasons: filterResult.rejectionReasons,
-        algorithmVersion: config.algorithmVersion,
-        astrologyMethodologyVersion: 'vedic_v1',
-        numerologyMethodologyVersion: 'numerology_v1',
-        weightsVersion: config.weightsVersion,
-        generatedAt: new Date(),
-      },
-      hardFilterResult: filterResult,
-      detailedBreakdown: null,
-    };
+  if (!filterResult.pass) return excluded(input, config, filterResult);
+
+  // 2. Kundli
+  const astrology = calculateAstrologyScore(
+    input.astroProfileA, input.astroProfileB,
+    {
+      gunaMilanWeight: config.astrologySubWeights.gunaMilan,
+      vedicSignalsWeight: config.astrologySubWeights.vedicSignals,
+      manglikWeight: config.astrologySubWeights.manglik,
+    },
+    { genderA: userA.gender, genderB: userB.gender }
+  );
+
+  // 3. Astro dealbreakers (Manglik / minimum Guna)
+  const astroRejections = applyAstroDealbreakers(userA, userB, prefsA, prefsB, astrology);
+  if (astroRejections.length > 0) {
+    return excluded(input, config, {
+      pass: false,
+      rejectionReasons: astroRejections,
+      unverifiedDealbreakers: filterResult.unverifiedDealbreakers,
+    });
   }
 
-  // 2. Calculate each layer score
-  const astrology = calculateAstrologyScore(astroProfileA, astroProfileB, {
-    gunaMilanWeight: config.astrologySubWeights.gunaMilan,
-    vedicSignalsWeight: config.astrologySubWeights.vedicSignals,
-    manglikWeight: config.astrologySubWeights.manglik,
-  });
-  const numerology = calculateNumerologyCompatibility(numerologyProfileA, numerologyProfileB);
-  const personality = calculatePersonalityCompatibility(personalityA, personalityB);
-  const communication = calculateCommunicationCompatibility(communicationA, communicationB);
-  const values = calculateValuesCompatibility(valuesA, valuesB);
-  const lifestyle = calculateLifestyleCompatibility(lifestyleA, lifestyleB);
-  const relationshipGoals = calculateRelationshipGoalsCompatibility(goalsA, goalsB);
-  const interests = calculateInterestsCompatibility(interestsA, interestsB);
+  // 4. Every other layer
+  const numerology = calculateNumerologyCompatibility(input.numerologyProfileA, input.numerologyProfileB);
+  const sun = both(input.sunSignA, input.sunSignB);
+  const horoscope = sun ? calculateSunSignCompatibility(sun[0], sun[1]) : null;
 
-  // 3. Calculate weighted base score
-  let baseScore = astrology.score * config.astrologyWeight
-    + personality.score * config.personalityWeight
-    + communication.score * config.communicationWeight
-    + values.score * config.valuesWeight
-    + relationshipGoals.score * config.relationshipGoalsWeight
-    + lifestyle.score * config.lifestyleWeight
-    + interests.score * config.interestsWeight;
+  const preferences = calculateMutualPreferenceFit(userA, prefsA, userB, prefsB);
+  // Soft astro preferences (not dealbreakers) lower the preference fit.
+  let preferenceScore = preferences.score;
+  for (const prefs of [prefsA, prefsB]) {
+    if (prefs.manglik && prefs.manglik.rule === 'avoid_mismatch' && astrology.manglik?.status === 'mismatch') {
+      preferenceScore -= SOFT_PENALTY[prefs.manglik.importance];
+    }
+    if (prefs.minGunaScore && astrology.gunaMilan.totalScore < prefs.minGunaScore.score) {
+      preferenceScore -= SOFT_PENALTY[prefs.minGunaScore.importance];
+    }
+  }
+  preferenceScore = Math.max(0, preferenceScore);
 
-  if (config.numerologyMode === 'small_weight') {
-    baseScore += numerology.score * config.numerologyWeight;
+  const p = usable(input.personalityA, input.personalityB, LAYER_KEYS.personality);
+  const c = usable(input.communicationA, input.communicationB, LAYER_KEYS.communication);
+  const v = usable(input.valuesA, input.valuesB, LAYER_KEYS.values);
+  const l = usable(input.lifestyleA, input.lifestyleB, LAYER_KEYS.lifestyle);
+  const g = usable(input.goalsA, input.goalsB, LAYER_KEYS.goals);
+  const i = both(input.interestsA, input.interestsB);
+
+  const personalityRaw = p ? calculatePersonalityCompatibility(p[0], p[1]) : null;
+  // Final guard: every layer score is a finite integer 0–100.
+  const safe = <T extends { score: number }>(r: T | null): T | null => (r ? { ...r, score: clampScore(r.score) } : null);
+  const personality = safe(personalityRaw);
+  const communication = safe(c ? calculateCommunicationCompatibility(c[0], c[1]) : null);
+  const values = safe(v ? calculateValuesCompatibility(v[0], v[1]) : null);
+  const lifestyle = safe(l ? calculateLifestyleCompatibility(l[0], l[1]) : null);
+  const relationshipGoals = safe(g ? calculateRelationshipGoalsCompatibility(g[0], g[1]) : null);
+  const interests = safe(i ? calculateInterestsCompatibility(i[0], i[1]) : null);
+
+  // 5. Weighted score over the layers that have data
+  const layers: Array<[keyof CompatibilityBreakdown, number | null, number]> = [
+    ['astrology', astrology.score, config.astrologyWeight],
+    ['horoscope', horoscope?.score ?? null, config.horoscopeWeight],
+    ['numerology', numerology.score, config.numerologyMode === 'small_weight' ? config.numerologyWeight : 0],
+    ['preferences', preferenceScore, config.preferenceWeight],
+    ['personality', personality?.score ?? null, config.personalityWeight],
+    ['communication', communication?.score ?? null, config.communicationWeight],
+    ['values', values?.score ?? null, config.valuesWeight],
+    ['lifestyle', lifestyle?.score ?? null, config.lifestyleWeight],
+    ['relationshipGoals', relationshipGoals?.score ?? null, config.relationshipGoalsWeight],
+    ['interests', interests?.score ?? null, config.interestsWeight],
+  ];
+
+  const active = layers.filter(([, s, w]) => s !== null && w > 0);
+  const activeWeight = active.reduce((sum, [, , w]) => sum + w, 0);
+  const appliedWeights: FullCompatibilityOutput['appliedWeights'] = {};
+  let weighted = 0;
+  for (const [key, s, w] of active) {
+    const share = w / activeWeight;
+    appliedWeights[key] = Math.round(share * 10000) / 10000;
+    weighted += (s as number) * share;
+  }
+  let finalScore = Math.round(Math.min(100, Math.max(0, weighted)));
+
+  // Values / goals hard conflicts (e.g. children) cap the score.
+  if ((values?.hardConflicts.length ?? 0) > 0 || (relationshipGoals?.hardConflicts.length ?? 0) > 0) {
+    finalScore = Math.min(finalScore, 40);
   }
 
-  // 4. Clamp to integer 0-100
-  const finalScore = Math.round(Math.min(100, Math.max(0, baseScore)));
-
-  // 5. Build Compatibility Breakdown
   const breakdown: CompatibilityBreakdown = {
     astrology: astrology.score,
+    horoscope: horoscope?.score ?? 0,
     numerology: numerology.score,
-    personality: personality.score,
-    communication: communication.score,
-    values: values.score,
-    lifestyle: lifestyle.score,
-    relationshipGoals: relationshipGoals.score,
-    interests: interests.score,
+    preferences: preferenceScore,
+    personality: personality?.score ?? 0,
+    communication: communication?.score ?? 0,
+    values: values?.score ?? 0,
+    lifestyle: lifestyle?.score ?? 0,
+    relationshipGoals: relationshipGoals?.score ?? 0,
+    interests: interests?.score ?? 0,
   };
 
-  // 6. Build reasons
-  const strengths: string[] = [];
-  const frictionPoints: string[] = [];
-  const reasons: string[] = [];
+  // 6. Confidence
+  const has = (x: unknown, keys?: readonly string[]) => (x == null ? 0 : keys ? usableShare(x, keys) : 1);
+  const confidence = calculateConfidence({
+    hasBirthTimeA: input.astroProfileA.hasBirthTime,
+    hasBirthTimeB: input.astroProfileB.hasBirthTime,
+    personalityCompletenessA: has(input.personalityA, LAYER_KEYS.personality),
+    personalityCompletenessB: has(input.personalityB, LAYER_KEYS.personality),
+    communicationCompletenessA: has(input.communicationA, LAYER_KEYS.communication),
+    communicationCompletenessB: has(input.communicationB, LAYER_KEYS.communication),
+    valuesCompletenessA: has(input.valuesA, LAYER_KEYS.values),
+    valuesCompletenessB: has(input.valuesB, LAYER_KEYS.values),
+    lifestyleCompletenessA: has(input.lifestyleA, LAYER_KEYS.lifestyle),
+    lifestyleCompletenessB: has(input.lifestyleB, LAYER_KEYS.lifestyle),
+    goalsCompletenessA: has(input.goalsA, LAYER_KEYS.goals),
+    goalsCompletenessB: has(input.goalsB, LAYER_KEYS.goals),
+    astrologyConfidence: astrology.confidence,
+    algorithmVersion: config.algorithmVersion,
+  });
 
-  if (astrology.score > 85) { strengths.push('Cosmic Compatibility'); reasons.push('Your Vedic astrological profiles show strong harmony.'); }
-  if (personality.score > 85) { strengths.push('Personality'); reasons.push('Your personality traits complement each other well.'); }
-  if (communication.score > 85) { strengths.push('Communication Style'); reasons.push('Your communication preferences are similar.'); }
-  if (values.score > 85) { strengths.push('Core Values'); reasons.push('Your core values and life priorities are closely aligned.'); }
-  if (lifestyle.score > 85) { strengths.push('Lifestyle'); reasons.push('Your daily lifestyle preferences are well-matched.'); }
-  if (relationshipGoals.score > 85) { strengths.push('Relationship Goals'); reasons.push('Your long-term relationship intentions are strongly aligned.'); }
-  if (interests.score > 80) { strengths.push('Shared Interests'); reasons.push('You share many common interests and hobbies.'); }
+  const detailedBreakdown: DetailedBreakdown = {
+    astrology, numerology, horoscope, preferences, personality,
+    communication, values, lifestyle, relationshipGoals, interests,
+  };
 
-  if (astrology.score < 60) frictionPoints.push('Cosmic Compatibility');
-  if (personality.score < 60) frictionPoints.push('Personality');
-  if (communication.score < 60) frictionPoints.push('Communication Style');
-  if (values.score < 60) frictionPoints.push('Core Values');
-  if (lifestyle.score < 60) frictionPoints.push('Lifestyle');
-  if (relationshipGoals.score < 60) frictionPoints.push('Relationship Goals');
+  // 7. Explanation
+  const explanation = generateExplanation(breakdown, detailedBreakdown, Object.keys(appliedWeights) as Array<keyof CompatibilityBreakdown>);
 
   return {
     result: {
       userAId: userA.id,
       userBId: userB.id,
       score: finalScore,
+      isEligible: true,
       breakdown,
-      confidence: 'moderate', // V1 caps at moderate
-      strengths,
-      frictionPoints,
-      reasons,
+      confidence,
+      astrologySummary: astrology.summary,
+      strengths: explanation.strengths,
+      frictionPoints: explanation.frictionPoints,
+      reasons: explanation.reasons,
       algorithmVersion: config.algorithmVersion,
-      astrologyMethodologyVersion: 'vedic_v1',
-      numerologyMethodologyVersion: 'numerology_v1',
+      astrologyMethodologyVersion: astrology.methodologyVersion,
+      numerologyMethodologyVersion: numerology.methodologyVersion,
       weightsVersion: config.weightsVersion,
       generatedAt: new Date(),
     },
     hardFilterResult: filterResult,
-    detailedBreakdown: {
-      astrology, numerology, personality, communication,
-      values, lifestyle, relationshipGoals, interests,
-    },
+    detailedBreakdown,
+    appliedWeights,
   };
 }

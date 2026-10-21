@@ -3,7 +3,8 @@
  * @description Values compatibility scorer for PREMA dating app.
  */
 
-import type { ValuesProfile, ChildrenPreference, ConfidenceLevel } from '../types';
+import type { ValuesProfile, ChildrenPreference } from '../types';
+import { similarity } from '../utils/sanitize';
 
 export interface ValueDimensionResult {
   dimension: string;
@@ -41,10 +42,13 @@ export function calculateValuesCompatibility(profileA: ValuesProfile, profileB: 
     displayName: string,
     valA: number | string,
     valB: number | string,
-    score: number,
+    rawScore: number | null,
     weight: number,
     isHardConflict: boolean = false
   ) => {
+    // Unusable answers are recorded but carry no weight.
+    if (rawScore === null) weight = 0;
+    const score = rawScore ?? 50;
     let interpretation = `Similarity score: ${Math.round(score)}/100`;
     if (isHardConflict) interpretation = 'Significant conflict detected.';
     else if (score > 80) interpretation = 'Strong alignment.';
@@ -98,28 +102,28 @@ export function calculateValuesCompatibility(profileA: ValuesProfile, profileB: 
 
   const cScore = getChildrenScore(profileA.childrenExpectation, profileB.childrenExpectation);
   const results = [
-    addDimension('familyImportance', 'Family Importance', profileA.familyImportance, profileB.familyImportance, (1 - Math.abs(profileA.familyImportance - profileB.familyImportance)) * 100, 0.15),
-    addDimension('marriageExpectation', 'Marriage Expectation', profileA.marriageExpectation, profileB.marriageExpectation, (1 - Math.abs(profileA.marriageExpectation - profileB.marriageExpectation)) * 100, 0.12),
+    addDimension('familyImportance', 'Family Importance', profileA.familyImportance, profileB.familyImportance, similarity(profileA.familyImportance, profileB.familyImportance), 0.15),
+    addDimension('marriageExpectation', 'Marriage Expectation', profileA.marriageExpectation, profileB.marriageExpectation, similarity(profileA.marriageExpectation, profileB.marriageExpectation), 0.12),
     addDimension('childrenExpectation', 'Children Expectation', profileA.childrenExpectation, profileB.childrenExpectation, cScore.score, 0.15, cScore.conflict),
-    addDimension('careerPriority', 'Career Priority', profileA.careerPriority, profileB.careerPriority, (1 - Math.abs(profileA.careerPriority - profileB.careerPriority)) * 100, 0.10),
-    addDimension('financialAttitude', 'Financial Attitude', profileA.financialAttitude, profileB.financialAttitude, (1 - Math.abs(profileA.financialAttitude - profileB.financialAttitude)) * 100, 0.10),
-    addDimension('lifestylePriority', 'Lifestyle Priority', profileA.lifestylePriority, profileB.lifestylePriority, (1 - Math.abs(profileA.lifestylePriority - profileB.lifestylePriority)) * 100, 0.08),
-    addDimension('religionSpirituality', 'Religion & Spirituality', profileA.religionSpirituality, profileB.religionSpirituality, (1 - Math.abs(profileA.religionSpirituality - profileB.religionSpirituality)) * 100, 0.12),
-    addDimension('socialValues', 'Social Values', profileA.socialValues, profileB.socialValues, (1 - Math.abs(profileA.socialValues - profileB.socialValues)) * 100, 0.10),
-    addDimension('personalIndependence', 'Personal Independence', profileA.personalIndependence, profileB.personalIndependence, (1 - Math.abs(profileA.personalIndependence - profileB.personalIndependence)) * 100, 0.08),
+    addDimension('careerPriority', 'Career Priority', profileA.careerPriority, profileB.careerPriority, similarity(profileA.careerPriority, profileB.careerPriority), 0.10),
+    addDimension('financialAttitude', 'Financial Attitude', profileA.financialAttitude, profileB.financialAttitude, similarity(profileA.financialAttitude, profileB.financialAttitude), 0.10),
+    addDimension('lifestylePriority', 'Lifestyle Priority', profileA.lifestylePriority, profileB.lifestylePriority, similarity(profileA.lifestylePriority, profileB.lifestylePriority), 0.08),
+    addDimension('religionSpirituality', 'Religion & Spirituality', profileA.religionSpirituality, profileB.religionSpirituality, similarity(profileA.religionSpirituality, profileB.religionSpirituality), 0.12),
+    addDimension('socialValues', 'Social Values', profileA.socialValues, profileB.socialValues, similarity(profileA.socialValues, profileB.socialValues), 0.10),
+    addDimension('personalIndependence', 'Personal Independence', profileA.personalIndependence, profileB.personalIndependence, similarity(profileA.personalIndependence, profileB.personalIndependence), 0.08),
   ];
 
   let totalScore = 0;
   let totalWeight = 0;
   
   for (const r of results) {
-    if (!r.isHardConflict) {
+    if (!r.isHardConflict && r.weight > 0) {
       totalScore += r.score * r.weight;
       totalWeight += r.weight;
     }
   }
 
-  let finalScore = totalWeight > 0 ? totalScore / totalWeight : 0;
+  let finalScore = totalWeight > 0 ? totalScore / totalWeight : 50;
   if (hardConflicts.length > 0) {
     finalScore = Math.min(finalScore, 30);
   }

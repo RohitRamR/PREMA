@@ -12,6 +12,7 @@ import {
   useConversation, sendMessage, markRead, timeLabel, removeConversation, reactToMessage, type Message,
 } from '../src/store/chats';
 import { goBack } from '../components/nav';
+import { useScoreOf } from '../src/features/compatibility';
 
 const GROUP_GAP_MS = 10 * 60_000;
 const REACTIONS = ['❤️', '😂', '😮', '🥹', '👏', '🙏'];
@@ -34,6 +35,7 @@ function ChatScreenInner() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const scoreFor = useScoreOf();
   const convo = useConversation(id);
   const scrollRef = useRef<ScrollView>(null);
   const [draft, setDraft] = useState('');
@@ -118,7 +120,7 @@ function ChatScreenInner() {
         </Tap>
         <Tap style={s.headerId} onPress={() => router.push({ pathname: '/MatchDetail', params: { id: convo.id } })} pressedStyle={{ opacity: 0.8 }}>
           <View>
-            <AuraRing score={convo.match} size={46} stroke={2.5} gap={2}>
+            <AuraRing score={scoreFor(convo.id, convo.match)} size={46} stroke={2.5} gap={2}>
               <Image source={{ uri: convo.photo }} style={{ width: '100%', height: '100%' }} />
             </AuraRing>
             {convo.online ? <View style={s.online} /> : null}

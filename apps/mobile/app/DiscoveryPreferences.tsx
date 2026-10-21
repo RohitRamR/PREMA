@@ -28,7 +28,7 @@ export default function DiscoveryPreferences() {
 function DiscoveryPreferencesInner() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { discovery } = useProfile();
+  const { discovery, vitals } = useProfile();
 
   const [distanceKm, setDistance] = useState(discovery.distanceKm);
   const [ageMin, setAgeMin] = useState(discovery.ageMin);
@@ -36,12 +36,22 @@ function DiscoveryPreferencesInner() {
   const [cities, setCities] = useState(discovery.cities);
   const [intents, setIntents] = useState(discovery.intents);
   const [verifiedOnly, setVerifiedOnly] = useState(discovery.verifiedOnly);
+  const [minGuna18, setMinGuna18] = useState(discovery.kundli.minGuna18);
+  const [avoidManglik, setAvoidManglik] = useState(discovery.kundli.avoidManglikMismatch);
+  const [must, setMust] = useState(discovery.mustHaves);
+  const setMustKey = (k: keyof typeof must) => (v: boolean) => setMust((m) => ({ ...m, [k]: v }));
 
   const toggle = (list: string[], set: (v: string[]) => void, v: string) =>
     set(list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
 
   const save = () => {
-    updateProfile({ discovery: { distanceKm, ageMin, ageMax, cities, intents, verifiedOnly } });
+    updateProfile({
+      discovery: {
+        distanceKm, ageMin, ageMax, cities, intents, verifiedOnly,
+        kundli: { minGuna18, avoidManglikMismatch: avoidManglik },
+        mustHaves: must,
+      },
+    });
     goBack(router);
   };
 
@@ -103,6 +113,27 @@ function DiscoveryPreferencesInner() {
             value={verifiedOnly} onValueChange={setVerifiedOnly} last />
         </Card>
 
+        <Card style={{ paddingVertical: 4, paddingHorizontal: 0 }}>
+          <ToggleRow icon="auto_awesome" title="Kundli match of 18+ Guna" sub="Only show matches at or above the traditional threshold"
+            value={minGuna18} onValueChange={setMinGuna18} />
+          <ToggleRow icon="spa" title="Avoid Manglik mismatch" sub="Hide matches where only one of you is Manglik"
+            value={avoidManglik} onValueChange={setAvoidManglik} last />
+        </Card>
+
+        <Text style={s.mustTitle}>Must-haves</Text>
+        <Text style={s.mustSub}>People who don’t meet these are never shown. Leave them off to stay open.</Text>
+        <Card style={{ paddingVertical: 4, paddingHorizontal: 0 }}>
+          <ToggleRow icon="eco" title="Vegetarian only" sub="Vegetarian, vegan or Jain"
+            value={must.vegetarianOnly} onValueChange={setMustKey('vegetarianOnly')} />
+          <ToggleRow icon="smoke_free" title="Non-smokers only" sub="From their Compatibility quiz"
+            value={must.nonSmokersOnly} onValueChange={setMustKey('nonSmokersOnly')} />
+          <ToggleRow icon="no_drinks" title="Non-drinkers only" sub="From their Compatibility quiz"
+            value={must.nonDrinkersOnly} onValueChange={setMustKey('nonDrinkersOnly')} />
+          <ToggleRow icon="temple_hindu" title="Same religion only"
+            sub={vitals.religion.trim() ? `Only ${vitals.religion.trim()}` : 'Add your religion in Edit profile first'}
+            value={must.sameReligionOnly && !!vitals.religion.trim()} onValueChange={setMustKey('sameReligionOnly')} last />
+        </Card>
+
         <Text style={s.note}>
           Wider preferences mean more thoughtful introductions — we’ll still never show more than your daily cadence.
         </Text>
@@ -146,6 +177,8 @@ const s = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#E3ECF5',
   },
   stepValue: { color: C.pri, fontSize: 22, fontWeight: '700' },
+  mustTitle: { color: C.pri, fontSize: 17, fontWeight: '900', marginTop: 8, marginLeft: 4 },
+  mustSub: { color: C.muted, fontSize: 13, lineHeight: 18, marginTop: 2, marginBottom: 10, marginLeft: 4 },
   note: { color: C.muted, fontSize: 13, lineHeight: 19, textAlign: 'center', paddingHorizontal: 12 },
   footer: {
     paddingHorizontal: 20, paddingTop: 12,

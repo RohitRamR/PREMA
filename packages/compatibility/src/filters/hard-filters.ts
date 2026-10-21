@@ -1,41 +1,36 @@
 /**
  * @file hard-filters.ts
- * @description Hard filters for PREMA dating app compatibility engine.
- * These are strict exclusion criteria — if any filter fails,
- * the pair is excluded from matching entirely.
+ * @description Strict exclusion rules. If any rule fails, the pair is never
+ * shown to each other — no astrology score can override a dealbreaker.
+ *
+ * Every preference-based rule is checked in BOTH directions.
  */
 
-import type { UserProfile, UserPreferences, HardFilterResult } from '../types';
+import type { UserProfile, UserPreferences, HardFilterResult, RelationshipIntention } from '../types';
+import type { AstrologyCompatibilityResult } from '../astrology/astrology-types';
+import { calculateHaversineDistance } from '../utils/geo';
+import { evaluatePreferences } from '../preferences/preference-scorer';
 
-/**
- * Calculates the Haversine distance between two coordinates in kilometers.
- * @param lat1 - Latitude of first point
- * @param lon1 - Longitude of first point
- * @param lat2 - Latitude of second point
- * @param lon2 - Longitude of second point
- * @returns The distance in kilometers.
- */
-export function calculateHaversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371; // Earth radius in km
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
+export { calculateHaversineDistance };
+
+const INTENTION_CONFLICTS = new Set(['casual+marriage_oriented', 'casual+long_term']);
+
+function genderMatches(targets: string[], gender: string): boolean {
+  const g = gender.trim().toLowerCase();
+  return targets.some((t) => {
+    const v = t.trim().toLowerCase();
+    return v === 'everyone' || v === 'any' || v === g;
+  });
+}
+
+function effectiveIntention(user: UserProfile, prefs: UserPreferences): RelationshipIntention {
+  return prefs.relationshipIntention ?? user.relationshipIntention;
 }
 
 /**
- * Applies hard filters between two users to determine if they can be matched.
- * Checks are run in priority order: blocking → safety → activity → gender → age → distance → intention → children.
- *
- * @param userA - The first user profile
- * @param userB - The second user profile
- * @param prefsA - The first user's match preferences
- * @param prefsB - The second user's match preferences
- * @returns Result of the hard filter checks
+ * Applies hard filters between two users.
+ * Order: blocking → safety → activity → gender → age → distance → intention
+ *        → children → personal dealbreakers (diet, smoking, religion, …).
  */
 export function applyHardFilters(
   userA: UserProfile,
@@ -44,6 +39,9 @@ export function applyHardFilters(
   prefsB: UserPreferences
 ): HardFilterResult {
   const rejectionReasons: string[] = [];
+  const unverifiedDealbreakers: string[] = [];
+
+  if (userA.id === userB.id) rejectionReasons.push('Same user');
 
   // 1. Blocked users
   if (userA.blockedUserIds.includes(userB.id) || userB.blockedUserIds.includes(userA.id)) {
@@ -60,39 +58,33 @@ export function applyHardFilters(
     rejectionReasons.push('Inactive account');
   }
 
-  // 4. Gender preference
-  if (!prefsA.targetGender.includes(userB.gender) || !prefsB.targetGender.includes(userA.gender)) {
+  // 4. Gender preference (mutual)
+  if (!genderMatches(prefsA.targetGender, userB.gender) || !genderMatches(prefsB.targetGender, userA.gender)) {
     rejectionReasons.push('Gender preference mismatch');
   }
 
-  // 5. Age preference
+  // 5. Age preference (mutual)
   if (userB.age < prefsA.minAge || userB.age > prefsA.maxAge ||
       userA.age < prefsB.minAge || userA.age > prefsB.maxAge) {
     rejectionReasons.push('Age preference mismatch');
   }
 
-  // 6. Distance (requires both users to have location data)
+  // 6. Distance (only when both locations are known)
   if (userA.latitude != null && userA.longitude != null &&
       userB.latitude != null && userB.longitude != null) {
-    const distance = calculateHaversineDistance(
-      userA.latitude, userA.longitude,
-      userB.latitude, userB.longitude
-    );
+    const distance = calculateHaversineDistance(userA.latitude, userA.longitude, userB.latitude, userB.longitude);
     if (distance > prefsA.maxDistanceKm || distance > prefsB.maxDistanceKm) {
       rejectionReasons.push('Distance exceeds preference');
     }
   }
 
   // 7. Relationship intention
-  const intentionPair = [userA.relationshipIntention, userB.relationshipIntention].sort().join('+');
-  if (
-    intentionPair === 'casual+marriage_oriented' ||
-    intentionPair === 'casual+long_term'
-  ) {
+  const intentionPair = [effectiveIntention(userA, prefsA), effectiveIntention(userB, prefsB)].sort().join('+');
+  if (INTENTION_CONFLICTS.has(intentionPair)) {
     rejectionReasons.push('Relationship intention conflict');
   }
 
-  // 8. Children conflict (via preferences)
+  // 8. Children conflict
   if (prefsA.childrenPreference && prefsB.childrenPreference) {
     const childrenPair = [prefsA.childrenPreference, prefsB.childrenPreference].sort().join('+');
     if (childrenPair === 'does_not_want_children+wants_children') {
@@ -100,8 +92,45 @@ export function applyHardFilters(
     }
   }
 
+  // 9. Personal dealbreakers, both directions
+  const aToB = evaluatePreferences(userA, prefsA, userB);
+  const bToA = evaluatePreferences(userB, prefsB, userA);
+  for (const d of aToB.failedDealbreakers) rejectionReasons.push(`Dealbreaker for ${userA.firstName}: ${d}`);
+  for (const d of bToA.failedDealbreakers) rejectionReasons.push(`Dealbreaker for ${userB.firstName}: ${d}`);
+  for (const d of aToB.unverifiedDealbreakers) unverifiedDealbreakers.push(`${userA.firstName}: ${d}`);
+  for (const d of bToA.unverifiedDealbreakers) unverifiedDealbreakers.push(`${userB.firstName}: ${d}`);
+
   return {
     pass: rejectionReasons.length === 0,
     rejectionReasons,
+    unverifiedDealbreakers,
   };
+}
+
+/**
+ * Astrology-based dealbreakers (Manglik, minimum Guna). These need the Kundli
+ * result, so they run right after the astrology layer is computed.
+ * Only rules marked 'dealbreaker' reject; softer importances are scored.
+ */
+export function applyAstroDealbreakers(
+  userA: UserProfile,
+  userB: UserProfile,
+  prefsA: UserPreferences,
+  prefsB: UserPreferences,
+  astrology: AstrologyCompatibilityResult
+): string[] {
+  const reasons: string[] = [];
+  const check = (user: UserProfile, prefs: UserPreferences) => {
+    if (prefs.manglik?.importance === 'dealbreaker' && prefs.manglik.rule === 'avoid_mismatch' &&
+        astrology.manglik?.status === 'mismatch') {
+      reasons.push(`Dealbreaker for ${user.firstName}: Manglik mismatch`);
+    }
+    if (prefs.minGunaScore?.importance === 'dealbreaker' &&
+        astrology.gunaMilan.totalScore < prefs.minGunaScore.score) {
+      reasons.push(`Dealbreaker for ${user.firstName}: Guna ${astrology.gunaMilan.totalScore}/36 below required ${prefs.minGunaScore.score}`);
+    }
+  };
+  check(userA, prefsA);
+  check(userB, prefsB);
+  return reasons;
 }

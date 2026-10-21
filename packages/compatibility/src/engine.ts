@@ -95,10 +95,13 @@ export class CompatibilityEngineV1 {
       userAId: userA.id,
       userBId: userB.id,
       score: totalScore,
+      isEligible: true,
       confidence: 'moderate',
       breakdown: {
         astrology: astrologyScore,
+        horoscope: 0,
         numerology: 0,
+        preferences: 0,
         personality: personalityScore,
         communication: 0,
         values: valuesScore,

@@ -9,6 +9,7 @@ import Icon from '../../components/Icon';
 import Logo from '../../components/Logo';
 import { addMatch } from '../../src/store/chats';
 import { useSafety } from '../../src/store/safety';
+import { useScoreOf, scoreOf } from '../../src/features/compatibility';
 import { AuraFrame, AuraRing } from '../../components/Aura';
 import { C, Tap, cardShadow, serif } from '../../components/prema-ui';
 import StatusFade from '../../components/StatusFade';
@@ -20,21 +21,6 @@ type Like = {
 };
 
 const LIKED_YOU: Like[] = [
-  {
-    id: 'riya', name: 'Riya', age: 27, city: 'Bengaluru', match: 94,
-    photo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=600',
-    on: 'Your boundary', note: 'Quiet weekends are non-negotiable for me too.',
-  },
-  {
-    id: 'diya', name: 'Diya', age: 25, city: 'Chennai', match: 90,
-    photo: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=600',
-    on: 'Your photo', note: 'Is that the Kapaleeshwarar tank at dawn?',
-  },
-  {
-    id: 'isha', name: 'Isha', age: 28, city: 'Bengaluru', match: 87,
-    photo: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&q=80&w=600',
-    on: 'Filter coffee lover', note: 'I have strong opinions on decoction.',
-  },
   {
     id: 'tara', name: 'Tara', age: 26, city: 'Chennai', match: 85,
     photo: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&q=80&w=600',
@@ -48,16 +34,12 @@ const YOU_LIKED: (Like & { status: string })[] = [
     photo: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=600',
     on: 'Her prompt', note: 'You wrote about monsoon reading corners.',
   },
-  {
-    id: 'aarohi', name: 'Aarohi', age: 29, city: 'Bengaluru', match: 89, status: 'Waiting for a reply',
-    photo: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&q=80&w=600',
-    on: 'Her photo', note: 'You asked about the pottery studio.',
-  },
 ];
 
 function LikesTabScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const scoreFor = useScoreOf();
   const { width } = useWindowDimensions();
   const [tab, setTab] = useState<'in' | 'out'>('in');
   const [incomingAll, setIncoming] = useState(LIKED_YOU);
@@ -70,7 +52,7 @@ function LikesTabScreen() {
     const l = incoming.find((x) => x.id === id);
     setIncoming((all) => all.filter((x) => x.id !== id));
     if (!l) return;
-    addMatch({ id: l.id, name: l.name, age: l.age, city: l.city, photo: l.photo, match: l.match });
+    addMatch({ id: l.id, name: l.name, age: l.age, city: l.city, photo: l.photo, match: scoreOf(l.id, l.match) });
     router.push({ pathname: '/ItSAMatch', params: { id: l.id, name: l.name, photo: l.photo } });
   };
 
@@ -147,7 +129,7 @@ function LikesTabScreen() {
                         </Tap>
                       </View>
                     </View>
-                    <AuraFrame score={l.match} radius={22} width={4} />
+                    <AuraFrame score={scoreFor(l.id, l.match)} radius={22} width={4} />
                   </View>
                 ))}
               </View>
@@ -164,7 +146,7 @@ function LikesTabScreen() {
                   style={[s.row, i < YOU_LIKED.length - 1 ? s.rowDivider : null]}
                   pressedStyle={{ backgroundColor: 'rgba(116,180,242,0.06)' }}
                 >
-                  <AuraRing score={l.match} size={64} stroke={2.5} gap={2.5}>
+                  <AuraRing score={scoreFor(l.id, l.match)} size={64} stroke={2.5} gap={2.5}>
                     <Image source={{ uri: l.photo }} style={{ width: '100%', height: '100%' }} />
                   </AuraRing>
                   <View style={{ flex: 1 }}>

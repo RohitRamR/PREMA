@@ -4,6 +4,7 @@
  */
 
 import type { RelationshipGoalsProfile, RelationshipIntention, ChildrenPreference, MarriageTimeline } from '../types';
+import { similarity } from '../utils/sanitize';
 
 export interface RelationshipGoalsResult {
   score: number; // 0-100
@@ -102,9 +103,10 @@ export function calculateRelationshipGoalsCompatibility(profileA: RelationshipGo
   const dimensionScores = {
     marriageTimeline: getMarriageTimelineScore(profileA.marriageTimeline, profileB.marriageTimeline),
     childrenAlignment: getChildrenScore(profileA.childrenPreference, profileB.childrenPreference),
-    familyInvolvement: (1 - Math.abs(profileA.familyInvolvement - profileB.familyInvolvement)) * 100,
-    relocation: (1 - Math.abs(profileA.relocationWillingness - profileB.relocationWillingness)) * 100,
-    longDistance: (1 - Math.abs(profileA.longDistanceWillingness - profileB.longDistanceWillingness)) * 100
+    // Unusable 0–1 answers fall back to a neutral 50 for that sub-dimension.
+    familyInvolvement: similarity(profileA.familyInvolvement, profileB.familyInvolvement) ?? 50,
+    relocation: similarity(profileA.relocationWillingness, profileB.relocationWillingness) ?? 50,
+    longDistance: similarity(profileA.longDistanceWillingness, profileB.longDistanceWillingness) ?? 50
   };
 
   const weights = {

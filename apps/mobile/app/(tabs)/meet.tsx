@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Image, ScrollView, StyleSheet, Animated, Easing, useWindowDimensions } from 'react-native';
 import Text, { NunitoScope } from '../../components/PremaText';
 import { useRouter } from 'expo-router';
@@ -49,23 +49,62 @@ function MeetScreen() {
   // ── Date idea deck ──
   const ideas = catalogue.activities;
   const [ideaIdx, setIdeaIdx] = useState(0);
-  const flip = useRef(new Animated.Value(0)).current;
+  // Shuffle works like a real deck: the front card glides off to the left (`exit` 0→1),
+  // then the card that was waiting behind it rises into place (`rise` 1→0) — no bounce,
+  // no fade-in, so nothing flickers. The new card at the very back fades in (`backFade`).
+  const exit = useRef(new Animated.Value(0)).current;
+  const rise = useRef(new Animated.Value(0)).current;
+  const backFade = useRef(new Animated.Value(0.8)).current;
+  const shuffling = useRef(false);
+  const shuffled = useRef(false);
   const idea = ideas[ideaIdx % ideas.length];
   const ideaVenue = catalogue.venue(idea.venueId);
+
+  // Preload the next few photos so a new card never appears before its image.
+  useEffect(() => {
+    for (let k = 1; k <= 3; k++) {
+      const uri = ideas[(ideaIdx + k) % ideas.length]?.photos[0];
+      if (uri) Image.prefetch(uri).catch(() => {});
+    }
+  }, [ideaIdx, ideas]);
+
+  // Runs after the next idea has rendered, so the old card is never shown in the new pose.
+  useEffect(() => {
+    if (!shuffled.current) return;
+    exit.setValue(0);
+    rise.setValue(1);
+    backFade.setValue(0);
+    Animated.parallel([
+      Animated.timing(rise, { toValue: 0, duration: 320, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+      Animated.timing(backFade, { toValue: 0.8, duration: 320, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+    ]).start(() => { shuffling.current = false; });
+  }, [ideaIdx, exit, rise, backFade]);
+
   const shuffle = () => {
-    Animated.timing(flip, { toValue: 1, duration: 220, easing: Easing.in(Easing.quad), useNativeDriver: true }).start(() => {
+    if (shuffling.current) return; // ignore taps mid-animation
+    shuffling.current = true;
+    Animated.timing(exit, { toValue: 1, duration: 260, easing: Easing.in(Easing.cubic), useNativeDriver: true }).start(({ finished }) => {
+      if (!finished) { shuffling.current = false; return; }
+      shuffled.current = true;
       setIdeaIdx((i) => i + 1);
-      flip.setValue(-1);
-      Animated.spring(flip, { toValue: 0, useNativeDriver: true, friction: 7, tension: 70 }).start();
     });
   };
   const cardW = width - 56;
   const evW = Math.min(250, width * 0.62);
   const deckStyle = {
-    opacity: flip.interpolate({ inputRange: [-1, 0, 1], outputRange: [0, 1, 0] }),
+    opacity: exit.interpolate({ inputRange: [0, 0.6, 1], outputRange: [1, 0.8, 0], extrapolate: 'clamp' }),
     transform: [
-      { translateX: flip.interpolate({ inputRange: [-1, 0, 1], outputRange: [40, 0, -cardW * 0.6] }) },
-      { rotate: flip.interpolate({ inputRange: [-1, 0, 1], outputRange: ['4deg', '-1deg', '-12deg'] }) },
+      // exit: slide left and tilt away
+      { translateX: Animated.add(
+        exit.interpolate({ inputRange: [0, 1], outputRange: [0, -cardW * 0.75], extrapolate: 'clamp' }),
+        rise.interpolate({ inputRange: [0, 1], outputRange: [0, 12], extrapolate: 'clamp' }),
+      ) },
+      // rise: start exactly where the first back card sits (12px right, 4px down, 5° tilt)
+      { translateY: rise.interpolate({ inputRange: [0, 1], outputRange: [0, 4], extrapolate: 'clamp' }) },
+      { rotate: Animated.add(
+        exit.interpolate({ inputRange: [0, 1], outputRange: [-1, -13], extrapolate: 'clamp' }),
+        rise.interpolate({ inputRange: [0, 1], outputRange: [0, 6], extrapolate: 'clamp' }),
+      ).interpolate({ inputRange: [-360, 360], outputRange: ['-360deg', '360deg'] }) },
     ],
   };
 
@@ -104,7 +143,10 @@ function MeetScreen() {
                   key={k}
                   style={[s.deckBack, { transform: [{ translateX: k === 1 ? 12 : -12 }, { translateY: k === 1 ? 4 : 10 }, { rotate: `${tilt}deg` }] }]}
                 >
-                  <Image source={{ uri: next.photos[0] }} style={[s.postcardImg, { opacity: k === 1 ? 0.95 : 0.8 }]} />
+                  <Animated.Image
+                    source={{ uri: next.photos[0] }}
+                    style={[s.postcardImg, { opacity: k === 1 ? 0.95 : backFade }]}
+                  />
                 </View>
               );
             })}

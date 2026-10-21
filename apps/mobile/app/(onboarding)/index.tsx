@@ -21,6 +21,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Icon from '../../components/Icon';
 import CelestialBackground from '../../components/CelestialBackground';
+import { saveOnboarding, type OnboardingAnswers } from '../../src/features/onboarding/save-onboarding';
 
 const { width: SW, height: SH } = Dimensions.get('window');
 
@@ -754,6 +755,8 @@ export default function AnimatedSignUp() {
     if (transitioningRef.current || nextStep < 0) return;
     Keyboard.dismiss();
     if (nextStep >= 8) {
+      // Save the member's own answers (birth details in IST, gender, intent…) before entering the app.
+      saveOnboarding(answersRef.current);
       playFinale();
       return;
     }
@@ -988,6 +991,13 @@ export default function AnimatedSignUp() {
   const phoneReady = phone.length === 10;
   const otpRef = useRef<TextInput>(null);
 
+  // Latest answers, read when onboarding finishes (goToStep is memoised).
+  const answersRef = useRef<OnboardingAnswers>({ name: '', dob: '', birthTime: '', birthCity: '', gender: '', targetGenders: [], intent: '', anchors: [], bio: '' });
+  answersRef.current = {
+    name, dob, birthTime, birthCity, gender, targetGenders, intent, bio,
+    anchors: selectedAnchors.map((id) => RESONANCE_ANCHORS.find((x) => x.id === id)?.name ?? id),
+  };
+
   // Birth date mask: digits only → DD/MM/YYYY
   const onDobChange = (t: string) => {
     const d = t.replace(/\D/g, '').slice(0, 8);
@@ -1193,9 +1203,9 @@ export default function AnimatedSignUp() {
           </View>
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={{ fontSize: 11, fontWeight: '700', color: C.pri, letterSpacing: 1.5, marginBottom: 6 }}>{'EXACT TIME'}</Text>
+          <Text style={{ fontSize: 11, fontWeight: '700', color: C.pri, letterSpacing: 1.5, marginBottom: 6 }}>{'BIRTH TIME (IST)'}</Text>
           <View style={{ backgroundColor: '#FFFFFF', borderRadius: 18, borderWidth: 1, borderColor: 'rgba(44,73,106,0.15)', paddingHorizontal: 16, height: 50, justifyContent: 'center' }}>
-            <TextInput value={birthTime} onChangeText={setBirthTime} placeholder="11:11 AM" placeholderTextColor="rgba(44,73,106,0.35)" style={{ fontSize: 14, color: C.pri, fontWeight: '600', letterSpacing: 1 }} />
+            <TextInput value={birthTime} onChangeText={setBirthTime} placeholder="e.g. 6:30 AM" placeholderTextColor="rgba(44,73,106,0.35)" style={{ fontSize: 14, color: C.pri, fontWeight: '600', letterSpacing: 1 }} />
           </View>
         </View>
       </View>

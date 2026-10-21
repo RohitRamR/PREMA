@@ -111,14 +111,17 @@ export function generateDailyRecommendations(
   candidates: RecommendationCandidate[],
   config: MatchingConfig
 ): DailyRecommendation {
-  const ranked = rankCandidates(candidates, config);
+  const eligible = candidates.filter(
+    (c) => c.compatibilityResult.isEligible !== false && c.compatibilityResult.score >= config.discoveryThreshold
+  );
+  const ranked = rankCandidates(eligible, config);
   const maxRecommendations = config.maxRecommendations || 5;
   const diverse = applyDiversityRules(ranked, maxRecommendations);
 
   return {
     userId,
     candidates: diverse,
-    algorithmVersion: '1.0',
+    algorithmVersion: config.algorithmVersion,
     generatedAt: new Date(),
   };
 }
