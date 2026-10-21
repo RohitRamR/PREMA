@@ -25,15 +25,26 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v5
 
+      # No built-in npm cache here: setup-node's cache step runs npm inside the
+      # repo with Node's bundled npm, which devEngines (npm 11.6.2) rejects.
       - name: Set up Node 24
         uses: actions/setup-node@v5
         with:
           node-version: 24
-          cache: npm
+          package-manager-cache: false
 
-      # package.json pins npm 11.6.2 in devEngines.
+      # package.json pins npm 11.6.2 in devEngines. Install it from outside the
+      # repo so the version check doesn't block the install itself.
       - name: Use npm 11.6.2
+        working-directory: ${{ runner.temp }}
         run: npm install -g npm@11.6.2
+
+      - name: Cache npm downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: npm-${{ runner.os }}-
 
       - name: Install dependencies
         run: npm ci
