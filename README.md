@@ -78,6 +78,23 @@ and each person's profile into `@prema/compatibility`.
 People profiles are sample data until the Supabase API is connected; their
 birth details live in `src/features/compatibility/sample-births.ts`.
 
+## Error tracking
+
+The mobile app reports errors to [Sentry](https://sentry.io).
+
+- **Turn it on:** copy `apps/mobile/.env.example` to `apps/mobile/.env` and set
+  `EXPO_PUBLIC_SENTRY_DSN`. With no DSN, Sentry stays off.
+- **Crashes:** a screen that throws shows a "Something went wrong" page with a
+  Try again button (`ErrorBoundary` in `apps/mobile/app/_layout.tsx`), and the
+  error is sent to Sentry.
+- **Recovered errors:** code that catches an error and shows a fallback calls
+  `reportError()` from `apps/mobile/src/lib/report-error.ts`, so those reach
+  Sentry too, as warnings. Use it in any new `catch`, and keep personal data
+  (names, birth details, messages) out of the context.
+- **Readable stack traces in release builds:** set `SENTRY_ORG`,
+  `SENTRY_PROJECT` and `SENTRY_AUTH_TOKEN` as EAS secrets so source maps are
+  uploaded. Never commit the auth token.
+
 ## Scripts (from the repo root)
 
 | Command | What it does |
