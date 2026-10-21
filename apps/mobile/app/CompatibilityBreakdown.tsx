@@ -221,15 +221,6 @@ function BreakdownInner() {
           </>
         ) : null}
 
-        {/* How it works */}
-        <Tap
-          onPress={() => Alert.alert('How scoring works', 'Your score blends shared values, relationship intent, lifestyle rhythm, communication and family outlook. It never includes looks or money, and it can’t be bought.')}
-          style={s.how} accessibilityRole="button"
-        >
-          <Icon name="info" size={18} color={C.pri} />
-          <Text style={s.howText}>Never based on looks or money. Can’t be bought.</Text>
-          <Icon name="chevron_right" size={20} color={C.muted} />
-        </Tap>
 
         {canChat ? (
           <Tap onPress={() => router.push({ pathname: '/Chat', params: { id: them.id } })} style={s.cta} pressedStyle={{ opacity: 0.9 }}>
@@ -303,10 +294,8 @@ const s = StyleSheet.create({
   chipOnText: { color: C.white, fontSize: 14, fontWeight: '800' },
   chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18, backgroundColor: C.white, borderWidth: 1, borderColor: '#E6EDF5' },
   chipText: { color: C.pri, fontSize: 14, fontWeight: '700' },
-  how: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 24, padding: 16, borderRadius: 20, backgroundColor: C.accentSoft },
-  howText: { flex: 1, color: C.pri, fontSize: 14, fontWeight: '700' },
   cta: {
-    marginTop: 16, height: 56, borderRadius: 28, backgroundColor: C.pink, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    marginTop: 24, height: 56, borderRadius: 28, backgroundColor: C.pink, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     shadowColor: C.pink, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 14,
   },
   ctaText: { color: C.white, fontSize: 16.5, fontWeight: '900' },
