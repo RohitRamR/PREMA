@@ -143,6 +143,13 @@ through `src/features/compatibility` (see above).
 the same hooks and functions, so screens shouldn't need to change. Server
 rules are already defined: see [Database access rules](#database-access-rules).
 
+## Colours
+
+Use the semantic tokens in `apps/mobile/src/theme` (`colors.text.primary`,
+`colors.action.primary.bg`…) instead of hex values. The palette, the tokens, the
+accessibility decisions and the plan for migrating the existing hard-coded
+colours are in [docs/colour-system.md](docs/colour-system.md).
+
 ## Error tracking
 
 The mobile app reports errors to [Sentry](https://sentry.io).
