@@ -60,12 +60,62 @@ export interface UserProfile {
   isActive: boolean;
   isSafetyRestricted: boolean;
   blockedUserIds: string[];
+  /** Facts about this user that other people's preferences are checked against. */
+  attributes?: UserAttributes;
+}
+
+// ---------------------------------------------------------------------------
+// Attributes & Preferences (what a user IS vs what a user WANTS)
+// ---------------------------------------------------------------------------
+
+export type Importance = 'dealbreaker' | 'important' | 'nice_to_have';
+export type Diet = 'vegetarian' | 'non_vegetarian' | 'vegan' | 'jain' | 'eggetarian';
+export type Habit = 'never' | 'occasionally' | 'regularly';
+export type EducationLevel = 'high_school' | 'diploma' | 'bachelors' | 'masters' | 'doctorate';
+
+export interface UserAttributes {
+  heightCm?: number;
+  diet?: Diet;
+  smoking?: Habit;
+  drinking?: Habit;
+  religion?: string;
+  community?: string;
+  motherTongue?: string;
+  education?: EducationLevel;
+}
+
+/** "I accept any of these values", with how much it matters. */
+export interface PreferenceRule<T> {
+  accepted: T[];
+  importance: Importance;
+}
+
+export interface RangePreference {
+  min?: number;
+  max?: number;
+  importance: Importance;
+}
+
+/**
+ * Manglik preference:
+ *  - 'any': doesn't matter
+ *  - 'avoid_mismatch': only one partner being Manglik is not OK
+ */
+export interface ManglikPreference {
+  rule: 'any' | 'avoid_mismatch';
+  importance: Importance;
 }
 
 export interface UserBirthData {
   userId: string;
-  dateOfBirth: Date;
-  exactBirthTime?: string; // HH:mm format, null if unknown
+  /** Prefer a "YYYY-MM-DD" string. Date objects are read on the IST calendar day. */
+  dateOfBirth: Date | string;
+  /** Local wall-clock birth time "HH:mm" (24h). Interpreted as IST unless a zone is given. */
+  exactBirthTime?: string | null;
+  /** Optional IANA zone for births outside India, e.g. "America/New_York". Default: IST. */
+  birthTimezone?: string;
+  /** Optional fixed UTC offset in minutes (takes priority over birthTimezone). IST = 330. */
+  birthUtcOffsetMinutes?: number;
   birthPlaceCity?: string;
   birthPlaceLat?: number;
   birthPlaceLon?: number;
@@ -80,6 +130,19 @@ export interface UserPreferences {
   relationshipIntention?: RelationshipIntention;
   childrenPreference?: ChildrenPreference;
   marriageTimeline?: MarriageTimeline;
+
+  // Optional detailed preferences — each rule carries its own importance.
+  diet?: PreferenceRule<Diet>;
+  smoking?: PreferenceRule<Habit>;
+  drinking?: PreferenceRule<Habit>;
+  religion?: PreferenceRule<string>;
+  community?: PreferenceRule<string>;
+  motherTongue?: PreferenceRule<string>;
+  heightCm?: RangePreference;
+  minEducation?: { level: EducationLevel; importance: Importance };
+  manglik?: ManglikPreference;
+  /** Minimum classical Guna Milan total (out of 36). */
+  minGunaScore?: { score: number; importance: Importance };
 }
 
 // ---------------------------------------------------------------------------
@@ -180,7 +243,9 @@ export interface InterestsProfile {
 
 export interface CompatibilityBreakdown {
   astrology: number;
+  horoscope: number;
   numerology: number;
+  preferences: number;
   personality: number;
   communication: number;
   values: number;
@@ -195,6 +260,10 @@ export interface CompatibilityResult {
 
   score: number; // 0–100, integer
   confidence: ConfidenceLevel;
+  /** False when a hard filter / dealbreaker excluded the pair. */
+  isEligible: boolean;
+  /** Short Kundli summary, e.g. "28/36 Guna · Nadi dosha cancelled". */
+  astrologySummary?: string;
 
   breakdown: CompatibilityBreakdown;
 
@@ -213,6 +282,8 @@ export interface CompatibilityResult {
 export interface HardFilterResult {
   pass: boolean;
   rejectionReasons: string[];
+  /** Dealbreakers that could not be verified because the other user left the field empty. */
+  unverifiedDealbreakers?: string[];
 }
 
 // ---------------------------------------------------------------------------
@@ -224,7 +295,9 @@ export interface MatchingConfig {
   weightsVersion: string;
 
   // Layer weights (must sum to 1.0)
-  astrologyWeight: number;
+  astrologyWeight: number;   // Vedic Kundli
+  horoscopeWeight: number;   // Western sun sign
+  preferenceWeight: number;  // mutual preference fit
   personalityWeight: number;
   communicationWeight: number;
   valuesWeight: number;

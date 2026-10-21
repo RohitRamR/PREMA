@@ -1,100 +1,82 @@
 import type { CompatibilityBreakdown } from '../types';
-import type { FullCompatibilityOutput } from './scoring-engine';
+import type { DetailedBreakdown } from './scoring-engine';
 
 /**
  * Explanation result containing human-readable compatibility insights.
  */
 export interface ExplanationResult {
-  strengths: string[];      // top 3 strongest areas
-  frictionPoints: string[]; // areas below threshold
+  strengths: string[];      // top strongest areas (score ≥ 70)
+  frictionPoints: string[]; // areas below 55
   reasons: string[];        // human-readable reason strings
   astrologyNarrative: string;
   numerologyNarrative: string;
 }
 
+const DISPLAY: Record<keyof CompatibilityBreakdown, string> = {
+  astrology: 'Kundli (Guna Milan)',
+  horoscope: 'Sun Sign Harmony',
+  numerology: 'Numerology',
+  preferences: 'What You Both Want',
+  personality: 'Personality',
+  communication: 'Communication Style',
+  values: 'Core Values',
+  lifestyle: 'Lifestyle',
+  relationshipGoals: 'Relationship Goals',
+  interests: 'Shared Interests',
+};
+
 /**
- * Generates an explanation based on the breakdown and detailed compatibility metrics.
- *
- * @param breakdown The overall dimension scores
- * @param detailedBreakdown The individual detailed breakdowns for each module
- * @returns Explanation string combinations mapping score thresholds
+ * Builds strengths, friction points and narrative text.
+ * Only layers that were actually scored (`scoredLayers`) are considered,
+ * so a missing questionnaire never shows up as a "friction point".
  */
 export function generateExplanation(
   breakdown: CompatibilityBreakdown,
-  detailedBreakdown: FullCompatibilityOutput['detailedBreakdown']
+  detailed: DetailedBreakdown | null,
+  scoredLayers: Array<keyof CompatibilityBreakdown> = Object.keys(breakdown) as Array<keyof CompatibilityBreakdown>
 ): ExplanationResult {
-  // Rank all dimensions by score
-  const dimensions = [
-    { key: 'astrology', score: breakdown.astrology, display: 'Cosmic Compatibility' },
-    { key: 'personality', score: breakdown.personality, display: 'Personality' },
-    { key: 'communication', score: breakdown.communication, display: 'Communication Style' },
-    { key: 'values', score: breakdown.values, display: 'Core Values' },
-    { key: 'lifestyle', score: breakdown.lifestyle, display: 'Lifestyle' },
-    { key: 'relationshipGoals', score: breakdown.relationshipGoals, display: 'Relationship Goals' },
-    { key: 'interests', score: breakdown.interests, display: 'Shared Interests' },
-  ];
+  const dims = scoredLayers
+    .map((key) => ({ key, score: breakdown[key], display: DISPLAY[key] }))
+    .sort((a, b) => b.score - a.score);
 
-  dimensions.sort((a, b) => b.score - a.score);
-
-  // Top 3 scoring dimensions become strengths
-  const strengths = dimensions.slice(0, 3).map((d) => d.display);
-
-  // Dimensions scoring below 60 become friction points
-  const frictionPoints = dimensions.filter((d) => d.score < 60).map((d) => d.display);
+  const strengths = dims.filter((d) => d.score >= 70).slice(0, 3).map((d) => d.display);
+  const frictionPoints = dims.filter((d) => d.score < 55).map((d) => d.display);
 
   const reasons: string[] = [];
+  const guna = detailed?.astrology.gunaMilan;
 
-  if (breakdown.relationshipGoals > 85) {
-    reasons.push('Your long-term relationship intentions are strongly aligned.');
+  if (guna) {
+    reasons.push(`Kundli: ${guna.totalScore}/36 Guna — ${guna.interpretation.toLowerCase()}.`);
+    const nadi = guna.kootas[7]!;
+    const bhakoot = guna.kootas[6]!;
+    if (nadi.hasDosha) reasons.push(nadi.interpretation);
+    if (bhakoot.hasDosha) reasons.push(bhakoot.interpretation);
   }
-  if (breakdown.communication > 85) {
-    reasons.push('Your communication preferences are similar, which supports daily harmony.');
-  }
-  if (breakdown.values > 85) {
-    reasons.push('Your core values and life priorities are closely aligned.');
-  }
-  if (breakdown.astrology > 85) {
-    reasons.push('Your Vedic astrological profiles show strong harmony.');
-  }
-  if (breakdown.lifestyle > 85) {
-    reasons.push('Your daily lifestyle preferences are well-matched.');
-  }
-  if (breakdown.personality > 85) {
-    reasons.push('Your personality traits complement each other well.');
-  }
-  if (breakdown.interests > 80) {
-    reasons.push('You share many common interests and hobbies.');
-  }
+  const manglik = detailed?.astrology.manglik;
+  if (manglik && manglik.status !== 'no_dosha') reasons.push(manglik.explanation);
+  if (detailed?.horoscope) reasons.push(`${detailed.horoscope.signA} & ${detailed.horoscope.signB}: ${detailed.horoscope.interpretation}`);
 
-  // Astrology narrative based on Guna Milan score out of 36
-  const gunaTotal = detailedBreakdown?.astrology?.gunaMilan?.totalScore ?? 0;
-  let astrologyNarrative = '';
-  if (gunaTotal >= 30) {
-    astrologyNarrative = 'Exceptionally aligned — your celestial profiles show deep harmony.';
-  } else if (gunaTotal >= 25) {
-    astrologyNarrative = 'Strongly aligned — your astrological compatibility is above average.';
-  } else if (gunaTotal >= 18) {
-    astrologyNarrative = 'Moderately aligned — your cosmic profiles show reasonable compatibility.';
-  } else {
-    astrologyNarrative = 'Some astrological differences — other compatibility factors may be more relevant.';
-  }
+  const has = (k: keyof CompatibilityBreakdown) => scoredLayers.includes(k);
+  if (has('preferences') && breakdown.preferences >= 85) reasons.push('You each match what the other is looking for.');
+  if (has('relationshipGoals') && breakdown.relationshipGoals >= 85) reasons.push('Your long-term relationship intentions are strongly aligned.');
+  if (has('values') && breakdown.values >= 85) reasons.push('Your core values and life priorities are closely aligned.');
+  if (has('communication') && breakdown.communication >= 85) reasons.push('Your communication styles are similar, which supports daily harmony.');
+  if (has('personality') && breakdown.personality >= 85) reasons.push('Your personality traits complement each other well.');
+  if (has('lifestyle') && breakdown.lifestyle >= 85) reasons.push('Your daily lifestyles are well-matched.');
+  if (has('interests') && breakdown.interests >= 80) reasons.push('You share many common interests.');
 
-  // Numerology narrative based on score
-  const numerologyScore = detailedBreakdown?.numerology?.score ?? 0;
-  let numerologyNarrative = '';
-  if (numerologyScore >= 80) {
-    numerologyNarrative = 'Your numerological profiles suggest strong energetic resonance.';
-  } else if (numerologyScore >= 60) {
-    numerologyNarrative = 'Moderate numerological alignment — your numbers show some natural affinity.';
-  } else {
-    numerologyNarrative = 'Different numerological energies — this can bring complementary perspectives.';
-  }
+  const gunaTotal = guna?.totalScore ?? 0;
+  const astrologyNarrative =
+    gunaTotal > 32 ? 'Exceptional Kundli match — your charts show deep harmony.'
+    : gunaTotal >= 25 ? 'Very good Kundli match — well above the traditional threshold.'
+    : gunaTotal >= 18 ? 'Acceptable Kundli match — meets the traditional 18-point threshold.'
+    : 'Below the traditional 18-point threshold — other strengths matter more here.';
 
-  return {
-    strengths,
-    frictionPoints,
-    reasons,
-    astrologyNarrative,
-    numerologyNarrative,
-  };
+  const n = detailed?.numerology;
+  const numerologyNarrative = !n ? ''
+    : n.score >= 80 ? `Strong numerology resonance (Moolank ${n.moolankCompatibility.numberA} & ${n.moolankCompatibility.numberB}).`
+    : n.score >= 60 ? 'Moderate numerology alignment — your numbers show natural affinity.'
+    : 'Different numerological energies — this can bring complementary perspectives.';
+
+  return { strengths, frictionPoints, reasons, astrologyNarrative, numerologyNarrative };
 }

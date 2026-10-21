@@ -1,65 +1,86 @@
 /**
  * @file astrology-scorer.ts
- * @description Orchestrates the full Vedic astrology compatibility score.
+ * @description Combines Guna Milan, Manglik and supporting Vedic signals into
+ * one 0–100 Kundli compatibility score.
  */
 
 import type { ConfidenceLevel } from '../types';
-import type { AstroProfile, AstrologyConfig, AstrologyCompatibilityResult } from './astrology-types';
+import type { AstroProfile, AstrologyConfig, AstrologyCompatibilityResult, GunaMilanOptions } from './astrology-types';
 import { calculateGunaMilan } from './ashtakoota';
 import { checkManglikCompatibility } from './manglik';
 import { calculateAllVedicSignals } from './vedic-signals';
 
-const METHODOLOGY = 'vedic_v1';
+const METHODOLOGY = 'vedic_v2';
 
 const DEFAULT_CONFIG: AstrologyConfig = {
     gunaMilanWeight: 0.70,
-    vedicSignalsWeight: 0.20,
-    manglikWeight: 0.10
+    vedicSignalsWeight: 0.15,
+    manglikWeight: 0.15,
 };
 
-export function calculateAstrologyScore(profileA: AstroProfile, profileB: AstroProfile, config: AstrologyConfig = DEFAULT_CONFIG): AstrologyCompatibilityResult {
-    // 1. Guna Milan
-    const gunaMilan = calculateGunaMilan(profileA, profileB);
-    const gunaMilanScoreRaw = gunaMilan.percentage; // 0 to 100
+export const DOSHA_PENALTY = { nadi: 18, bhakoot: 8, gana: 4 } as const;
+export const MIN_TRADITIONAL_GUNA = 18;
+export const BELOW_THRESHOLD_CAP = 45;
 
-    // 2. Vedic Signals
+const CONFIDENCE_RANK: Record<ConfidenceLevel, number> = { insufficient_data: 0, low: 1, moderate: 2, strong: 3 };
+
+/** How much of the raw astrology signal to trust, by data quality. */
+const RELIABILITY: Record<ConfidenceLevel, number> = { strong: 1, moderate: 1, low: 0.6, insufficient_data: 0 };
+
+function weakest(a: ConfidenceLevel, b: ConfidenceLevel): ConfidenceLevel {
+    return CONFIDENCE_RANK[a] <= CONFIDENCE_RANK[b] ? a : b;
+}
+
+export function calculateAstrologyScore(
+    profileA: AstroProfile,
+    profileB: AstroProfile,
+    config: AstrologyConfig = DEFAULT_CONFIG,
+    options: GunaMilanOptions = {}
+): AstrologyCompatibilityResult {
+    const gunaMilan = calculateGunaMilan(profileA, profileB, options);
+
     const vedicSignals = calculateAllVedicSignals(profileA, profileB);
-    const signalValues = vedicSignals.map(s => {
-        if (s.result === 'strong') return 100;
-        if (s.result === 'moderate') return 75;
-        if (s.result === 'neutral') return 50;
-        return 25;
-    });
-    const signalsScoreRaw = signalValues.length > 0 ? (signalValues.reduce((a, b) => a + b, 0) / signalValues.length) : 50;
+    const signalValue = { strong: 100, moderate: 75, neutral: 50, weak: 25 } as const;
+    const signalsScore = vedicSignals.length
+        ? vedicSignals.reduce((s, v) => s + signalValue[v.result], 0) / vedicSignals.length
+        : 50;
 
-    // 3. Manglik Check
     const manglik = checkManglikCompatibility(profileA, profileB);
-    let manglikScoreRaw = 100; // default compatible
-    if (!manglik.compatible) {
-        manglikScoreRaw = manglik.severity === 'strong' ? 0 : 50;
-    } else if (manglik.explanation.includes('unknown')) {
-        manglikScoreRaw = 75; // unknown baseline
-    }
 
-    // Weighted Combine
-    const finalScore = Math.round(
-        (gunaMilanScoreRaw * config.gunaMilanWeight) +
-        (signalsScoreRaw * config.vedicSignalsWeight) +
-        (manglikScoreRaw * config.manglikWeight)
-    );
+    const totalWeight = config.gunaMilanWeight + config.vedicSignalsWeight + config.manglikWeight;
+    let raw = (
+        gunaMilan.effectivePercentage * config.gunaMilanWeight +
+        signalsScore * config.vedicSignalsWeight +
+        manglik.score * config.manglikWeight
+    ) / (totalWeight || 1);
 
-    // Combine confidence — map to ConfidenceLevel union
-    let confidence: ConfidenceLevel = 'strong';
-    if (profileA.confidence === 'insufficient_data' || profileB.confidence === 'insufficient_data') confidence = 'insufficient_data';
-    else if (profileA.confidence === 'low' || profileB.confidence === 'low') confidence = 'low';
-    else if (profileA.confidence === 'moderate' || profileB.confidence === 'moderate') confidence = 'moderate';
+    // Uncancelled doshas are serious in tradition — penalise beyond the lost points.
+    if (gunaMilan.hasNadiDosha) raw -= DOSHA_PENALTY.nadi;
+    if (gunaMilan.hasBhakootDosha) raw -= DOSHA_PENALTY.bhakoot;
+    if (gunaMilan.hasGanaDosha) raw -= DOSHA_PENALTY.gana;
+    // Below the traditional 18-Guna threshold a match is "not recommended".
+    if (gunaMilan.totalScore < MIN_TRADITIONAL_GUNA) raw = Math.min(raw, BELOW_THRESHOLD_CAP);
+
+    const confidence = weakest(profileA.confidence, profileB.confidence);
+    // Uncertain charts are shrunk toward neutral (50) so they can't win on noise.
+    const reliability = RELIABILITY[confidence];
+    const score = Math.round(Math.max(0, Math.min(100, 50 + (raw - 50) * reliability)));
+
+    const notes: string[] = [`${gunaMilan.totalScore}/36 Guna`];
+    const nadi = gunaMilan.kootas[7]!;
+    const bhakoot = gunaMilan.kootas[6]!;
+    if (nadi.hasDosha) notes.push(nadi.doshaCancelled ? 'Nadi dosha cancelled' : 'Nadi dosha');
+    if (bhakoot.hasDosha) notes.push(bhakoot.doshaCancelled ? 'Bhakoot dosha cancelled' : 'Bhakoot dosha');
+    if (manglik.status === 'mutual_cancellation') notes.push('both Manglik');
+    if (manglik.status === 'mismatch') notes.push(`Manglik mismatch (${manglik.severity})`);
 
     return {
-        score: Math.max(0, Math.min(100, finalScore)),
+        score,
         gunaMilan,
         vedicSignals,
         manglik,
         confidence,
-        methodologyVersion: METHODOLOGY
+        summary: notes.join(' · '),
+        methodologyVersion: METHODOLOGY,
     };
 }
