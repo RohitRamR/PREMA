@@ -35,7 +35,8 @@ export default function Invitations() {
 
   const accept = (inv: Invitation) => {
     const booking = respondToInvitation(inv.id, 'accept');
-    if (booking) router.push(`/date/booking/${booking.id}`);
+    // Paid dates go straight to payment; free ones to the booking.
+    if (booking) router.push(booking.status === 'payment_pending' ? `/date/pay/${booking.id}` : `/date/booking/${booking.id}`);
   };
   const decline = (inv: Invitation, name?: string) =>
     Alert.alert('Decline this invitation?', `${name ?? 'They'} will see that you’ve declined. You can still chat.`, [
@@ -130,7 +131,7 @@ export default function Invitations() {
                 <View style={s.actions}>
                   <Tap onPress={() => cancelInvitation(inv.id)} style={s.btnSoft}><Text style={s.btnSoftText}>Withdraw</Text></Tap>
                   <Tap
-                    onPress={() => { const b = simulateTheyAccept(inv.id); if (b) router.push(`/date/booking/${b.id}`); }}
+                    onPress={() => { const b = simulateTheyAccept(inv.id); if (b) router.push(b.status === 'payment_pending' ? `/date/pay/${b.id}` : `/date/booking/${b.id}`); }}
                     style={s.previewBtn}
                   >
                     <Text style={s.previewText}>Preview: {m?.name} accepts</Text>

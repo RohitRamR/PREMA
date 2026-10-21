@@ -7,6 +7,7 @@ import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
 import CelestialBackground from '../../components/CelestialBackground';
 import Icon from '../../components/Icon';
 import Logo from '../../components/Logo';
+import { addMatch } from '../../src/store/chats';
 import { AuraFrame, AuraRing } from '../../components/Aura';
 import { C, Tap, cardShadow, serif } from '../../components/prema-ui';
 import StatusFade from '../../components/StatusFade';
@@ -63,8 +64,11 @@ function LikesTabScreen() {
 
   const pass = (id: string) => setIncoming((l) => l.filter((x) => x.id !== id));
   const connect = (id: string) => {
-    setIncoming((l) => l.filter((x) => x.id !== id));
-    router.push('/ItSAMatch');
+    const l = incoming.find((x) => x.id === id);
+    setIncoming((all) => all.filter((x) => x.id !== id));
+    if (!l) return;
+    addMatch({ id: l.id, name: l.name, age: l.age, city: l.city, photo: l.photo, match: l.match });
+    router.push({ pathname: '/ItSAMatch', params: { id: l.id, name: l.name, photo: l.photo } });
   };
 
   return (
@@ -108,7 +112,7 @@ function LikesTabScreen() {
               <View style={s.grid}>
                 {incoming.map((l) => (
                   <View key={l.id} style={[s.card, { width: cardW }]}>
-                    <Tap onPress={() => router.push('/MatchDetail')} pressedStyle={{ opacity: 0.92 }}>
+                    <Tap onPress={() => router.push({ pathname: '/MatchDetail', params: { id: l.id } })} pressedStyle={{ opacity: 0.92 }}>
                       <View style={{ height: cardW * 1.2 }}>
                         <Image source={{ uri: l.photo }} style={StyleSheet.absoluteFill} />
                         <Svg style={StyleSheet.absoluteFill} preserveAspectRatio="none">
@@ -153,7 +157,7 @@ function LikesTabScreen() {
               {YOU_LIKED.map((l, i) => (
                 <Tap
                   key={l.id}
-                  onPress={() => router.push('/MatchDetail')}
+                  onPress={() => router.push({ pathname: '/MatchDetail', params: { id: l.id } })}
                   style={[s.row, i < YOU_LIKED.length - 1 ? s.rowDivider : null]}
                   pressedStyle={{ backgroundColor: 'rgba(116,180,242,0.06)' }}
                 >

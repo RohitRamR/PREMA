@@ -65,7 +65,7 @@ function MeetScreen() {
     opacity: flip.interpolate({ inputRange: [-1, 0, 1], outputRange: [0, 1, 0] }),
     transform: [
       { translateX: flip.interpolate({ inputRange: [-1, 0, 1], outputRange: [40, 0, -cardW * 0.6] }) },
-      { rotate: flip.interpolate({ inputRange: [-1, 0, 1], outputRange: ['4deg', '-1.5deg', '-12deg'] }) },
+      { rotate: flip.interpolate({ inputRange: [-1, 0, 1], outputRange: ['4deg', '-1deg', '-12deg'] }) },
     ],
   };
 
@@ -91,10 +91,20 @@ function MeetScreen() {
 
         {/* ── Date idea deck ── */}
         <View style={{ paddingHorizontal: 28, marginTop: 4 }}>
-          <View style={{ marginTop: 6 }}>
-            {/* stacked cards behind */}
-            <View style={[s.deckBack, { transform: [{ rotate: '4deg' }], backgroundColor: '#FFE8EE' }]} />
-            <View style={[s.deckBack, { transform: [{ rotate: '-4deg' }], backgroundColor: '#E7F0F9' }]} />
+          <View style={{ marginTop: 10, marginBottom: 22 }}>
+            {/* The next two ideas, fanned out behind like real cards so their photos peek out */}
+            {[2, 1].map((k) => {
+              const next = ideas[(ideaIdx + k) % ideas.length];
+              const tilt = k === 1 ? 5 : -6;
+              return (
+                <View
+                  key={k}
+                  style={[s.deckBack, { transform: [{ translateX: k === 1 ? 12 : -12 }, { translateY: k === 1 ? 4 : 10 }, { rotate: `${tilt}deg` }] }]}
+                >
+                  <Image source={{ uri: next.photos[0] }} style={[s.postcardImg, { opacity: k === 1 ? 0.95 : 0.8 }]} />
+                </View>
+              );
+            })}
             <Animated.View style={[s.postcard, deckStyle]}>
               <Tap onPress={() => router.push(`/date/activity/${idea.id}`)} pressedStyle={{ opacity: 0.95 }}>
                 <Image source={{ uri: idea.photos[0] }} style={s.postcardImg} />
@@ -283,7 +293,11 @@ const s = StyleSheet.create({
 
   kicker: { color: C.pink, fontSize: 13, fontWeight: '800', letterSpacing: 0.4 },
 
-  deckBack: { position: 'absolute', left: 6, right: 6, top: 10, bottom: 4, borderRadius: 26 },
+  deckBack: {
+    position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, borderRadius: 26, padding: 12,
+    backgroundColor: C.white,
+    shadowColor: '#1A2E44', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 3,
+  },
   postcard: {
     backgroundColor: C.white, borderRadius: 26, padding: 12, paddingBottom: 14,
     shadowColor: '#1A2E44', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.1, shadowRadius: 20, elevation: 6,

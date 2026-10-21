@@ -133,4 +133,8 @@ export type Booking = {
   pass: { token: string; validFrom: string; expiresAt: string; redeemedAt: string | null } | null;
   review: Review | null;
   createdAt: string;
+  /** How the couple pays: one person covers it all, or each pays half. */
+  payment?: { mode: PaymentMode; mePaid: boolean; themPaid: boolean };
 };
+
+export type PaymentMode = 'full' | 'split';

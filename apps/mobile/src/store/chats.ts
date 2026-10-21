@@ -91,6 +91,23 @@ export function sendMessage(id: string, text: string, from: Message['from'] = 'm
   }));
 }
 
+/** Total unread messages across all conversations (drives the Chats tab dot). */
+export function useUnreadCount() {
+  return useConversations().reduce((n, c) => n + c.unread, 0);
+}
+
+/** A new mutual match opens an empty conversation (no-op if one already exists). */
+export function addMatch(p: { id: string; name: string; age: number; city: string; photo: string; match: number }) {
+  if (conversations.some((c) => c.id === p.id)) return;
+  conversations = [{
+    ...p, online: false, unread: 0, messages: [],
+    prompt: 'What made you smile this week?',
+  }, ...conversations];
+  emit();
+}
+
+export const hasConversation = (id: string) => conversations.some((c) => c.id === id);
+
 export function timeLabel(at: number) {
   const diff = Date.now() - at;
   if (diff < min) return 'now';

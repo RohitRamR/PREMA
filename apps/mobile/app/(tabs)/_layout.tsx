@@ -5,11 +5,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from '../../components/Icon';
 import { Ionicons } from '@expo/vector-icons';
 import Svg, { Path } from 'react-native-svg';
+import { useUnreadCount } from '../../src/store/chats';
 import { Dimensions } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
 function CustomTab({ name, title, focused, isMeetButton }: { name: string; title: string; focused: boolean; isMeetButton?: boolean }) {
+  const unread = useUnreadCount();
   if (isMeetButton) {
     return (
       <View style={{ alignItems: 'center', justifyContent: 'center', width: 70, height: 60 }}>
@@ -65,7 +67,7 @@ function CustomTab({ name, title, focused, isMeetButton }: { name: string; title
       return (
         <View style={{ position: 'relative' }}>
           <Ionicons name="chatbubble-ellipses-outline" size={26} color={focused ? '#74B4F2' : '#A0AAB8'} />
-          <View style={{
+          {unread > 0 ? <View style={{
             position: 'absolute',
             top: -2,
             right: -4,
@@ -75,7 +77,7 @@ function CustomTab({ name, title, focused, isMeetButton }: { name: string; title
             backgroundColor: '#FF6B8B',
             borderWidth: 2,
             borderColor: '#FFFFFF',
-          }} />
+          }} /> : null}
         </View>
       );
     }

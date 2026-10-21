@@ -44,6 +44,10 @@ function PremaLogoMark({ size = 34, color = '#FFFFFF' }: { size?: number; color?
   );
 }
 
+// Dev only: lets you tap Continue through sign-up without phone/OTP or any
+// required fields. Set to false before release to restore real validation.
+const SKIP_SIGNUP_CHECKS = true;
+
 const GRID_COLUMN_1 = [
   require('../../assets/images/adesh-bankar-t0uFIywV6g4-unsplash.jpg'),
   require('../../assets/images/anthony-tran-3Xkms-gMvZg-unsplash.jpg'),
@@ -494,6 +498,51 @@ function FloatingCapsule({
 }
 
 // ─── MAIN ONBOARDING COMPONENT ───
+// ─── Ticket shape: rounded card with real half-circle notches at the tear line ───
+const TICKET_TEAR = 76;
+function ticketPath(w: number, h: number, r = 24, ny = TICKET_TEAR, nr = 12) {
+  return `M${r},0 H${w - r} A${r},${r} 0 0 1 ${w},${r} V${ny - nr} A${nr},${nr} 0 0 0 ${w},${ny + nr} ` +
+    `V${h - r} A${r},${r} 0 0 1 ${w - r},${h} H${r} A${r},${r} 0 0 1 0,${h - r} V${ny + nr} ` +
+    `A${nr},${nr} 0 0 0 0,${ny - nr} V${r} A${r},${r} 0 0 1 ${r},0 Z`;
+}
+
+function Ticket({ variant, selected, children }: { variant: 'pink' | 'light'; selected: boolean; children: React.ReactNode }) {
+  const [size, setSize] = useState({ w: 0, h: 0 });
+  const pink = variant === 'pink';
+  const gid = `ticket-${variant}`;
+  return (
+    <View
+      onLayout={(e) => setSize({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })}
+      style={{
+        // No background, so the iOS shadow follows the ticket shape (notches included).
+        shadowColor: pink ? '#E2456B' : selected ? '#FF6B8B' : '#2C496A',
+        shadowOffset: { width: 0, height: selected ? 12 : 8 },
+        shadowOpacity: pink ? (selected ? 0.42 : 0.26) : selected ? 0.25 : 0.08,
+        shadowRadius: selected ? 16 : 12,
+      }}
+    >
+      {size.w > 0 ? (
+        <Svg width={size.w} height={size.h} style={{ position: 'absolute' }}>
+          <Defs>
+            <LinearGradient id={gid} x1="0" y1="0" x2="1" y2="1">
+              <Stop offset="0" stopColor={pink ? (selected ? '#FFA0B4' : '#FF97AE') : selected ? '#FFF4F7' : '#FFFFFF'} />
+              <Stop offset="0.55" stopColor={pink ? '#FF6B8B' : selected ? '#FFF4F7' : '#FFFFFF'} />
+              <Stop offset="1" stopColor={pink ? '#E2456B' : selected ? '#FFF4F7' : '#FFFFFF'} />
+            </LinearGradient>
+          </Defs>
+          <Path
+            d={ticketPath(size.w, size.h)}
+            fill={`url(#${gid})`}
+            stroke={!pink && selected ? '#FF6B8B' : 'none'}
+            strokeWidth={2}
+          />
+        </Svg>
+      ) : null}
+      {children}
+    </View>
+  );
+}
+
 export default function AnimatedSignUp() {
   const router = useRouter();
   const flatListRef = useRef<FlatList>(null);
@@ -521,6 +570,14 @@ export default function AnimatedSignUp() {
   const [birthTime, setBirthTime] = useState('');
   const [birthCity, setBirthCity] = useState('');
   const [gender, setGender] = useState('');
+
+  // Step 2: Invite-only access. An invite code unlocks the app; everyone else joins the waiting list.
+  const [access, setAccess] = useState<'invite' | 'waitlist' | null>(null);
+  const [inviteCode, setInviteCode] = useState('');
+  const accessRef = useRef<'invite' | 'waitlist' | null>(null);
+  useEffect(() => { accessRef.current = access; }, [access]);
+  const cleanInvite = inviteCode.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+  const inviteReady = cleanInvite.length >= 6 && cleanInvite.length <= 12;
 
   // Step 3: Target Dating Preferences
   const [targetGenders, setTargetGenders] = useState<string[]>([]);
@@ -676,7 +733,11 @@ export default function AnimatedSignUp() {
               }).start(() => {
                 // 3. After the second spin finishes, route to home!
                 later(() => {
-                  router.replace('/(tabs)');
+                  if (accessRef.current === 'waitlist') {
+                    router.replace({ pathname: '/(onboarding)/waitlist', params: { phone } });
+                  } else {
+                    router.replace('/(tabs)');
+                  }
                 }, 300); // Tiny pause before transitioning
               });
             });
@@ -687,12 +748,12 @@ export default function AnimatedSignUp() {
         }, 500);
       }, 400);
     });
-  }, [leftX, rightX, startWalkCycle, stopWalkCycle, flowerOpacity, messageOpacity, router]);
+  }, [leftX, rightX, startWalkCycle, stopWalkCycle, flowerOpacity, messageOpacity, router, phone]);
 
   const goToStep = useCallback((nextStep: number) => {
     if (transitioningRef.current || nextStep < 0) return;
     Keyboard.dismiss();
-    if (nextStep >= 7) {
+    if (nextStep >= 8) {
       playFinale();
       return;
     }
@@ -705,7 +766,7 @@ export default function AnimatedSignUp() {
     stepRef.current = nextStep;
     setStep(nextStep);
 
-    const progressRatio = nextStep / 6;
+    const progressRatio = nextStep / 7;
     const leftTarget = 20 + progressRatio * (SW / 2 - 80);
     const rightTarget = (SW - 60) - progressRatio * (SW / 2 - 80);
     startWalkCycle();
@@ -995,7 +1056,117 @@ export default function AnimatedSignUp() {
     </View>
   );
 
-  // ─── STEP 2: COSMIC BIRTH DATA ───
+  // ─── LAST STEP: INVITE CODE OR WAITING LIST ───
+  const renderAccess = () => {
+    const inviteOn = access === 'invite';
+    const waitOn = access === 'waitlist';
+    const radio = (on: boolean, light: boolean) => (
+      <View style={{
+        width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center', borderWidth: 2,
+        borderColor: light ? (on ? '#FFF' : 'rgba(255,255,255,0.6)') : (on ? C.pink : '#C9D5E3'),
+      }}>
+        {on ? <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: light ? '#FFF' : C.pink }} /> : null}
+      </View>
+    );
+    const stubLabel = { fontFamily: 'Nunito_800ExtraBold', fontSize: 11, letterSpacing: 1.8 } as const;
+
+    return (
+      <View style={{ width: SW, flex: 1, paddingHorizontal: 20, paddingTop: 18 }}>
+        {/* Their own first photo, ringed in pink with a "done" tick */}
+        <View style={{ alignItems: 'center' }}>
+          <View style={{ width: 88, height: 88 }}>
+            <Svg width={88} height={88} style={{ position: 'absolute' }}>
+              <Defs>
+                <LinearGradient id="accessRing" x1="0" y1="0" x2="1" y2="1">
+                  <Stop offset="0" stopColor="#FFC2CF" />
+                  <Stop offset="0.5" stopColor="#FF6B8B" />
+                  <Stop offset="1" stopColor="#E2456B" />
+                </LinearGradient>
+              </Defs>
+              <Circle cx={44} cy={44} r={42.5} stroke="url(#accessRing)" strokeWidth={3} fill="none" />
+            </Svg>
+            {photos[0] ? (
+              <Image source={photos[0]} style={{ position: 'absolute', left: 7, top: 7, width: 74, height: 74, borderRadius: 37 }} />
+            ) : (
+              <View style={{ position: 'absolute', left: 7, top: 7, width: 74, height: 74, borderRadius: 37, backgroundColor: C.light, alignItems: 'center', justifyContent: 'center' }}>
+                <Icon name="person" size={34} color={C.pri} />
+              </View>
+            )}
+            <View style={{ position: 'absolute', right: -2, bottom: 0, width: 28, height: 28, borderRadius: 14, backgroundColor: C.pink, borderWidth: 3, borderColor: C.bg, alignItems: 'center', justifyContent: 'center' }}>
+              <Icon name="check" size={14} color="#FFF" />
+            </View>
+          </View>
+          <Text style={{ fontFamily: 'Nunito_900Black', fontSize: 30, color: C.pri, marginTop: 16, letterSpacing: -0.5 }}>
+            {name.trim() ? `Almost there, ${name.trim().split(' ')[0]}` : 'Almost there'}
+          </Text>
+          <Text style={{ fontFamily: 'Nunito_600SemiBold', fontSize: 15.5, color: '#6B7F99', marginTop: 4 }}>
+            Prema is invite-only for now.
+          </Text>
+        </View>
+
+        <View style={{ marginTop: 26, gap: 14 }}>
+          {/* Invite ticket: pink, with a stub that holds the code */}
+          <Ticket variant="pink" selected={inviteOn}>
+            <Pressable onPress={() => setAccess('invite')} accessibilityRole="radio" accessibilityState={{ checked: inviteOn }}
+              style={{ height: TICKET_TEAR, flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 18 }}>
+              <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.22)', alignItems: 'center', justifyContent: 'center' }}>
+                <Icon name="confirmation_number" size={22} color="#FFF" />
+              </View>
+              <Text style={{ flex: 1, fontFamily: 'Nunito_900Black', fontSize: 17, color: '#FFF' }}>I have an invite</Text>
+              {radio(inviteOn, true)}
+            </Pressable>
+            <View style={{ marginHorizontal: 22, borderTopWidth: 2, borderStyle: 'dashed', borderColor: 'rgba(255,255,255,0.45)' }} />
+            <View style={{ paddingHorizontal: 18, paddingTop: 14, paddingBottom: 18 }}>
+              <Text style={[stubLabel, { color: 'rgba(255,255,255,0.85)' }]}>ADMIT ONE · PREMA</Text>
+              {inviteOn ? (
+                <View style={{ marginTop: 10, height: 52, borderRadius: 14, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10,
+                  backgroundColor: 'rgba(255,255,255,0.2)', borderWidth: 1.5, borderColor: inviteReady ? '#FFF' : 'rgba(255,255,255,0.35)' }}>
+                  <TextInput
+                    value={inviteCode}
+                    onChangeText={(t) => setInviteCode(t.toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 14))}
+                    placeholder="PREMA-XXXX"
+                    placeholderTextColor="rgba(255,255,255,0.6)"
+                    autoCapitalize="characters"
+                    autoCorrect={false}
+                    autoFocus
+                    returnKeyType="done"
+                    accessibilityLabel="Invite code"
+                    style={{ flex: 1, fontFamily: 'Nunito_900Black', fontSize: 19, letterSpacing: 3, color: '#FFF' }}
+                  />
+                  {inviteReady ? (
+                    <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: '#3BB273', alignItems: 'center', justifyContent: 'center' }}>
+                      <Icon name="check" size={14} color="#FFF" />
+                    </View>
+                  ) : null}
+                </View>
+              ) : (
+                <Text style={{ fontFamily: 'Nunito_700Bold', fontSize: 14, color: '#FFF', marginTop: 4 }}>Start meeting people today</Text>
+              )}
+            </View>
+          </Ticket>
+
+          {/* Waiting-list ticket: white, turns blush when chosen */}
+          <Ticket variant="light" selected={waitOn}>
+            <Pressable onPress={() => setAccess('waitlist')} accessibilityRole="radio" accessibilityState={{ checked: waitOn }}
+              style={{ height: TICKET_TEAR, flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 18 }}>
+              <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: waitOn ? C.pink : '#EAF2FB', alignItems: 'center', justifyContent: 'center' }}>
+                <Icon name="hourglass_empty" size={22} color={waitOn ? '#FFF' : C.pri} />
+              </View>
+              <Text style={{ flex: 1, fontFamily: 'Nunito_900Black', fontSize: 17, color: C.pri }}>Join the waiting list</Text>
+              {radio(waitOn, false)}
+            </Pressable>
+            <View style={{ marginHorizontal: 22, borderTopWidth: 2, borderStyle: 'dashed', borderColor: '#DCE6F1' }} />
+            <View style={{ paddingHorizontal: 18, paddingTop: 14, paddingBottom: 18 }}>
+              <Text style={[stubLabel, { color: '#8A9AB0' }]}>STANDBY · PREMA</Text>
+              <Text style={{ fontFamily: 'Nunito_700Bold', fontSize: 14, color: '#4A6585', marginTop: 4 }}>We’ll text you when it’s your turn</Text>
+            </View>
+          </Ticket>
+        </View>
+      </View>
+    );
+  };
+
+  // ─── STEP 3: COSMIC BIRTH DATA ───
   const renderBasics = () => (
     <View style={{ width: SW, flex: 1, paddingHorizontal: 28, paddingTop: 12 }}>
       <Text style={{ fontFamily: 'Georgia', fontSize: 32, color: C.pri, fontStyle: 'italic', marginBottom: 14, lineHeight: 38 }}>
@@ -1378,19 +1549,31 @@ export default function AnimatedSignUp() {
   );
 
   // One Continue button for every step, pinned above the walking figures so it is never clipped.
-  const cta = (() => {
+  // Real per-step requirements (used when SKIP_SIGNUP_CHECKS is false).
+  const baseCta = (() => {
     switch (step) {
       case 1: return { label: 'Verify & Continue', ok: phoneReady && otp.length === 6, next: 2 };
       case 2: return { label: 'Continue', ok: !!(name.trim() && dobReady && gender), next: 3 };
       case 3: return { label: 'Continue', ok: targetGenders.length > 0, next: 4 };
       case 4: return { label: 'Continue', ok: !!intent, next: 5 };
       case 5: return { label: selectedAnchors.length ? `Continue · ${selectedAnchors.length}/5` : 'Continue', ok: selectedAnchors.length > 0, next: 6 };
-      case 6: return { label: 'Complete Profile', ok: photos.length > 0, next: 7 };
+      case 6: return { label: 'Continue', ok: photos.length > 0, next: 7 };
+      case 7: return access === 'waitlist'
+        ? { label: 'Save my spot', ok: true, next: 8 }
+        : { label: 'Unlock Prema', ok: access === 'invite' && inviteReady, next: 8 };
       default: return null;
     }
   })();
 
-  const slides = [renderWelcome, renderVerify, renderBasics, renderWhoToMeet, renderIntent, renderResonanceAnchors, renderPhotosAndBio];
+  const cta = (() => {
+    const c = baseCta;
+    // Dev: no credentials or required fields — every Continue is tappable.
+    return c && SKIP_SIGNUP_CHECKS
+      ? { ...c, ok: true, label: step === 7 && !access ? 'Continue' : c.label }
+      : c;
+  })();
+
+  const slides = [renderWelcome, renderVerify, renderBasics, renderWhoToMeet, renderIntent, renderResonanceAnchors, renderPhotosAndBio, renderAccess];
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: C.bg }} edges={step === 0 ? [] : ['top']}>
@@ -1410,15 +1593,15 @@ export default function AnimatedSignUp() {
               <Icon name="chevron_left" size={26} color={C.pri} />
             </Pressable>
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
-              {/* Track spans exactly from the first node's centre to the last (nodes are 42 wide). */}
-              <View style={{ position: 'absolute', top: 8, left: 21, right: 21, height: 1.5, backgroundColor: 'rgba(44,73,106,0.15)', zIndex: 1 }} />
+              {/* Track spans exactly from the first node's centre to the last (nodes are 36 wide). */}
+              <View style={{ position: 'absolute', top: 8, left: 18, right: 18, height: 1.5, backgroundColor: 'rgba(44,73,106,0.15)', zIndex: 1 }} />
               <RNAnimated.View style={{
-                position: 'absolute', top: 8, left: 21, right: 21, height: 1.5, backgroundColor: C.pri, zIndex: 1,
+                position: 'absolute', top: 8, left: 18, right: 18, height: 1.5, backgroundColor: C.pri, zIndex: 1,
                 transformOrigin: 'left',
-                transform: [{ scaleX: scrollX.interpolate({ inputRange: [0, SW * 6], outputRange: [0.0001, 1], extrapolate: 'clamp' }) }],
+                transform: [{ scaleX: scrollX.interpolate({ inputRange: [0, SW * 7], outputRange: [0.0001, 1], extrapolate: 'clamp' }) }],
               }} />
 
-              {['WELCOME', 'AUTH', 'COSMIC', 'MATCH', 'INTENT', 'ANCHORS', 'PROFILE'].map((label, i) => {
+              {['WELCOME', 'AUTH', 'COSMIC', 'MATCH', 'INTENT', 'ANCHORS', 'PROFILE', 'ACCESS'].map((label, i) => {
                 const starOpacity = scrollX.interpolate({
                   inputRange: [(i - 0.6) * SW, i * SW, (i + 0.6) * SW],
                   outputRange: [0, 1, 0],
@@ -1444,7 +1627,7 @@ export default function AnimatedSignUp() {
                 });
 
                 return (
-                  <View key={label} style={{ alignItems: 'center', zIndex: 2, width: 42 }}>
+                  <View key={label} style={{ alignItems: 'center', zIndex: 2, width: 36 }}>
                     {/* Wire hanging from the line */}
                     <View style={{ width: 1, height: 6, backgroundColor: 'rgba(44,73,106,0.2)', marginTop: 8 }} />
                     

@@ -11,7 +11,7 @@ import {
   ACTIVITIES, CATEGORIES, EVENTS, INITIAL_BOOKINGS, INITIAL_INVITATIONS, OFFERS, VENUES,
 } from './mock';
 import type {
-  Activity, Booking, BookingStatus, DateEvent, Invitation, Offer, Review, Slot, Subject, Venue,
+  Activity, Booking, BookingStatus, DateEvent, Invitation, Offer, PaymentMode, Review, Slot, Subject, Venue,
 } from './types';
 
 // ── Catalogue (read-only; swap for API) ─────────────────────────────────────
@@ -169,6 +169,34 @@ export function previewCompletePayment(id: string) {
   patchBooking(id, (b) => (b.status === 'payment_pending' ? { ...b, status: 'confirmed', pass: makePass(b.startsAt) } : b));
 }
 
+/** Half of the total, rounded up to the rupee, so splits never short the venue. */
+export const halfOf = (paise: number) => Math.ceil(paise / 200) * 100;
+
+/**
+ * PREVIEW ONLY — you pay, either the whole amount or your half.
+ * Full → confirmed straight away. Split → waits for the other half.
+ */
+export function payBooking(id: string, mode: PaymentMode) {
+  patchBooking(id, (b) => {
+    if (b.status !== 'payment_pending') return b;
+    const themPaid = b.payment?.themPaid ?? false;
+    if (mode === 'full' || themPaid) {
+      return { ...b, status: 'confirmed', pass: makePass(b.startsAt), payment: { mode, mePaid: true, themPaid: mode === 'split' } };
+    }
+    return { ...b, payment: { mode: 'split', mePaid: true, themPaid: false } };
+  });
+}
+
+/** PREVIEW ONLY — stands in for your date paying their half on their phone. */
+export function previewPartnerPaysHalf(id: string) {
+  patchBooking(id, (b) => {
+    if (b.status !== 'payment_pending' || b.payment?.mode !== 'split') return b;
+    return b.payment.mePaid
+      ? { ...b, status: 'confirmed', pass: makePass(b.startsAt), payment: { ...b.payment, themPaid: true } }
+      : { ...b, payment: { ...b.payment, themPaid: true } };
+  });
+}
+
 /** PREVIEW ONLY — stands in for the venue confirming a requested time. */
 export function previewVenueConfirms(id: string) {
   patchBooking(id, (b) => (b.status === 'awaiting_response'
@@ -179,7 +207,8 @@ export function previewVenueConfirms(id: string) {
 export function cancelBooking(id: string) {
   patchBooking(id, (b) => {
     if (!['confirmed', 'payment_pending', 'awaiting_response'].includes(b.status)) return b;
-    const paid = b.status === 'confirmed' && b.totalPaise > 0;
+    // Any money taken (full payment, or one half of a split) is refunded.
+    const paid = b.totalPaise > 0 && (b.status === 'confirmed' || !!b.payment?.mePaid || !!b.payment?.themPaid);
     return { ...b, status: paid ? 'refunded' : 'cancelled', pass: null };
   });
 }
