@@ -43,3 +43,7 @@ yarn-error.log*
 
 # Third-party skill packs are downloaded locally, not committed
 .github/skills/vendor/
+
+# Python
+__pycache__/
+*.pyc
