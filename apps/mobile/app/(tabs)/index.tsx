@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { View, Image, Dimensions, Pressable, FlatList, Animated, Share } from 'react-native';
 import Text, { NunitoScope } from '../../components/PremaText';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -10,6 +10,7 @@ import Svg, { Path } from 'react-native-svg';
 import { AuraFrame } from '../../components/Aura';
 import { useSafety } from '../../src/store/safety';
 import { useRankedDeck } from '../../src/features/compatibility';
+import { PEOPLE } from '../../src/store/people';
 
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
 
@@ -18,54 +19,49 @@ const CARD_WIDTH = width * 0.74; // Smaller card to show more of side cards
 const CARD_SPACING = 20;
 const SNAP_INTERVAL = CARD_WIDTH + CARD_SPACING;
 
+// Icons for interest chips on the deck (MaterialIcons names).
+const INTEREST_ICONS: [RegExp, string][] = [
+  [/coffee|chai/i, 'local-cafe'], [/music|ghazal|carnatic|song/i, 'music-note'], [/travel|road trip/i, 'flight'],
+  [/hik|trek|nature/i, 'landscape'], [/art|sketch|paint|pottery|ceramic/i, 'palette'], [/read|book|writ/i, 'menu-book'],
+  [/tech|code/i, 'computer'], [/cook|bak|biryani|food/i, 'restaurant'], [/yoga|slow|spa/i, 'self-improvement'],
+  [/photo/i, 'photo-camera'], [/dance/i, 'music-note'], [/garden|plant/i, 'local-florist'], [/game/i, 'casino'],
+  [/temple|heritage|architecture/i, 'account-balance'], [/family/i, 'home'], [/volunteer/i, 'volunteer-activism'],
+];
+const iconFor = (interest: string) => INTEREST_ICONS.find(([re]) => re.test(interest))?.[1] ?? 'favorite-border';
+
+// Ananya is the hand-made demo card; everyone else comes from the shared people list.
+const ANANYA_CARD = {
+  id: 'ananya',
+  name: 'Ananya',
+  match: 96, // fallback only — the matching engine supplies the real score
+  age: 24,
+  verified: true,
+  occupation: 'Design Student',
+  distance: '3 km away',
+  image: 'https://images.unsplash.com/photo-1524250502761-1ac6f2e30d43?q=80&w=800&auto=format&fit=crop',
+  quote: '"Coffee, good people and a better tomorrow"',
+  interests: [
+    { id: '1', name: 'Coffee', icon: 'local-cafe' },
+    { id: '2', name: 'Music', icon: 'music-note' },
+    { id: '3', name: 'Travel', icon: 'flight' },
+    { id: '4', name: 'Dogs', icon: 'pets' },
+  ]
+};
+
 const PROFILES = [
-  {
-    id: 'ananya',
-    name: 'Ananya',
-    match: 96, // fallback only — the matching engine supplies the real score
-    age: 24,
+  ANANYA_CARD,
+  ...Object.values(PEOPLE).map((p) => ({
+    id: p.id,
+    name: p.name,
+    match: p.match, // fallback only — the matching engine supplies the real score
+    age: p.age,
     verified: true,
-    occupation: 'Design Student',
-    distance: '3 km away',
-    image: 'https://images.unsplash.com/photo-1524250502761-1ac6f2e30d43?q=80&w=800&auto=format&fit=crop',
-    quote: '"Coffee, good people and a better tomorrow"',
-    interests: [
-      { id: '1', name: 'Coffee', icon: 'local-cafe' },
-      { id: '2', name: 'Music', icon: 'music-note' },
-      { id: '3', name: 'Travel', icon: 'flight' },
-      { id: '4', name: 'Dogs', icon: 'pets' },
-    ]
-  },
-  {
-    id: 'priya',
-    name: 'Priya',
-    match: 91, // fallback only — the matching engine supplies the real score
-    age: 24,
-    verified: true,
-    occupation: 'Architect',
-    distance: '5 km away',
-    image: 'https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?q=80&w=800&auto=format&fit=crop',
-    quote: '"Looking for my next adventure"',
-    interests: [
-      { id: '5', name: 'Art', icon: 'palette' },
-      { id: '6', name: 'Hiking', icon: 'landscape' },
-    ]
-  },
-  {
-    id: 'neha',
-    name: 'Neha',
-    match: 87, // fallback only — the matching engine supplies the real score
-    age: 23,
-    verified: true,
-    occupation: 'Software Engineer',
-    distance: '10 km away',
-    image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&auto=format&fit=crop',
-    quote: '"Debugging life one coffee at a time"',
-    interests: [
-      { id: '7', name: 'Tech', icon: 'computer' },
-      { id: '8', name: 'Reading', icon: 'menu-book' },
-    ]
-  }
+    occupation: p.job,
+    distance: p.city,
+    image: p.photos[0]!,
+    quote: `"${p.prompt.answer}"`,
+    interests: p.interests.slice(0, 4).map((name, i) => ({ id: `${p.id}-${i}`, name, icon: iconFor(name) })),
+  })),
 ];
 
 export default function DiscoverScreen() {
@@ -83,7 +79,9 @@ function DiscoverInner() {
   const flatListRef = useRef<any>(null);
 
   // Profiles you've passed on or liked leave the deck.
-  const [deckAll, setDeck] = useState(PROFILES);
+  // Remember only who you've passed/liked, so the deck always reflects the current people list.
+  const [doneIds, setDoneIds] = useState<string[]>([]);
+  const deckAll = useMemo(() => PROFILES.filter((p) => !doneIds.includes(p.id)), [doneIds]);
   const { blocked } = useSafety();
   // Real compatibility: people your filters/dealbreakers exclude are hidden, best match first.
   const ranked = useRankedDeck(deckAll);
@@ -103,7 +101,7 @@ function DiscoverInner() {
   const act = (kind: 'pass' | 'like' | 'star') => {
     const p = currentProfile;
     if (!p) return;
-    setDeck((d) => d.filter((x) => x.id !== p.id));
+    setDoneIds((d) => [...d, p.id]);
     const nextIdx = Math.min(safeIdx, deck.length - 2);
     setActiveIdx(Math.max(nextIdx, 0));
     requestAnimationFrame(() => flatListRef.current?.scrollToOffset({ offset: Math.max(nextIdx, 0) * SNAP_INTERVAL, animated: true }));
@@ -247,7 +245,7 @@ function DiscoverInner() {
               <Icon name="favorite" size={40} color="#FF6B8B" />
               <Text style={{ marginTop: 12, fontSize: 22, fontWeight: '800', color: '#2C496A', textAlign: 'center' }}>That’s everyone for today</Text>
               <Text style={{ marginTop: 6, fontSize: 15, color: '#8892A3', textAlign: 'center' }}>New introductions arrive tomorrow morning.</Text>
-              <Pressable onPress={() => { setDeck(PROFILES); setActiveIdx(0); }} style={{ marginTop: 18, paddingHorizontal: 20, height: 44, borderRadius: 22, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' }}>
+              <Pressable onPress={() => { setDoneIds([]); setActiveIdx(0); }} style={{ marginTop: 18, paddingHorizontal: 20, height: 44, borderRadius: 22, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' }}>
                 <Text style={{ color: '#2C496A', fontWeight: '700' }}>Start over (preview)</Text>
               </Pressable>
             </View>

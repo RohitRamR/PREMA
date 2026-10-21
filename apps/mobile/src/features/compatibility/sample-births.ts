@@ -19,6 +19,7 @@ const BENGALURU = { name: 'Bengaluru', lat: 12.9716, lon: 77.5946 };
 const HYDERABAD = { name: 'Hyderabad', lat: 17.385, lon: 78.4867 };
 const MADURAI = { name: 'Madurai', lat: 9.9252, lon: 78.1198 };
 const MYSURU = { name: 'Mysuru', lat: 12.2958, lon: 76.6394 };
+const PUNE = { name: 'Pune', lat: 18.5204, lon: 73.8567 };
 
 export const SAMPLE_BIRTHS: Record<string, SampleBirth> = {
   ananya: { gender: 'female', date: '2002-05-22', time: '07:45', place: CHENNAI, diet: 'vegetarian', religion: 'Hindu', heightCm: 163, education: 'masters' },
@@ -32,6 +33,9 @@ export const SAMPLE_BIRTHS: Record<string, SampleBirth> = {
   tara: { gender: 'female', date: '2000-05-05', time: '08:15', place: MADURAI, diet: 'vegetarian', religion: 'Hindu', heightCm: 161, education: 'masters' },
   nila: { gender: 'female', date: '2000-02-17', time: '23:30', place: CHENNAI, diet: 'vegetarian', religion: 'Hindu', heightCm: 159, education: 'masters' },
   aarohi: { gender: 'female', date: '1997-08-29', time: '15:55', place: BENGALURU, diet: 'vegetarian', religion: 'Jain', heightCm: 164, education: 'bachelors' },
+  sana: { gender: 'female', date: '1999-03-08', time: '09:25', place: HYDERABAD, diet: 'non_vegetarian', religion: 'Muslim', heightCm: 162, education: 'masters' },
+  lakshmi: { gender: 'female', date: '2001-01-14', time: '05:40', place: CHENNAI, diet: 'vegetarian', religion: 'Hindu', heightCm: 158, education: 'bachelors' },
+  shreya: { gender: 'female', date: '1998-07-03', time: null, place: PUNE, diet: 'eggetarian', religion: 'Hindu', heightCm: 165, education: 'bachelors' },
 };
 
 /** Basics for sample people who are not in the shared people list. */

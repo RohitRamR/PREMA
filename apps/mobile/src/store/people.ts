@@ -99,6 +99,30 @@ export const PEOPLE: Record<string, Person> = {
     interests: ['Pottery', 'Art', 'Plants'],
     prompt: { question: 'A perfect first date…', answer: 'Getting clay on our hands at the wheel.' },
   },
+  sana: {
+    id: 'sana', name: 'Sana', age: 27, city: 'Hyderabad', job: 'Data scientist', match: 88,
+    photos: [u('photo-1536766768598-e09213fdcf22')],
+    bio: 'Data scientist by day, ghazal listener by night. I collect old Hyderabadi recipes and new reasons to visit the Old City.',
+    lookingFor: 'Marriage within 1–2 years',
+    interests: ['Ghazals', 'Cooking', 'Reading', 'Heritage walks', 'Photography'],
+    prompt: { question: 'The way to win me over…', answer: 'Know your Irani chai spot and defend it passionately.' },
+  },
+  lakshmi: {
+    id: 'lakshmi', name: 'Lakshmi', age: 25, city: 'Chennai', job: 'Bharatanatyam teacher', match: 86,
+    photos: [u('photo-1617297873650-aef8f4e00b9b')],
+    bio: 'I teach Bharatanatyam on weekends and work in UX on weekdays. Family-first, always up for a Margazhi season concert.',
+    lookingFor: 'Intentional life partnership',
+    interests: ['Dance', 'Carnatic music', 'Filter coffee', 'Temples', 'Yoga'],
+    prompt: { question: 'Sundays are sacred for…', answer: 'Morning practice, a long lunch with family, and a nap I never regret.' },
+  },
+  shreya: {
+    id: 'shreya', name: 'Shreya', age: 28, city: 'Pune', job: 'Civil engineer', match: 85,
+    photos: [u('photo-1789500381106-ba13068a6520')],
+    bio: 'I build bridges for a living (literally). Monsoon treks in the Sahyadris are my reset button.',
+    lookingFor: 'Long-term relationship',
+    interests: ['Hiking', 'Travel', 'Road trips', 'Board games', 'Cooking'],
+    prompt: { question: 'A perfect first date…', answer: 'A sunrise trek to a fort, vada pav at the top.' },
+  },
 };
 
 export const person = (id: string | undefined) => (id ? PEOPLE[id] : undefined);
