@@ -27,7 +27,7 @@ export const SAMPLE_BIRTHS: Record<string, SampleBirth> = {
   neha: { gender: 'female', date: '2003-04-30', time: null, place: BENGALURU, diet: 'eggetarian', religion: 'Hindu', heightCm: 162, education: 'bachelors' },
   tara: { gender: 'female', date: '2000-05-05', time: '08:15', place: MADURAI, diet: 'vegetarian', religion: 'Hindu', heightCm: 161, education: 'masters' },
   nila: { gender: 'female', date: '2000-02-17', time: '23:30', place: CHENNAI, diet: 'vegetarian', religion: 'Hindu', heightCm: 159, education: 'masters' },
-  lakshmi: { gender: 'female', date: '2001-01-14', time: '05:40', place: CHENNAI, diet: 'vegetarian', religion: 'Hindu', heightCm: 158, education: 'bachelors' },
+  lakshmi: { gender: 'female', date: '2001-05-25', time: '05:40', place: CHENNAI, diet: 'vegetarian', religion: 'Hindu', heightCm: 158, education: 'bachelors' },
 };
 
 /** Basics for sample people who are not in the shared people list. */
