@@ -1,7 +1,7 @@
 // A little Cupid's arrow for "send your arrow": heart-shaped tip,
 // rounded shaft and soft leaf-like feathers.
 import React from 'react';
-import Svg, { Path, Circle } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 
 export default function CupidArrow({ size = 24, color = '#FFFFFF' }: { size?: number; color?: string }) {
   return (
@@ -18,8 +18,6 @@ export default function CupidArrow({ size = 24, color = '#FFFFFF' }: { size?: nu
       <Path d="M7.6 12 C6.3 14.8 4.6 16.1 2.6 16 C3.2 14 4.9 12.5 7.6 12 Z" fill={color} opacity={0.9} />
       <Path d="M10.4 12 C9.4 10 8.2 9.1 6.8 9.1 C7.2 10.6 8.4 11.6 10.4 12 Z" fill={color} opacity={0.75} />
       <Path d="M10.4 12 C9.4 14 8.2 14.9 6.8 14.9 C7.2 13.4 8.4 12.4 10.4 12 Z" fill={color} opacity={0.75} />
-      {/* tiny sparkle */}
-      <Circle cx={19.6} cy={4.6} r={1.1} fill={color} opacity={0.85} />
     </Svg>
   );
 }
