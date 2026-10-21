@@ -1,6 +1,7 @@
 // Sample people the app can show a full profile for (mock until the API lands).
 // One place for names, photos and basics, so Discover, Likes, Chats and the
 // profile page all agree on who someone is.
+import type { Vitals } from './profile';
 
 export type Person = {
   id: string;
@@ -14,11 +15,51 @@ export type Person = {
   lookingFor: string;
   interests: string[];
   prompt: { question: string; answer: string };
+  // Optional extras for a fuller profile page (Match Detail).
+  /** Shown instead of `city`, e.g. "Chennai • Alwarpet". */
+  area?: string;
+  vitals?: Vitals;
+  /** A second prompt card further down the profile. */
+  secondPrompt?: { question: string; answer: string };
+  /** Caption on the second photo. */
+  photoCaption?: string;
+  voice?: { question: string; recorded: boolean; seconds: number };
 };
 
 const u = (id: string, w = 1200) => `https://images.unsplash.com/${id}?auto=format&fit=crop&q=80&w=${w}`;
 
+/** Same photo at thumbnail width, for avatars and chat lists. */
+export const thumb = (url: string, w = 300) => url.replace(/([?&])w=\d+/, `$1w=${w}`);
+
 export const PEOPLE: Record<string, Person> = {
+  // The fullest sample profile (the default Match Detail page).
+  ananya: {
+    id: 'ananya', name: 'Ananya', age: 24, city: 'Chennai', job: 'Architectural historian', match: 96,
+    photos: [
+      u('photo-1524250502761-1ac6f2e30d43'),
+      u('photo-1534528741775-53994a69daeb'),
+      u('photo-1517841905240-472988babdf9'),
+      u('photo-1513207565459-d7f36bfa1222'),
+    ],
+    bio: 'I spend my days tracing the forgotten histories of Chettinad homes and my evenings trying to perfect my grandmother’s rasam recipe.',
+    lookingFor: 'Life partner · in the next 1–2 years',
+    interests: ['Filter coffee', 'Architecture', 'Slow living', 'Carnatic music', 'Heritage walks', 'Sketching', 'Rasam perfectionist'],
+    prompt: {
+      question: 'Sundays are sacred for…',
+      answer: 'Slow filter coffee, hunting for vintage maps in Moore Market, and dinners cooked together without any screens.',
+    },
+    area: 'Chennai • Alwarpet',
+    vitals: {
+      height: '5′4″', religion: 'Hindu', languages: 'Tamil, English',
+      education: 'M.Arch, SPA', diet: 'Vegetarian', family: 'Close-knit',
+    },
+    secondPrompt: {
+      question: 'A boundary I firmly hold…',
+      answer: 'No work talk after 8 PM. Life is too short to optimize every hour.',
+    },
+    photoCaption: 'Kanadukathan, last monsoon',
+    voice: { question: 'My grandmother taught me…', recorded: true, seconds: 24 },
+  },
   meera: {
     id: 'meera', name: 'Meera', age: 27, city: 'Bengaluru', job: 'Product designer', match: 91,
     photos: [u('photo-1517841905240-472988babdf9'), u('photo-1524504388940-b1c1722653e1')],

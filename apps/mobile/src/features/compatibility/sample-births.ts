@@ -30,12 +30,3 @@ export const SAMPLE_BIRTHS: Record<string, SampleBirth> = {
   lakshmi: { gender: 'female', date: '2001-05-25', time: '05:40', place: CHENNAI, diet: 'vegetarian', religion: 'Hindu', heightCm: 158, education: 'bachelors' },
 };
 
-/** Basics for sample people who are not in the shared people list. */
-export const EXTRA_BASICS: Record<string, { name: string; age: number; interests: string[]; lookingFor: string }> = {
-  ananya: {
-    name: 'Ananya',
-    age: 24,
-    interests: ['Filter coffee', 'Architecture', 'Slow living', 'Carnatic music', 'Heritage walks', 'Sketching'],
-    lookingFor: 'Life partner · in the next 1–2 years',
-  },
-};
