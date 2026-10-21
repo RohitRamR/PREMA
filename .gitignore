@@ -40,3 +40,6 @@ yarn-error.log*
 # Expo / Metro local state
 .expo/
 *.log
+
+# Third-party skill packs are downloaded locally, not committed
+.github/skills/vendor/

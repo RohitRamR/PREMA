@@ -24,10 +24,19 @@ prema/
 │   ├── ui/              Shared React components for web/admin
 │   ├── eslint-config/   Shared lint rules
 │   └── typescript-config/
-├── supabase/            Database schema and migrations
+├── supabase/            Database schema, migrations and access-rule tests
 ├── docs/                Product and architecture plans
+├── design-mockups/      Screen designs: a screenshot and HTML per screen,
+│                        plus the design brief (warm_editorial_intent/DESIGN.md)
+├── .github/
+│   ├── workflows/       CI (type-check and tests on every PR)
+│   └── skills/          PREMA engineering guidelines for AI coding assistants
+│                        (one SKILL.md per area: auth, Supabase, testing…)
 └── tools/codemods/      One-off scripts kept for history (not run)
 ```
+
+The mockups are design references, not the source of truth: where a mockup
+and the app disagree, the app wins.
 
 ## Getting started
 
