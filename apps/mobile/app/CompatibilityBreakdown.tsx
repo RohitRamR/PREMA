@@ -1,282 +1,313 @@
-import { useRouter } from 'expo-router';
+// "Why you match": the compatibility breakdown between you and one person.
+// ?id=<person id> picks who; without it, it shows your strongest match (Ananya).
 import React from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, ScrollView, Image, StyleSheet, Share, Alert } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
+import CelestialBackground from '../components/CelestialBackground';
 import Icon from '../components/Icon';
-import { View, Text, ScrollView, Image, Pressable, TextInput, Share, Alert } from 'react-native';
-import Svg, { Path, Circle, Rect } from 'react-native-svg';
-import { goBack } from '../components/nav';
+import Text, { NunitoScope } from '../components/PremaText';
+import { C, ScreenHeader, Tap, cardShadow } from '../components/prema-ui';
+import { useProfile } from '../src/store/profile';
+import { person } from '../src/store/people';
+import { useConversations } from '../src/store/chats';
+
+const ANANYA = {
+  id: 'ananya', name: 'Ananya', match: 96,
+  photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400',
+  interests: ['Filter coffee', 'Architecture', 'Slow living', 'Carnatic music', 'Heritage walks', 'Sketching'],
+};
+
+// Sample birth-chart data until real charts are computed server-side.
+const ME_CHART = { sign: 'Vrishabha', english: 'Taurus', nakshatra: 'Rohini', element: 'Earth', lifePath: 6 };
+const CHARTS: Record<string, { sign: string; english: string; nakshatra: string; element: string; lifePath: number }> = {
+  ananya: { sign: 'Kanya', english: 'Virgo', nakshatra: 'Hasta', element: 'Earth', lifePath: 9 },
+  riya: { sign: 'Karka', english: 'Cancer', nakshatra: 'Pushya', element: 'Water', lifePath: 2 },
+  priya: { sign: 'Makara', english: 'Capricorn', nakshatra: 'Shravana', element: 'Earth', lifePath: 4 },
+  neha: { sign: 'Meena', english: 'Pisces', nakshatra: 'Revati', element: 'Water', lifePath: 3 },
+  meera: { sign: 'Tula', english: 'Libra', nakshatra: 'Swati', element: 'Air', lifePath: 6 },
+  kavya: { sign: 'Meena', english: 'Pisces', nakshatra: 'Uttara Bhadrapada', element: 'Water', lifePath: 7 },
+};
+// The eight kootas of Ashtakoot milan and their maximum points (total 36).
+// Each with a plain-English meaning so anyone can read it.
+const KOOTAS: [string, number, string, string][] = [
+  ['Varna', 1, 'Work & values', 'How your outlooks on work, duty and growth line up.'],
+  ['Vashya', 2, 'Mutual pull', 'How naturally you influence and are drawn to each other.'],
+  ['Tara', 3, 'Health & luck', 'Wellbeing and good fortune you bring each other.'],
+  ['Yoni', 4, 'Intimacy', 'Physical and emotional closeness.'],
+  ['Graha Maitri', 5, 'Friendship', 'Mental compatibility and how well you get along.'],
+  ['Gana', 6, 'Temperament', 'Whether your natures are calm, lively or intense together.'],
+  ['Bhakoot', 7, 'Love & family', 'Emotional bond, family life and shared prosperity.'],
+  ['Nadi', 8, 'Health & children', 'Genetic and health harmony; the most important koota.'],
+];
+
+const R = 54, STROKE = 10, CIRC = 2 * Math.PI * R, BOX = 2 * R + STROKE;
 
 export default function CompatibilityBreakdown() {
-  const router = useRouter();
   return (
-    <SafeAreaView className="bg-surface text-on-surface font-body-md text-body-md flex flex-1">
-      <View className="bg-surface border-surface-container-highest bg-surface/85"><View className="h-16 px-space-16 max-w-[480px] mx-auto flex items-center justify-between flex-row"><View className="flex items-center gap-space-8 flex-row"><Pressable onPress={() => goBack(router)} aria-label="Go Back" className="w-11 h-11 -ml-space-8 flex items-center justify-center text-primary rounded-full flex-row" ><Icon name="arrow_back_ios_new" size={22} className="text-[22px]" /></Pressable><Image alt="PREMA Logo" className="h-7 w-[67px]" resizeMode="contain" source={require('../assets/images/logo.png')} /><Text className="font-headline-sm text-headline-sm text-primary tracking-tight">Profile Deep Dive</Text></View><View className="flex items-center gap-space-4 flex-row"><Image alt="Profile" className="w-8 h-8 rounded-full" source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBnpv7GVuzd6fs5TliuCiwIlpL0Rt2bVAxsXV2oCjBpVhp4UG2QcSA0fM1E5q0b-Bi3hANo_gxxHA1NjlLrqjE8ohvM6MdNojlI797HuC0AUkvZ0e2I5nz-fDRMdLXKv5aD9DyFmCPwJsDQdw4uv-m2poXm4GRuvfCjVpkLQEOf-1fFeXQOV7jP88Y-BVm6Xpd7_d4ZzQTNKZfgN_NLPKw3_kWAaoVLwLZ_BFzC19ixAfQnTKjdTvg9' }} /></View></View></View><ScrollView className="flex relative w-full max-w-[480px] mx-auto px-margin-mobile pt-16 bg-surface"><View className="flex w-full pb-28">
-
-<View className="flex items-center justify-between py-space-8 mb-space-12 flex-row">
-<View className="flex items-center gap-space-8 flex-row">
-<Text className="items-center justify-center w-7 h-7 rounded-full bg-secondary-container text-on-secondary-container">
-<Icon name="auto_awesome" size={16} className="text-[16px]" />
-</Text>
-<Text className="font-label-md text-label-md text-primary tracking-wide uppercase">Editorial Synergy Report</Text>
-</View>
-<View className="flex items-center gap-space-8 flex-row">
-<Pressable onPress={() => Share.share({ message: 'Our PREMA compatibility: 96% aligned on values, intent and lifestyle.' })} aria-label="Share Compatibility Analysis" className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container text-primary flex-row" >
-<Icon name="share" size={18} className="text-[18px]" />
-</Pressable>
-<Pressable onPress={() => Alert.alert('How scoring works', 'Your score blends shared values, relationship intent, lifestyle rhythm and communication style. It never includes looks or money, and it can’t be bought.')} aria-label="Info on Scoring" className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container text-primary flex-row">
-<Icon name="info" size={18} className="text-[18px]" />
-</Pressable>
-</View>
-</View>
-
-<View className="relative w-full rounded-xl p-space-20 shadow-sm flex items-center justify-center overflow-hidden mb-space-20">
-
-<Svg className="absolute w-full h-full opacity-45" fill="none" viewBox="0 0 380 220">
-<Circle cx="140" cy="90" r="70" stroke="#34647d" strokeDasharray="3 4" strokeWidth="1.2" />
-<Circle cx="240" cy="90" r="70" stroke="#34647d" strokeDasharray="3 4" strokeWidth="1.2" />
-<Circle cx="190" cy="90" opacity="0.3" r="88" stroke="#172b3a" strokeWidth="0.8" />
-<Circle cx="190" cy="90" r="110" stroke="#b1e0fe" strokeDasharray="4 6" strokeWidth="1" />
-<Circle cx="108" cy="46" fill="#34647d" r="2.5" />
-<Circle cx="272" cy="46" fill="#34647d" r="2.5" />
-<Circle cx="190" cy="18" fill="#172b3a" r="3" />
-<Circle cx="190" cy="162" fill="#34647d" r="2.5" />
-</Svg>
-
-<View className="relative flex items-center justify-center - mb-space-16 pt-space-8 flex-row">
-<View className="relative">
-<View className="w-20 h-20 rounded-full p-1 bg-surface-container-lowest shadow-md flex items-center justify-center flex-row">
-<Image className="w-full h-full rounded-full" source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC1krajC9MKL46tzuKdnVcsyF0svHvEtTnO9oSxTMnJ_U0KLICg45vQRF6Hzwaz923al5Eet7SLRrHiD2uS2L6GJbWyJ5d1nsv7QCnC0qtWpjHbWqdQ5PzzMLD37djf-n9Fn4gCeY8zZydATS52SqBUryIogBANc13mAItMBGv8JTkj_aEvPU2y5X-nH9h8qZH-59QHT4J2gTapHbTbQMlI_gcWLY_mpuCpbct9PKNe1ik7DIs82S6c' }} />
-</View>
-<Text className="absolute -bottom-1 left-1/2 - px-2.5 py-0.5 rounded-full bg-primary text-on-primary font-label-sm text-label-sm shadow-sm">You</Text>
-</View>
-<View className="relative flex items-center justify-center w-10 h-10 rounded-full bg-surface-container-lowest shadow-lg text-secondary flex-row">
-<Icon name="all_inclusive" size={20} className="text-[20px]" />
-</View>
-<View className="relative">
-<View className="w-20 h-20 rounded-full p-1 bg-surface-container-lowest shadow-md flex items-center justify-center flex-row">
-<Image className="w-full h-full rounded-full" source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCKfQRShjG8Td5ucloroIh2JU9tl4oY69Xv6EMntNHGyEPDtk5Velni2mGfP7SjHDuGNzWQd8P_4A3d1RJ1lS4MeA7mxcHasRlwJV4-86gvnCvUpKRkBJ9qIq0KWq-_McucNcB4ZUp6jxfoTdJ5Wq0Hd0LLqa95DLd1nHDZEC-uLWx6dWuq1HdmOIDcM0AndUS-m_Ej9sr_K7sMFepI4HEydMjcomIPfe9UI0dnNfk4lBaoY_GJL26g' }} />
-</View>
-<Text className="absolute -bottom-1 left-1/2 - px-2.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm shadow-sm">Ananya, 24</Text>
-</View>
-</View>
-
-<View className="relative flex items-center text-center mt-space-4">
-<View className="items-baseline gap-1.5 px-space-16 py-space-4 rounded-full bg-secondary-container/60 mb-space-8">
-<Text className="font-headline-display text-headline-display text-primary tracking-tight leading-none">94%</Text>
-<Text className="font-label-lg text-label-lg text-on-secondary-container font-bold">PREMA MATCH</Text>
-</View>
-<Text className="font-headline-sm text-headline-sm text-primary mb-space-2">High Compatibility · Strong Alignment</Text>
-<Text className="font-body-sm text-body-sm text-on-surface-variant max-w-[280px]">Based on 48 deep psycho-social traits, values architecture &amp; cultural resonance.</Text>
-</View>
-</View>
-
-<View className="rounded-xl bg-surface-container-lowest p-space-20 shadow-sm mb-space-20">
-<View className="flex items-center justify-between mb-space-16 flex-row">
-<View className="flex items-center gap-space-8 flex-row">
-<Icon name="tune" size={20} className="text-secondary text-[20px]" />
-<Text className="font-headline-sm text-headline-sm text-primary">Compatibility Dimensions</Text>
-</View>
-<Text className="font-label-sm text-label-sm text-secondary bg-secondary-container/40 px-2 py-0.5 rounded-full">Weighted Analysis</Text>
-</View>
-<View className="gap-space-12">
-
-<View>
-<View className="flex justify-between items-center mb-1.5 flex-row">
-<Text className="font-label-md text-label-md text-on-surface flex items-center gap-2 flex-row">
-<Icon name="favorite" size={16} className="text-[16px] text-secondary" />
-            Relationship Goals &amp; Family
-          </Text>
-<Text className="font-label-md text-label-md text-primary font-bold">100%</Text>
-</View>
-<View className="w-full h-2 rounded-full bg-surface-container overflow-hidden">
-<View className="h-full rounded-full bg-primary" ></View>
-</View>
-</View>
-
-<View>
-<View className="flex justify-between items-center mb-1.5 flex-row">
-<Text className="font-label-md text-label-md text-on-surface flex items-center gap-2 flex-row">
-<Icon name="verified_user" size={16} className="text-[16px] text-secondary" />
-            Core Values &amp; Ethics
-          </Text>
-<Text className="font-label-md text-label-md text-primary font-bold">96%</Text>
-</View>
-<View className="w-full h-2 rounded-full bg-surface-container overflow-hidden">
-<View className="h-full rounded-full bg-primary" ></View>
-</View>
-</View>
-
-<View>
-<View className="flex justify-between items-center mb-1.5 flex-row">
-<Text className="font-label-md text-label-md text-on-surface flex items-center gap-2 flex-row">
-<Icon name="nights_stay" size={16} className="text-[16px] text-secondary" />
-            Astrology &amp; Harmony
-          </Text>
-<Text className="font-label-md text-label-md text-primary font-bold">92%</Text>
-</View>
-<View className="w-full h-2 rounded-full bg-surface-container overflow-hidden">
-<View className="h-full rounded-full bg-secondary" ></View>
-</View>
-</View>
-
-<View>
-<View className="flex justify-between items-center mb-1.5 flex-row">
-<Text className="font-label-md text-label-md text-on-surface flex items-center gap-2 flex-row">
-<Icon name="forum" size={16} className="text-[16px] text-secondary" />
-            Communication Style
-          </Text>
-<Text className="font-label-md text-label-md text-primary font-bold">91%</Text>
-</View>
-<View className="w-full h-2 rounded-full bg-surface-container overflow-hidden">
-<View className="h-full rounded-full bg-secondary" ></View>
-</View>
-</View>
-
-<View>
-<View className="flex justify-between items-center mb-1.5 flex-row">
-<Text className="font-label-md text-label-md text-on-surface flex items-center gap-2 flex-row">
-<Icon name="psychology" size={16} className="text-[16px] text-secondary" />
-            Personality (Big 5 &amp; Temperament)
-          </Text>
-<Text className="font-label-md text-label-md text-primary font-bold">88%</Text>
-</View>
-<View className="w-full h-2 rounded-full bg-surface-container overflow-hidden">
-<View className="h-full rounded-full bg-secondary" ></View>
-</View>
-</View>
-
-<View>
-<View className="flex justify-between items-center mb-1.5 flex-row">
-<Text className="font-label-md text-label-md text-on-surface flex items-center gap-2 flex-row">
-<Icon name="schedule" size={16} className="text-[16px] text-secondary" />
-            Lifestyle &amp; Rhythm
-          </Text>
-<Text className="font-label-md text-label-md text-primary font-bold">84%</Text>
-</View>
-<View className="w-full h-2 rounded-full bg-surface-container overflow-hidden">
-<View className="h-full rounded-full bg-secondary" ></View>
-</View>
-</View>
-</View>
-</View>
-
-<View className="relative rounded-xl bg-primary-container text-on-primary p-space-20 shadow-md mb-space-20 overflow-hidden">
-
-<View className="absolute -right-10 -bottom-10 w-44 h-44 rounded-full bg-secondary/15"></View>
-<View className="relative flex items-center justify-between mb-space-16 flex-row">
-<View>
-<View className="flex items-center gap-2 mb-1 flex-row">
-<Icon name="grain" size={18} className="text-secondary-fixed text-[18px]" />
-<Text className="font-label-sm text-label-sm text-secondary-fixed tracking-wider uppercase">Cosmic &amp; Cultural Archetype</Text>
-</View>
-<Text className="font-headline-sm text-headline-sm text-on-primary">Your Compatibility DNA</Text>
-</View>
-<View className="px-3 py-1 rounded-full bg-surface-container-lowest/10">
-<Text className="font-label-sm text-label-sm text-tertiary-fixed">Earth Harmony</Text>
-</View>
-</View>
-
-<View className="relative grid grid-cols-2 gap-space-12 mb-space-16">
-<View className="p-space-12 rounded-lg bg-surface-container-lowest/5">
-<Text className="font-label-sm text-label-sm text-on-primary-container mb-0.5">Rashi Symbiosis</Text>
-<Text className="font-headline-sm text-headline-sm text-on-primary">Vrishabha &amp; Kanya</Text>
-<Text className="font-body-sm text-body-sm text-secondary-fixed-dim">Taurus &amp; Virgo · Deep stability</Text>
-</View>
-<View className="p-space-12 rounded-lg bg-surface-container-lowest/5">
-<Text className="font-label-sm text-label-sm text-on-primary-container mb-0.5">Nakshatra Pair</Text>
-<Text className="font-headline-sm text-headline-sm text-on-primary">Rohini &amp; Hasta</Text>
-<Text className="font-body-sm text-body-sm text-secondary-fixed-dim">Creative nurturing alignment</Text>
-</View>
-<View className="col-span-2 p-space-16 rounded-lg bg-surface-container-lowest/10 flex items-center justify-between flex-row">
-<View>
-<View className="flex items-center gap-1.5 mb-1 flex-row">
-<Text className="font-label-md text-label-md text-on-primary">Guna Milan Score</Text>
-<Text className="w-1.5 h-1.5 rounded-full bg-secondary-fixed"></Text>
-<Text className="font-label-sm text-label-sm text-secondary-fixed">Uttama (Superior)</Text>
-</View>
-<Text className="font-body-sm text-body-sm text-tertiary-fixed-dim">31 out of 36 points indicate sustained emotional peace and family synchronicity.</Text>
-</View>
-<View className="text-right pl-4">
-<Text className="font-headline-md text-headline-md text-secondary-fixed font-bold">31<Text className="text-label-md text-tertiary-fixed-dim font-normal">/36</Text></Text>
-</View>
-</View>
-</View>
-<View className="relative flex items-center gap-2 text-tertiary-fixed-dim/80 pt-space-4 flex-row">
-<Icon name="lock" size={15} className="text-[15px]" />
-<Text className="font-body-sm text-body-sm">Birthplace and exact birth time remain strictly private and encrypted.</Text>
-</View>
-</View>
-
-<View className="rounded-xl overflow-hidden bg-surface-container-lowest shadow-sm mb-space-20">
-<View className="relative h-36 w-full">
-<Image className="w-full h-full" source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCbgJwDmA1ieAnXC_d2-4z9FjFJJD2TJN1lZSJhvVmCmtzh-S2kKRVUWnt14xFxJbX1n3sivYA2B2TvtTtKps1gMqiIOir-ruKGPZezLVO_HKIZ2adia_bmphGSsumQFQ2m4YD---Co__F1Tb5MTSyJy0qsYWHZ6-55oEYzg4zCeOWQ4sxDyZ3jQFAlarIb15c0hzAQS_cEweJHIhtRAzRsCfuQf2lakDmFEyzOs0IzOQ4PswIJIp06' }} />
-<View className="absolute inset-0"></View>
-<View className="absolute bottom-3 left-4 flex items-center gap-2 flex-row">
-<Text className="px-2.5 py-1 rounded-full bg-surface-container-lowest/90 text-primary font-label-sm text-label-sm shadow-sm">Chennai Roots · Cosmopolitan Outlook</Text>
-</View>
-</View>
-<View className="p-space-16 pt-space-8">
-<Text className="font-body-md text-body-md text-on-surface-variant">
-        Both of you cherish traditional family grounding while pursuing autonomous, contemporary professional lives in South India's bustling urban centers.
-      </Text>
-</View>
-</View>
-
-<View className="rounded-xl bg-surface-container-lowest p-space-20 shadow-sm mb-space-20">
-<View className="flex items-center gap-space-8 mb-space-16 flex-row">
-<Text className="w-7 h-7 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center flex-row">
-<Icon name="verified" size={16} className="text-[16px]" />
-</Text>
-<Text className="font-headline-sm text-headline-sm text-primary">3 Strongest Reasons You Align</Text>
-</View>
-<View className="gap-space-12">
-<View className="flex items-start gap-space-12 p-space-12 rounded-lg bg-surface-container-low flex-row">
-<View className="w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center mt-0.5 flex-row">
-<Text className="font-label-sm text-label-sm">1</Text>
-</View>
-<View>
-<Text className="font-label-lg text-label-lg text-primary mb-0.5">Deeply relationship-oriented</Text>
-<Text className="font-body-sm text-body-sm text-on-surface-variant">Neither of you treats companionship as casual. You both prioritize emotional accountability and longevity over rapid flings.</Text>
-</View>
-</View>
-<View className="flex items-start gap-space-12 p-space-12 rounded-lg bg-surface-container-low flex-row">
-<View className="w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center mt-0.5 flex-row">
-<Text className="font-label-sm text-label-sm">2</Text>
-</View>
-<View>
-<Text className="font-label-lg text-label-lg text-primary mb-0.5">Direct communication &amp; healthy boundaries</Text>
-<Text className="font-body-sm text-body-sm text-on-surface-variant">Both value clear speech without guessing games, respecting alone time and focused career hours with mutual confidence.</Text>
-</View>
-</View>
-<View className="flex items-start gap-space-12 p-space-12 rounded-lg bg-surface-container-low flex-row">
-<View className="w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center mt-0.5 flex-row">
-<Text className="font-label-sm text-label-sm">3</Text>
-</View>
-<View>
-<Text className="font-label-lg text-label-lg text-primary mb-0.5">Harmonious family expectations</Text>
-<Text className="font-body-sm text-body-sm text-on-surface-variant">Aligned views on joint family involvement, festival traditions, and shared long-term generational wealth creation.</Text>
-</View>
-</View>
-</View>
-</View>
-
-<View className="rounded-xl bg-surface-container p-space-20 shadow-sm mb-space-24">
-<View className="flex items-center gap-space-8 mb-space-8 flex-row">
-<Icon name="lightbulb" size={20} className="text-secondary text-[20px]" />
-<Text className="font-headline-sm text-headline-sm text-primary">One Thing to Keep in Mind</Text>
-</View>
-<View className="p-space-16 rounded-lg bg-surface-container-lowest">
-<Text className="font-body-md text-body-md text-on-surface leading-relaxed mb-2">
-<Text className="text-primary font-semibold">Lifestyle pace may differ:</Text> Ananya thrives in spontaneous weekend plans, creative arts popups, and impromptu social gatherings across Besant Nagar.
-      </Text>
-<Text className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
-        Meanwhile, your responses indicate a strong preference for structured recharge routines. Balancing her spontaneous spark with your restorative predictability will be your sweetest growth point.
-      </Text>
-</View>
-</View>
-
-</View>
-</ScrollView>
-    </SafeAreaView>
+    <NunitoScope>
+      <BreakdownInner />
+    </NunitoScope>
   );
 }
+
+function BreakdownInner() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const { id } = useLocalSearchParams<{ id?: string }>();
+  const me = useProfile();
+  const convos = useConversations();
+  const convo = convos.find((c) => c.id === id);
+  const p = person(id);
+  const them = p
+    ? { id: p.id, name: p.name, match: p.match, photo: p.photos[0], interests: p.interests }
+    : convo
+      ? { id: convo.id, name: convo.name, match: convo.match, photo: convo.photo, interests: [] as string[] }
+      : ANANYA;
+  const canChat = convos.some((c) => c.id === them.id);
+
+  const score = them.match;
+  const chart = CHARTS[them.id] ?? CHARTS.ananya;
+  // Guna milan points out of 36, scaled from the overall score (sample until charts are live).
+  const guna = Math.max(18, Math.min(35, Math.round((score / 100) * 34)));
+  // Spread the missing points across kootas (bigger ones first) so the parts always add up to the total.
+  const kootas = (() => {
+    const got = KOOTAS.map(([, max]) => max);
+    let missing = 36 - guna;
+    for (let i = KOOTAS.length - 2; missing > 0; i = (i - 1 + KOOTAS.length) % KOOTAS.length) {
+      if (got[i] > 0) { got[i] -= 1; missing -= 1; }
+    }
+    return KOOTAS.map(([k, max, plain, why], i) => ({ k, max, plain, why, got: got[i] }));
+  })();
+  const elements = ME_CHART.element === chart.element
+    ? `Both ${chart.element}: steady and grounding together.`
+    : `${ME_CHART.element} and ${chart.element}: ${ME_CHART.element === 'Earth' && chart.element === 'Water' ? 'nurturing, like soil and rain.' : 'complementary energies.'}`;
+  const lifePathNote = Math.abs(ME_CHART.lifePath - chart.lifePath) % 3 === 0 ? 'Harmonious numbers' : 'Balancing numbers';
+  const parts = [
+    { icon: 'favorite', label: 'Core values', value: Math.min(100, score + 2), note: 'You both put emotional honesty and family first.' },
+    { icon: 'flag', label: 'Relationship intent', value: Math.min(100, score + 4), note: 'Both looking for something lasting, at a similar pace.' },
+    { icon: 'wb_sunny', label: 'Lifestyle rhythm', value: Math.max(60, score - 7), note: 'Early mornings and quiet weekends line up well.' },
+    { icon: 'chat', label: 'Communication', value: Math.max(60, score - 4), note: 'Thoughtful, unhurried replies on both sides.' },
+    { icon: 'home', label: 'Family outlook', value: Math.max(60, score - 10), note: 'Close to family, with room to build your own.' },
+  ];
+  const shared = them.interests.filter((t) => me.interests.some((m) => m.toLowerCase() === t.toLowerCase()));
+  const different = them.interests.filter((t) => !shared.includes(t)).slice(0, 3);
+
+  return (
+    <View style={{ flex: 1, backgroundColor: C.bg }}>
+      <CelestialBackground />
+      <ScreenHeader
+        eyebrow="Compatibility"
+        title="Why you match"
+        right={
+          <Tap onPress={() => Share.share({ message: `Prema says ${them.name} and I are ${score}% aligned.` })} style={s.iconBtn} accessibilityLabel="Share">
+            <Icon name="share" size={20} color={C.pri} />
+          </Tap>
+        }
+      />
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 40 }} showsVerticalScrollIndicator={false}>
+        {/* Score hero */}
+        <View style={s.hero}>
+          <View style={s.faces}>
+            <Image source={{ uri: me.photos[0] }} style={s.face} />
+            <View style={{ width: BOX, height: BOX, marginHorizontal: -14, zIndex: 2 }}>
+              <Svg width={BOX} height={BOX}>
+                <Defs>
+                  <LinearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
+                    <Stop offset="0" stopColor="#FF97AE" />
+                    <Stop offset="1" stopColor="#E2456B" />
+                  </LinearGradient>
+                </Defs>
+                <Circle cx={BOX / 2} cy={BOX / 2} r={R} fill={C.white} stroke="#FFE0E8" strokeWidth={STROKE} />
+                <Circle
+                  cx={BOX / 2} cy={BOX / 2} r={R} fill="none" stroke="url(#ring)" strokeWidth={STROKE}
+                  strokeLinecap="round" strokeDasharray={`${(CIRC * score) / 100} ${CIRC}`}
+                  transform={`rotate(-90 ${BOX / 2} ${BOX / 2})`}
+                />
+              </Svg>
+              <View style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]}>
+                <Text style={s.score}>{score}%</Text>
+                <Text style={s.scoreLabel}>aligned</Text>
+              </View>
+            </View>
+            {them.photo ? <Image source={{ uri: them.photo }} style={s.face} /> : null}
+          </View>
+          <Text style={s.heroTitle}>You and {them.name}</Text>
+          <Text style={s.heroSub}>A strong match on what matters most.</Text>
+        </View>
+
+        {/* Stars & numbers first */}
+        <Text style={s.section}>Stars & numbers</Text>
+        <View style={s.astro}>
+          <View style={s.signRow}>
+            <SignTile who="Your moon sign" sign={ME_CHART.sign} english={ME_CHART.english} nakshatra={ME_CHART.nakshatra} />
+            <View style={s.signJoin}><Icon name="favorite" size={16} color={C.white} /></View>
+            <SignTile who={`${them.name}’s`} sign={chart.sign} english={chart.english} nakshatra={chart.nakshatra} />
+          </View>
+
+          <View style={s.gunaHead}>
+            <View style={{ flex: 1 }}>
+              <Text style={s.gunaLabel}>Kundli match <Text style={s.gunaSmall}>(guna milan)</Text></Text>
+              <Text style={s.gunaNote}>{guna >= 28 ? 'Excellent' : guna >= 18 ? 'Good' : 'Needs care'} · 18 or more out of 36 is a good match</Text>
+            </View>
+            <Text style={s.gunaScore}>{guna}<Text style={s.gunaOf}>/36</Text></Text>
+          </View>
+          <View style={s.track}><View style={[s.fill, { width: `${(guna / 36) * 100}%` }]} /></View>
+          <Text style={s.explain}>Vedic astrology compares your moon signs across 8 areas of life. Tap any one to learn more.</Text>
+
+          <View style={s.kootaGrid}>
+            {kootas.map((x) => {
+              const full = x.got === x.max;
+              return (
+                <Tap key={x.k} onPress={() => Alert.alert(`${x.plain} (${x.k})`, `${x.why}\n\nYou scored ${x.got} of ${x.max}.`)}
+                  style={s.koota} accessibilityRole="button" accessibilityLabel={`${x.plain}, ${x.got} of ${x.max}`}>
+                  <Text style={s.kootaPlain} numberOfLines={1}>{x.plain}</Text>
+                  <Text style={s.kootaName} numberOfLines={1}>{x.k}</Text>
+                  <View style={s.kootaBar}><View style={[s.kootaFill, { width: `${(x.got / x.max) * 100}%`, backgroundColor: full ? C.pink : '#FFB3C4' }]} /></View>
+                  <Text style={[s.kootaVal, full ? { color: C.pink } : null]}>{x.got}/{x.max}</Text>
+                </Tap>
+              );
+            })}
+          </View>
+
+          <View style={s.astroRow}>
+            <View style={s.astroIcon}><Icon name="eco" size={17} color={C.pink} /></View>
+            <View style={{ flex: 1 }}>
+              <Text style={s.astroTitle}>Elements · {ME_CHART.element} & {chart.element}</Text>
+              <Text style={s.astroBody}>{elements}</Text>
+            </View>
+          </View>
+          <View style={[s.astroRow, { borderBottomWidth: 0 }]}>
+            <View style={s.astroIcon}><Text style={s.num}>{ME_CHART.lifePath}·{chart.lifePath}</Text></View>
+            <View style={{ flex: 1 }}>
+              <Text style={s.astroTitle}>Numerology · {lifePathNote.toLowerCase()}</Text>
+              <Text style={s.astroBody}>Your life path numbers ({ME_CHART.lifePath} and {chart.lifePath}, from your birth dates) suggest one brings care, the other brings depth.</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Breakdown */}
+        <Text style={s.section}>Everyday compatibility</Text>
+        <View style={s.card}>
+          {parts.map((x, i) => (
+            <View key={x.label} style={[s.part, i < parts.length - 1 ? s.divider : null]}>
+              <View style={s.partHead}>
+                <View style={s.partIcon}><Icon name={x.icon} size={17} color={C.pink} /></View>
+                <Text style={s.partLabel}>{x.label}</Text>
+                <Text style={s.partValue}>{x.value}%</Text>
+              </View>
+              <View style={s.track}><View style={[s.fill, { width: `${x.value}%` }]} /></View>
+              <Text style={s.partNote}>{x.note}</Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Shared and different */}
+        {shared.length ? (
+          <>
+            <Text style={s.section}>You both love</Text>
+            <View style={s.wrap}>
+              {shared.map((t) => <View key={t} style={s.chipOn}><Text style={s.chipOnText}>{t}</Text></View>)}
+            </View>
+          </>
+        ) : null}
+        {different.length ? (
+          <>
+            <Text style={s.section}>Worth asking {them.name} about</Text>
+            <View style={s.wrap}>
+              {different.map((t) => <View key={t} style={s.chip}><Text style={s.chipText}>{t}</Text></View>)}
+            </View>
+          </>
+        ) : null}
+
+        {/* How it works */}
+        <Tap
+          onPress={() => Alert.alert('How scoring works', 'Your score blends shared values, relationship intent, lifestyle rhythm, communication and family outlook. It never includes looks or money, and it can’t be bought.')}
+          style={s.how} accessibilityRole="button"
+        >
+          <Icon name="info" size={18} color={C.pri} />
+          <Text style={s.howText}>Never based on looks or money. Can’t be bought.</Text>
+          <Icon name="chevron_right" size={20} color={C.muted} />
+        </Tap>
+
+        {canChat ? (
+          <Tap onPress={() => router.push({ pathname: '/Chat', params: { id: them.id } })} style={s.cta} pressedStyle={{ opacity: 0.9 }}>
+            <Icon name="chat_bubble" size={18} color={C.white} />
+            <Text style={s.ctaText}>Message {them.name}</Text>
+          </Tap>
+        ) : null}
+      </ScrollView>
+    </View>
+  );
+}
+
+function SignTile({ who, sign, english, nakshatra }: { who: string; sign: string; english: string; nakshatra: string }) {
+  return (
+    <View style={s.signTile}>
+      <Text style={s.signWho}>{who}</Text>
+      <Text style={s.signName}>{sign}</Text>
+      <Text style={s.signSub}>{english} · {nakshatra}</Text>
+    </View>
+  );
+}
+
+const s = StyleSheet.create({
+  astro: { backgroundColor: C.white, borderRadius: 24, padding: 18, ...cardShadow },
+  signRow: { flexDirection: 'row', alignItems: 'center' },
+  signTile: { flex: 1, alignItems: 'center', paddingVertical: 14, borderRadius: 18, backgroundColor: '#FFF5F8' },
+  signWho: { color: C.muted, fontSize: 12, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1 },
+  signName: { color: C.pri, fontSize: 19, fontWeight: '900', marginTop: 4 },
+  signSub: { color: C.muted, fontSize: 12.5, fontWeight: '600', marginTop: 2, textAlign: 'center' },
+  signJoin: { width: 34, height: 34, borderRadius: 17, backgroundColor: C.pink, alignItems: 'center', justifyContent: 'center', marginHorizontal: -10, zIndex: 2, borderWidth: 3, borderColor: C.white },
+  gunaHead: { flexDirection: 'row', alignItems: 'flex-end', marginTop: 18 },
+  gunaLabel: { color: C.pri, fontSize: 15.5, fontWeight: '900' },
+  gunaSmall: { color: C.muted, fontSize: 13, fontWeight: '700' },
+  explain: { color: C.body, fontSize: 13.5, lineHeight: 19, marginTop: 12 },
+  kootaPlain: { color: C.pri, fontSize: 13, fontWeight: '900' },
+  kootaBar: { alignSelf: 'stretch', height: 5, borderRadius: 3, backgroundColor: '#EEF2F7', overflow: 'hidden', marginTop: 8 },
+  kootaFill: { height: '100%', borderRadius: 3 },
+  gunaNote: { color: C.muted, fontSize: 12.5, fontWeight: '600', marginTop: 2 },
+  gunaScore: { color: C.pink, fontSize: 28, fontWeight: '900' },
+  gunaOf: { color: C.muted, fontSize: 15, fontWeight: '800' },
+  kootaGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 14 },
+  koota: { width: '47%', flexGrow: 1, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 14, backgroundColor: '#F6F9FC' },
+  kootaName: { color: C.muted, fontSize: 11.5, fontWeight: '700', marginTop: 1 },
+  kootaVal: { position: 'absolute', right: 12, top: 10, color: C.pri, fontSize: 14, fontWeight: '900' },
+  astroRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: C.line },
+  astroIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: C.pinkSoft, alignItems: 'center', justifyContent: 'center' },
+  num: { color: C.pink, fontSize: 12.5, fontWeight: '900' },
+  astroTitle: { color: C.pri, fontSize: 15, fontWeight: '800' },
+  astroBody: { color: C.muted, fontSize: 13.5, marginTop: 2, lineHeight: 19 },
+  iconBtn: { width: 42, height: 42, borderRadius: 21, backgroundColor: C.white, alignItems: 'center', justifyContent: 'center', ...cardShadow },
+  hero: { alignItems: 'center', backgroundColor: C.white, borderRadius: 28, paddingVertical: 24, paddingHorizontal: 16, marginTop: 4, ...cardShadow },
+  faces: { flexDirection: 'row', alignItems: 'center' },
+  face: { width: 76, height: 76, borderRadius: 38, borderWidth: 3, borderColor: C.white, backgroundColor: C.accentSoft },
+  score: { color: C.pri, fontSize: 30, fontWeight: '900', letterSpacing: -0.5 },
+  scoreLabel: { color: C.muted, fontSize: 12, fontWeight: '800', marginTop: -2 },
+  heroTitle: { color: C.pri, fontSize: 22, fontWeight: '900', marginTop: 16 },
+  heroSub: { color: C.muted, fontSize: 14.5, fontWeight: '600', marginTop: 2 },
+  section: { color: C.pri, fontSize: 17, fontWeight: '900', marginTop: 24, marginBottom: 10, marginLeft: 4 },
+  card: { backgroundColor: C.white, borderRadius: 24, paddingHorizontal: 18, ...cardShadow },
+  part: { paddingVertical: 15 },
+  divider: { borderBottomWidth: 1, borderBottomColor: C.line },
+  partHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  partIcon: { width: 32, height: 32, borderRadius: 16, backgroundColor: C.pinkSoft, alignItems: 'center', justifyContent: 'center' },
+  partLabel: { flex: 1, color: C.pri, fontSize: 15.5, fontWeight: '800' },
+  partValue: { color: C.pri, fontSize: 15, fontWeight: '900' },
+  track: { height: 8, borderRadius: 4, backgroundColor: '#EEF2F7', overflow: 'hidden', marginTop: 10 },
+  fill: { height: '100%', borderRadius: 4, backgroundColor: C.pink },
+  partNote: { color: C.muted, fontSize: 13.5, lineHeight: 19, marginTop: 8 },
+  wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  chipOn: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18, backgroundColor: C.pink },
+  chipOnText: { color: C.white, fontSize: 14, fontWeight: '800' },
+  chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18, backgroundColor: C.white, borderWidth: 1, borderColor: '#E6EDF5' },
+  chipText: { color: C.pri, fontSize: 14, fontWeight: '700' },
+  how: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 24, padding: 16, borderRadius: 20, backgroundColor: C.accentSoft },
+  howText: { flex: 1, color: C.pri, fontSize: 14, fontWeight: '700' },
+  cta: {
+    marginTop: 16, height: 56, borderRadius: 28, backgroundColor: C.pink, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    shadowColor: C.pink, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 14,
+  },
+  ctaText: { color: C.white, fontSize: 16.5, fontWeight: '900' },
+});
