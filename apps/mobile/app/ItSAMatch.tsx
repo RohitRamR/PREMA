@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
-import { 
+import {
   View, 
-  Text, 
   StyleSheet, 
   Image, 
   Pressable, 
@@ -21,12 +20,21 @@ import Animated, {
 import { colors, spacing, radii } from '../src/theme/theme';
 import Icon from '../components/Icon';
 import CelestialBackground from '../components/CelestialBackground';
+import Text, { NunitoScope } from '../components/PremaText';
 import { useProfile } from '../src/store/profile';
 import { goBack } from '../components/nav';
 
 const PREMA_THEME = { colors, spacing, radii };
 
 export default function ItSAMatch() {
+  return (
+    <NunitoScope>
+      <MatchInner />
+    </NunitoScope>
+  );
+}
+
+function MatchInner() {
   const router = useRouter();
   // Who you just matched with, and your own main photo.
   const { id, name, photo } = useLocalSearchParams<{ id?: string; name?: string; photo?: string }>();
@@ -218,7 +226,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   primaryButton: {
-    backgroundColor: PREMA_THEME.colors.deepNavy,
+    backgroundColor: "#FF6B8B",
     borderRadius: 999,
     height: 56,
     flexDirection: 'row',

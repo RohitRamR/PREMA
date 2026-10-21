@@ -1,7 +1,12 @@
 // In-memory conversations store (mock data until the messaging API lands).
 import { useSyncExternalStore } from 'react';
 
-export type Message = { id: string; from: 'me' | 'them'; text: string; at: number };
+export type Message = {
+  id: string; from: 'me' | 'them'; text: string; at: number;
+  image?: string; // photo attachment
+  replyTo?: { id: string; text: string; from: 'me' | 'them' }; // quoted message
+  reaction?: string; // one emoji reaction, set by the other person
+};
 export type Conversation = {
   id: string;
   name: string;
@@ -84,10 +89,21 @@ export function markRead(id: string) {
   if (c && c.unread > 0) patch(id, (x) => ({ ...x, unread: 0 }));
 }
 
-export function sendMessage(id: string, text: string, from: Message['from'] = 'me') {
+export function sendMessage(
+  id: string, text: string, from: Message['from'] = 'me',
+  extra?: Pick<Message, 'image' | 'replyTo'>,
+) {
   patch(id, (c) => ({
     ...c,
-    messages: [...c.messages, { id: `${Date.now()}-${Math.random()}`, from, text, at: Date.now() }],
+    messages: [...c.messages, { id: `${Date.now()}-${Math.random()}`, from, text, at: Date.now(), ...extra }],
+  }));
+}
+
+/** React to a message with one emoji; the same emoji again removes it. */
+export function reactToMessage(convoId: string, messageId: string, emoji: string) {
+  patch(convoId, (c) => ({
+    ...c,
+    messages: c.messages.map((m) => (m.id === messageId ? { ...m, reaction: m.reaction === emoji ? undefined : emoji } : m)),
   }));
 }
 

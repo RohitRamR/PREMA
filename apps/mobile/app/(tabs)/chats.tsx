@@ -97,7 +97,7 @@ function ChatsTabInner() {
                     <Text style={s.time}>{last ? timeLabel(last.at) : ''}</Text>
                   </View>
                   <Text style={[s.preview, unread ? s.previewUnread : null]} numberOfLines={1}>
-                    {last ? `${last.from === 'me' ? 'You: ' : ''}${last.text}` : 'New match · say hello'}
+                    {last ? `${last.from === 'me' ? 'You: ' : ''}${last.text || '📷 Photo'}` : 'New match · say hello'}
                   </Text>
                 </View>
               </Tap>

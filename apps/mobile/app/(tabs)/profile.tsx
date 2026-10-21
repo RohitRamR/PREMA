@@ -4,6 +4,7 @@ import Text, { NunitoScope } from '../../components/PremaText';
 import { useRouter, type Href } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from '../../components/Icon';
+import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
 import Logo from '../../components/Logo';
 import CelestialBackground from '../../components/CelestialBackground';
 import { useProfile, updateProfile, LIFESTYLE_OPTIONS } from '../../src/store/profile';
@@ -165,13 +166,24 @@ function ProfileTabScreen() {
           onPress={() => router.push('/PremaPlusMembership')}
           style={s.navyCard} pressedStyle={{ opacity: 0.92 }}
         >
+          {/* Same pink gradient as the Prema Plus page */}
+          <Svg style={StyleSheet.absoluteFill} preserveAspectRatio="none">
+            <Defs>
+              <LinearGradient id="plusCard" x1="0" y1="0" x2="1" y2="1">
+                <Stop offset="0" stopColor="#FF97AE" />
+                <Stop offset="0.55" stopColor="#FF6B8B" />
+                <Stop offset="1" stopColor="#E2456B" />
+              </LinearGradient>
+            </Defs>
+            <Rect width="100%" height="100%" fill="url(#plusCard)" />
+          </Svg>
           <View style={{ flex: 1 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-              <Icon name="auto_awesome" size={14} color={C.accent} />
-              <Text style={[s.label, { color: C.accent, marginBottom: 0 }]}>PREMA Tier I</Text>
+              <Icon name="auto_awesome" size={14} color={C.white} />
+              <Text style={[s.label, { color: 'rgba(255,255,255,0.9)', marginBottom: 0 }]}>Prema Plus</Text>
             </View>
             <Text style={s.navyTitle}>Founding Member</Text>
-            <Text style={s.navyBody}>Unlimited deep-alignment previews & vetted introductions</Text>
+            <Text style={s.navyBody}>Quarterly plan · renews 14 Jan 2027</Text>
           </View>
           <View style={s.navyChip}>
             <Text style={s.navyChipText}>Manage</Text>
@@ -374,15 +386,15 @@ const s = StyleSheet.create({
   bodySmall: { color: C.muted, fontSize: 13, lineHeight: 19, marginTop: 12 },
 
   navyCard: {
-    backgroundColor: C.navy, borderRadius: 24, padding: 22, marginBottom: 16,
+    backgroundColor: C.pink, borderRadius: 24, padding: 22, marginBottom: 16, overflow: 'hidden',
     flexDirection: 'row', alignItems: 'center', gap: 12,
-    shadowColor: C.navy, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.25, shadowRadius: 18, elevation: 6,
+    shadowColor: C.pink, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.3, shadowRadius: 18, elevation: 6,
   },
   navyTitle: { color: C.white, fontSize: 22, fontFamily: 'Georgia', fontStyle: 'italic', marginBottom: 4 },
-  navyBody: { color: 'rgba(255,255,255,0.65)', fontSize: 13, lineHeight: 19 },
+  navyBody: { color: 'rgba(255,255,255,0.9)', fontSize: 13, lineHeight: 19 },
   navyChip: {
     flexDirection: 'row', alignItems: 'center', gap: 2,
-    backgroundColor: 'rgba(255,255,255,0.12)', paddingLeft: 14, paddingRight: 8, paddingVertical: 8, borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.25)', paddingLeft: 14, paddingRight: 8, paddingVertical: 8, borderRadius: 18,
   },
   navyChipText: { color: C.white, fontSize: 13, fontWeight: '700' },
 
