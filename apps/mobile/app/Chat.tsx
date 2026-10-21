@@ -67,7 +67,7 @@ function ChatScreenInner() {
         <Tap onPress={() => router.back()} style={s.roundBtn} accessibilityLabel="Go back">
           <Icon name="arrow_back" size={22} color={C.pri} />
         </Tap>
-        <Tap style={s.headerId} onPress={() => router.push('/MatchDetail')} pressedStyle={{ opacity: 0.8 }}>
+        <Tap style={s.headerId} onPress={() => router.push({ pathname: '/MatchDetail', params: { id: convo.id } })} pressedStyle={{ opacity: 0.8 }}>
           <View>
             <AuraRing score={convo.match} size={46} stroke={2.5} gap={2}>
               <Image source={{ uri: convo.photo }} style={{ width: '100%', height: '100%' }} />

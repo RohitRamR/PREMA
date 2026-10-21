@@ -8,7 +8,7 @@ import {
   ScrollView,
   SafeAreaView
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle, 
@@ -20,12 +20,16 @@ import Animated, {
 } from 'react-native-reanimated';
 import { colors, spacing, radii } from '../src/theme/theme';
 import Icon from '../components/Icon';
-import { CelestialBackground } from '../components/CelestialBackground';
+import CelestialBackground from '../components/CelestialBackground';
+import { useProfile } from '../src/store/profile';
 
 const PREMA_THEME = { colors, spacing, radii };
 
 export default function ItSAMatch() {
   const router = useRouter();
+  // Who you just matched with, and your own main photo.
+  const { id, name, photo } = useLocalSearchParams<{ id?: string; name?: string; photo?: string }>();
+  const me = useProfile();
 
   // Animation values for the floating FLOW
   const floatY = useSharedValue(0);
@@ -56,7 +60,7 @@ export default function ItSAMatch() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={StyleSheet.absoluteFill}>
-        <CelestialBackground intensity="match" />
+        <CelestialBackground />
       </View>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         
@@ -73,7 +77,7 @@ export default function ItSAMatch() {
           
           <View style={styles.avatarLeft}>
             <Image 
-              source={{ uri: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400' }}
+              source={{ uri: me.photos[0] }}
               style={styles.avatarImage}
             />
           </View>
@@ -85,7 +89,7 @@ export default function ItSAMatch() {
 
           <View style={styles.avatarRight}>
             <Image 
-              source={{ uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400' }}
+              source={{ uri: photo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400' }}
               style={styles.avatarImage}
             />
           </View>
@@ -95,7 +99,7 @@ export default function ItSAMatch() {
         {/* ── Match Details ── */}
         <View style={styles.matchDetails}>
           <Text style={styles.matchSubtitle}>
-            PREMA thinks you two have something worth exploring with care and presence.
+            {name ? `You and ${name} liked each other. ` : ''}PREMA thinks you two have something worth exploring with care and presence.
           </Text>
         </View>
 
@@ -103,7 +107,7 @@ export default function ItSAMatch() {
         <View style={styles.actionContainer}>
           <Pressable 
             style={styles.primaryButton}
-            onPress={() => router.push('/SendIntentionalNote')}
+            onPress={() => (id ? router.replace({ pathname: '/Chat', params: { id } }) : router.push('/SendIntentionalNote'))}
           >
             <Icon name="mark_email_read" size={20} color="#FFF" />
             <Text style={styles.primaryButtonText}>Send Intentional Note</Text>

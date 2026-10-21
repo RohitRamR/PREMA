@@ -8,7 +8,7 @@ import Icon from '../../../components/Icon';
 import { C, Tap, cardShadow, serif } from '../../../components/prema-ui';
 import { useConversations } from '../../../src/store/chats';
 import {
-  cancelBooking, catalogue, describe, previewCompletePayment, previewVenueConfirms, rupees, useDateState, whenLabel, duration,
+  cancelBooking, catalogue, describe, previewVenueConfirms, rupees, useDateState, whenLabel, duration,
 } from '../../../src/features/date/store';
 import { DetailHero, MissingListing, PreviewNotice } from '../../../src/features/date/ui';
 import type { Booking } from '../../../src/features/date/types';
@@ -104,9 +104,13 @@ export default function BookingDetail() {
           {b.status === 'payment_pending' ? (
             <View style={s.notice}>
               <Text style={s.noticeTitle}>Payment pending</Text>
-              <Text style={s.noticeBody}>You both accepted. The booking confirms once payment of {rupees(b.totalPaise)} is verified by our payment provider.</Text>
-              <Tap onPress={() => previewCompletePayment(b.id)} style={s.noticeBtn}>
-                <Text style={s.noticeBtnText}>Pay {rupees(b.totalPaise)} (preview)</Text>
+              <Text style={s.noticeBody}>
+                {b.payment?.mode === 'split' && b.payment.mePaid
+                  ? `Your half is paid. Waiting for ${m?.name ?? 'your date'} to pay theirs.`
+                  : `You both accepted. Pay in full or split ${rupees(b.totalPaise)} in two to confirm.`}
+              </Text>
+              <Tap onPress={() => router.push(`/date/pay/${b.id}`)} style={s.noticeBtn}>
+                <Text style={s.noticeBtnText}>{b.payment?.mode === 'split' && b.payment.mePaid ? 'View payment' : 'Go to payment'}</Text>
               </Tap>
             </View>
           ) : null}
@@ -214,7 +218,7 @@ const s = StyleSheet.create({
   notice: { backgroundColor: C.white, borderRadius: 22, padding: 18, marginTop: 16, borderLeftWidth: 3, borderLeftColor: C.accent, ...cardShadow },
   noticeTitle: { color: C.pri, fontSize: 16, fontWeight: '600' },
   noticeBody: { color: C.body, fontSize: 13.5, lineHeight: 20, marginTop: 4 },
-  noticeBtn: { marginTop: 12, height: 44, borderRadius: 22, backgroundColor: C.pri, alignItems: 'center', justifyContent: 'center' },
+  noticeBtn: { marginTop: 12, height: 44, borderRadius: 22, backgroundColor: C.pink, alignItems: 'center', justifyContent: 'center' },
   noticeBtnGhost: { backgroundColor: 'transparent', borderWidth: 1, borderStyle: 'dashed', borderColor: '#BFD4EA' },
   noticeBtnText: { color: C.white, fontSize: 14, fontWeight: '600' },
   feedback: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: C.white, borderRadius: 22, padding: 18, marginTop: 16, ...cardShadow },

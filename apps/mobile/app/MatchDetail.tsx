@@ -8,7 +8,9 @@ import CelestialBackground from '../components/CelestialBackground';
 import Text, { NunitoScope } from '../components/PremaText';
 import { Tap } from '../components/prema-ui';
 import CupidArrow from '../components/CupidArrow';
-import { sendMessage } from '../src/store/chats';
+import { sendMessage, hasConversation } from '../src/store/chats';
+import { person, type Person } from '../src/store/people';
+import { Alert } from 'react-native';
 import { useProfile, VITAL_FIELDS, type Profile } from '../src/store/profile';
 
 const { width, height } = Dimensions.get('window');
@@ -99,6 +101,35 @@ const vitalList = (v: Profile['vitals']) =>
 const sameText = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
 
 /** Someone else's profile, with interests you both listed marked as shared. */
+/** Someone other than Ananya: built from the shared people list. */
+function personView(mine: Profile, p: Person): ProfileView {
+  return {
+    chatId: p.id,
+    name: p.name,
+    age: p.age,
+    location: p.city,
+    bio: p.bio,
+    lookingFor: p.lookingFor,
+    vitals: [{ icon: 'work_outline', k: 'Works as', v: p.job }],
+    prompts: [p.prompt, { question: '', answer: '' }],
+    photos: p.photos,
+    photoCaption: '',
+    voice: { question: '', recorded: false, seconds: 0 },
+    interests: p.interests
+      .map((t) => ({ label: t, shared: mine.interests.some((m) => sameText(m, t)) }))
+      .sort((x, y) => Number(y.shared) - Number(x.shared)),
+    fit: {
+      score: p.match,
+      summary: 'Shared intent and a similar pace.',
+      parts: [
+        { label: 'Values', value: Math.min(100, p.match + 2), color: '#FF6B8B' },
+        { label: 'Intent', value: p.match, color: '#FF6B8B' },
+        { label: 'Lifestyle', value: Math.max(60, p.match - 6), color: '#74B4F2' },
+      ],
+    },
+  };
+}
+
 function matchView(mine: Profile): ProfileView {
   return {
     ...ANANYA,
@@ -184,10 +215,11 @@ function Fade({ id, color, from, to, style }: { id: string; color: string; from:
 
 export default function MatchDetail() {
   const router = useRouter();
-  const { me } = useLocalSearchParams<{ me?: string }>();
+  const { me, id } = useLocalSearchParams<{ me?: string; id?: string }>();
   const isMe = me === '1';
+  const other = person(id);
   const mine = useProfile();
-  const P = isMe ? myView(mine) : matchView(mine);
+  const P = isMe ? myView(mine) : other ? personView(mine, other) : matchView(mine);
   const sharedCount = P.interests.filter((t) => t.shared).length;
   const insets = useSafeAreaInsets();
   const [activePhoto, setActivePhoto] = useState(0);
@@ -213,11 +245,17 @@ export default function MatchDetail() {
   // Send the note into her conversation and jump straight to the chat.
   const sendNote = () => {
     const text = note.trim();
-    if (text) sendMessage(P.chatId ?? 'ananya', text);
+    const chatId = P.chatId ?? 'ananya';
     setNote('');
     dock.setValue(0);
     setIsDockExpanded(false);
-    router.push({ pathname: '/Chat', params: { id: P.chatId ?? 'ananya' } });
+    // You can only chat with mutual matches. Otherwise the note travels with your like.
+    if (!hasConversation(chatId)) {
+      Alert.alert('Arrow sent', `${P.name} will see your note with your like. If she likes you back, you can chat.`);
+      return;
+    }
+    if (text) sendMessage(chatId, text);
+    router.push({ pathname: '/Chat', params: { id: chatId } });
   };
   // Reacting to a photo or answer marks it and opens the note bar.
   const react = (key: string) => () => {

@@ -17,7 +17,7 @@ const SNAP_INTERVAL = CARD_WIDTH + CARD_SPACING;
 
 const PROFILES = [
   {
-    id: '1',
+    id: 'ananya',
     name: 'Ananya',
     match: 96, // compatibility score → aura colour
     age: 22,
@@ -34,7 +34,7 @@ const PROFILES = [
     ]
   },
   {
-    id: '2',
+    id: 'priya',
     name: 'Priya',
     match: 91, // compatibility score → aura colour
     age: 24,
@@ -49,7 +49,7 @@ const PROFILES = [
     ]
   },
   {
-    id: '3',
+    id: 'neha',
     name: 'Neha',
     match: 87, // compatibility score → aura colour
     age: 23,
@@ -69,22 +69,44 @@ export default function DiscoverScreen() {
   const router = useRouter();
   const [activeIdx, setActiveIdx] = useState(0);
   const scrollX = useRef(new Animated.Value(0)).current;
-  const flatListRef = useRef(null);
+  const flatListRef = useRef<any>(null);
 
-  const currentProfile = PROFILES[activeIdx];
+  // Profiles you've passed on or liked leave the deck.
+  const [deck, setDeck] = useState(PROFILES);
+  const [toast, setToast] = useState('');
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const safeIdx = Math.min(activeIdx, Math.max(deck.length - 1, 0));
+  const currentProfile = deck[safeIdx];
+
+  const say = (msg: string) => {
+    setToast(msg);
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(''), 1800);
+  };
+
+  // Pass / like / star act on the card in the middle, then move to the next one.
+  const act = (kind: 'pass' | 'like' | 'star') => {
+    const p = currentProfile;
+    if (!p) return;
+    setDeck((d) => d.filter((x) => x.id !== p.id));
+    const nextIdx = Math.min(safeIdx, deck.length - 2);
+    setActiveIdx(Math.max(nextIdx, 0));
+    requestAnimationFrame(() => flatListRef.current?.scrollToOffset({ offset: Math.max(nextIdx, 0) * SNAP_INTERVAL, animated: true }));
+    say(kind === 'pass' ? `Passed on ${p.name}` : kind === 'like' ? `You liked ${p.name}` : `Super-liked ${p.name}`);
+  };
 
   const handleScroll = Animated.event(
     [{ nativeEvent: { contentOffset: { x: scrollX } } }],
     { useNativeDriver: true }
   );
 
-  const onViewableItemsChanged = useRef(({ viewableItems }) => {
-    if (viewableItems.length > 0) {
+  const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: { index: number | null }[] }) => {
+    if (viewableItems.length > 0 && viewableItems[0].index != null) {
       setActiveIdx(viewableItems[0].index);
     }
   }).current;
 
-  const renderProfileCard = ({ item, index }) => {
+  const renderProfileCard = ({ item, index }: { item: (typeof PROFILES)[number]; index: number }) => {
     const inputRange = [
       (index - 1) * SNAP_INTERVAL,
       index * SNAP_INTERVAL,
@@ -110,7 +132,7 @@ export default function DiscoverScreen() {
 
     return (
       <View style={{ width: CARD_WIDTH, marginHorizontal: CARD_SPACING / 2 }}>
-        <Pressable style={{ flex: 1 }} onPress={() => router.push('/MatchDetail')}>
+        <Pressable style={{ flex: 1 }} onPress={() => router.push({ pathname: '/MatchDetail', params: { id: item.id } })}>
           <Animated.View 
             className="bg-white overflow-hidden shadow-lg shadow-black/10" 
             style={{ flex: 1, borderRadius: 36, transform: [{ scale }] }}
@@ -197,7 +219,7 @@ export default function DiscoverScreen() {
               <Icon name="notifications-none" size={22} color="#2B4A6A" />
               <View className="absolute top-2 right-2.5 w-2.5 h-2.5 bg-[#FF6B8B] rounded-full border-2 border-[#F1F7FD]" />
             </Pressable>
-            <Pressable className="w-10 h-10 bg-[#F1F7FD] rounded-full items-center justify-center border border-[#E3EDF7]">
+            <Pressable onPress={() => router.push('/DiscoveryPreferences')} accessibilityLabel="Discovery preferences" className="w-10 h-10 bg-[#F1F7FD] rounded-full items-center justify-center border border-[#E3EDF7]">
               <Icon name="tune" size={22} color="#2B4A6A" />
             </Pressable>
           </View>
@@ -205,9 +227,19 @@ export default function DiscoverScreen() {
 
         {/* Swipeable Horizontal Cards - Flex 1 to take all remaining space */}
         <View className="flex-1 z-10">
+          {deck.length === 0 ? (
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40 }}>
+              <Icon name="favorite" size={40} color="#FF6B8B" />
+              <Text style={{ marginTop: 12, fontSize: 22, fontWeight: '800', color: '#2C496A', textAlign: 'center' }}>That’s everyone for today</Text>
+              <Text style={{ marginTop: 6, fontSize: 15, color: '#8892A3', textAlign: 'center' }}>New introductions arrive tomorrow morning.</Text>
+              <Pressable onPress={() => { setDeck(PROFILES); setActiveIdx(0); }} style={{ marginTop: 18, paddingHorizontal: 20, height: 44, borderRadius: 22, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={{ color: '#2C496A', fontWeight: '700' }}>Start over (preview)</Text>
+              </Pressable>
+            </View>
+          ) : null}
           <Animated.FlatList
             ref={flatListRef}
-            data={PROFILES}
+            data={deck}
             keyExtractor={(item) => item.id}
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -224,8 +256,14 @@ export default function DiscoverScreen() {
           />
         </View>
 
+        {toast ? (
+          <View pointerEvents="none" style={{ position: 'absolute', alignSelf: 'center', top: 70, zIndex: 60, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 18, backgroundColor: '#2C496A' }}>
+            <Text style={{ color: '#FFFFFF', fontWeight: '700' }}>{toast}</Text>
+          </View>
+        ) : null}
+
         {/* User Info Section - Fixed Height */}
-        <View className="px-6 mt-2 z-20">
+        <View className="px-6 mt-2 z-20" style={{ opacity: deck.length ? 1 : 0 }}>
           <View className="bg-[#E7F0F9] rounded-3xl py-3 px-4 items-center">
             <Text className="text-[#3E5C7D] text-sm font-medium mb-2 text-center">{currentProfile?.quote}</Text>
             <View className="flex-row flex-wrap justify-center gap-2 w-full">
@@ -242,18 +280,24 @@ export default function DiscoverScreen() {
         {/* Action Buttons - Fixed Height */}
         <View className="flex-row justify-center items-center mt-2 mb-6 gap-5 z-20">
           <Pressable 
+            onPress={() => act('pass')}
+            accessibilityLabel="Pass"
             className="w-16 h-16 bg-white rounded-full items-center justify-center shadow-md shadow-[#E3EDF7]"
           >
             <Icon name="close" size={28} color="#8892A3" />
           </Pressable>
           
           <Pressable 
+            onPress={() => act('like')}
+            accessibilityLabel="Like"
             className="w-20 h-20 bg-[#74B4F2] rounded-full items-center justify-center shadow-lg shadow-[#74B4F2]/50"
           >
             <Icon name="favorite" size={38} color="white" />
           </Pressable>
 
           <Pressable 
+            onPress={() => act('star')}
+            accessibilityLabel="Super like"
             className="w-16 h-16 bg-white rounded-full items-center justify-center shadow-md shadow-[#E3EDF7]"
           >
             <Icon name="star" size={28} color="#74B4F2" />

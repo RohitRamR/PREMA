@@ -58,8 +58,8 @@ function ChatsTabInner() {
           <AuraLegend style={{ marginTop: 12 }} />
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, gap: 16 }}>
-          {NEW_MATCHES.map((m) => (
-            <Tap key={m.id} style={{ alignItems: 'center', width: 72 }} onPress={() => router.push('/MatchDetail')}>
+          {NEW_MATCHES.filter((m) => !conversations.some((c) => c.id === m.id)).map((m) => (
+            <Tap key={m.id} style={{ alignItems: 'center', width: 72 }} onPress={() => router.push({ pathname: '/MatchDetail', params: { id: m.id } })}>
               <AuraRing score={m.match} size={70}>
                 <Image source={{ uri: m.photo }} style={{ width: '100%', height: '100%' }} />
               </AuraRing>
@@ -97,7 +97,7 @@ function ChatsTabInner() {
                     <Text style={s.time}>{last ? timeLabel(last.at) : ''}</Text>
                   </View>
                   <Text style={[s.preview, unread ? s.previewUnread : null]} numberOfLines={1}>
-                    {last?.from === 'me' ? 'You: ' : ''}{last?.text}
+                    {last ? `${last.from === 'me' ? 'You: ' : ''}${last.text}` : 'New match · say hello'}
                   </Text>
                 </View>
               </Tap>
