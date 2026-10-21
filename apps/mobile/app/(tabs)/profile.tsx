@@ -8,6 +8,7 @@ import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
 import Logo from '../../components/Logo';
 import CelestialBackground from '../../components/CelestialBackground';
 import { useProfile, updateProfile, LIFESTYLE_OPTIONS } from '../../src/store/profile';
+import { useMyChart, answeredCount, QUESTION_COUNT } from '../../src/features/compatibility';
 import StatusFade from '../../components/StatusFade';
 
 // Live app palette (matches MatchDetail / Discover / onboarding)
@@ -26,21 +27,12 @@ const C = {
   white: '#FFFFFF',
 };
 
-const ME = {
-  vedic: {
-    archetype: 'Vrishabha (Taurus)',
-    nakshatra: 'Rohini Nakshatra · Pada 2',
-    element: 'Earth Core',
-    influence: 'Chandra primary influence',
-    resonance: 31,
-    resonanceMax: 36,
-  },
-};
 
 const PREFERENCES: { icon: string; title: string; sub: string; href?: Href }[] = [
   { icon: 'shield', title: 'Safety & Verification', sub: 'Aadhaar & work verified', href: '/DateCheckInSafety' },
   { icon: 'group', title: 'Family Circle', sub: '2 trusted contacts linked', href: '/FamilyMatrimonialCircle' },
   { icon: 'tune', title: 'Discovery & Distance', sub: '', href: '/DiscoveryPreferences' },
+  { icon: 'auto_awesome', title: 'Compatibility Quiz', sub: '', href: '/CompatibilityQuiz' },
   { icon: 'notifications_none', title: 'Curated Introductions', sub: 'Daily at 9:00 AM', href: '/DailyReleaseMindfulCadence' },
 ];
 
@@ -70,6 +62,9 @@ function ProfileTabScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const me = useProfile();
+  // Your real Kundli summary from the matching engine (birth time in IST).
+  const chart = useMyChart();
+  const quizDone = answeredCount(me.answers ?? {});
   const paused = me.paused;
   const setPaused = (v: boolean) => updateProfile({ paused: v });
   const lifestyle = me.lifestyle.map((label) => ({
@@ -237,22 +232,22 @@ function ProfileTabScreen() {
           <View style={{ flexDirection: 'row', gap: 10 }}>
             <View style={s.harmonyTile}>
               <Text style={s.label}>Archetype</Text>
-              <Text style={s.harmonyValue}>{ME.vedic.archetype}</Text>
-              <Text style={s.bodySmall}>{ME.vedic.nakshatra}</Text>
+              <Text style={s.harmonyValue}>{chart ? `${chart.moonSign} (${chart.moonSignEnglish})` : 'Add birth date'}</Text>
+              <Text style={s.bodySmall}>{chart ? `${chart.nakshatra} Nakshatra · Pada ${chart.pada}` : 'In Edit profile'}</Text>
             </View>
             <View style={s.harmonyTile}>
               <Text style={s.label}>Element</Text>
-              <Text style={s.harmonyValue}>{ME.vedic.element}</Text>
-              <Text style={s.bodySmall}>{ME.vedic.influence}</Text>
+              <Text style={s.harmonyValue}>{chart ? `${chart.element} Moon` : '—'}</Text>
+              <Text style={s.bodySmall}>{chart ? (chart.lagna ? `${chart.lagna} rising · Sun in ${chart.sunSign}` : `Sun in ${chart.sunSign}`) : ''}</Text>
             </View>
           </View>
 
           <View style={s.resonanceRow}>
             <View style={{ flex: 1 }}>
-              <Text style={s.label}>Baseline resonance</Text>
+              <Text style={s.label}>Compatibility DNA</Text>
               <Text style={s.resonanceNum}>
-                {ME.vedic.resonance}
-                <Text style={s.resonanceMax}> / {ME.vedic.resonanceMax}</Text>
+                {quizDone}
+                <Text style={s.resonanceMax}> / {QUESTION_COUNT} answered</Text>
               </Text>
             </View>
             <View style={s.resonanceIcon}>
@@ -283,7 +278,13 @@ function ProfileTabScreen() {
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={s.rowTitle}>{p.title}</Text>
-                <Text style={s.rowSub}>{p.href === '/DiscoveryPreferences' ? `${me.discovery.cities.join(' & ')} · ${me.discovery.distanceKm} km` : p.sub}</Text>
+                <Text style={s.rowSub}>
+                  {p.href === '/DiscoveryPreferences'
+                    ? `${me.discovery.cities.join(' & ')} · ${me.discovery.distanceKm} km`
+                    : p.href === '/CompatibilityQuiz'
+                      ? `${quizDone} of ${QUESTION_COUNT} answered · sharpens every match`
+                      : p.sub}
+                </Text>
               </View>
               <Icon name="chevron_right" size={22} color={C.muted} />
             </Tap>

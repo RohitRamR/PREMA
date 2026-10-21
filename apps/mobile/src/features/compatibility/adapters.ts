@@ -11,6 +11,7 @@ import {
 import type { Profile } from '../../store/profile';
 import { person } from '../../store/people';
 import { SAMPLE_BIRTHS, EXTRA_BASICS } from './sample-births';
+import { quizToProfiles, sampleAnswers } from './quiz';
 
 /**
  * 'display' scores the couple — always produces a score, so account status
@@ -67,6 +68,19 @@ export function parseIntention(text: string | undefined): RelationshipIntention 
 
 const ME_ID = 'me';
 
+/** Your must-haves become dealbreakers in Discover (never in the couple's %). */
+function mustHaveRules(me: Profile): Partial<UserPreferences> {
+  const m = me.discovery.mustHaves;
+  const rules: Partial<UserPreferences> = {};
+  if (m?.vegetarianOnly) rules.diet = { accepted: ['vegetarian', 'vegan', 'jain'], importance: 'dealbreaker' };
+  if (m?.nonSmokersOnly) rules.smoking = { accepted: ['never'], importance: 'dealbreaker' };
+  if (m?.nonDrinkersOnly) rules.drinking = { accepted: ['never'], importance: 'dealbreaker' };
+  if (m?.sameReligionOnly && me.vitals.religion.trim()) {
+    rules.religion = { accepted: [me.vitals.religion.trim()], importance: 'dealbreaker' };
+  }
+  return rules;
+}
+
 /** Your own engine profile, rebuilt whenever your profile changes. */
 export function buildMyProfile(me: Profile, mode: Mode): MatchProfile {
   const prefs: UserPreferences =
@@ -80,7 +94,9 @@ export function buildMyProfile(me: Profile, mode: Mode): MatchProfile {
           maxDistanceKm: me.discovery.distanceKm,
           ...(me.discovery.kundli.minGuna18 ? { minGunaScore: { score: 18, importance: 'dealbreaker' as const } } : {}),
           ...(me.discovery.kundli.avoidManglikMismatch ? { manglik: { rule: 'avoid_mismatch' as const, importance: 'dealbreaker' as const } } : {}),
+          ...mustHaveRules(me),
         };
+  const quiz = quizToProfiles(ME_ID, me.answers ?? {}, parseIntention(me.intent));
 
   return buildMatchProfile({
     user: {
@@ -98,6 +114,8 @@ export function buildMyProfile(me: Profile, mode: Mode): MatchProfile {
         religion: me.vitals.religion || undefined,
         heightCm: parseHeightCm(me.vitals.height),
         education: parseEducation(me.vitals.education),
+        smoking: quiz.smoking,
+        drinking: quiz.drinking,
       },
     },
     prefs,
@@ -109,6 +127,11 @@ export function buildMyProfile(me: Profile, mode: Mode): MatchProfile {
     },
     fullName: me.name,
     interests: { userId: ME_ID, interests: me.interests },
+    personality: quiz.personality,
+    communication: quiz.communication,
+    values: quiz.values,
+    lifestyle: quiz.lifestyle,
+    goals: quiz.goals,
   });
 }
 
@@ -122,25 +145,32 @@ export function buildTheirProfile(id: string, mode: Mode, given?: PersonBasics):
   const fallback = given ?? EXTRA_BASICS[id];
   const name = p?.name ?? fallback?.name ?? id;
   const age = p?.age ?? fallback?.age ?? 25;
+  const intention = parseIntention(p?.lookingFor ?? fallback?.lookingFor ?? 'Long-term relationship');
+  const quiz = quizToProfiles(id, sampleAnswers(id), intention);
   return buildMatchProfile({
     user: {
       id,
       firstName: name,
       age,
       gender: b.gender,
-      relationshipIntention: mode === 'display' ? 'open_to_either' : parseIntention(p?.lookingFor ?? fallback?.lookingFor ?? 'Long-term relationship'),
+      relationshipIntention: mode === 'display' ? 'open_to_either' : intention,
       isVerified: true,
       isActive: true,
       isSafetyRestricted: false,
       blockedUserIds: [],
-      attributes: { diet: b.diet, religion: b.religion, heightCm: b.heightCm, education: b.education },
+      attributes: { diet: b.diet, religion: b.religion, heightCm: b.heightCm, education: b.education, smoking: quiz.smoking, drinking: quiz.drinking },
     },
     prefs:
       mode === 'display'
         ? { userId: id, ...OPEN_PREFS }
-        : { userId: id, targetGender: [b.gender === 'female' ? 'male' : 'female'], minAge: 21, maxAge: 40, maxDistanceKm: 100000 },
+        : { userId: id, targetGender: [b.gender === 'female' ? 'male' : 'female', 'non_binary'], minAge: 21, maxAge: 40, maxDistanceKm: 100000 },
     birthData: { dateOfBirth: b.date, exactBirthTime: b.time, birthPlaceLat: b.place.lat, birthPlaceLon: b.place.lon },
     fullName: name,
     interests: { userId: id, interests: p?.interests ?? fallback?.interests ?? [] },
+    personality: quiz.personality,
+    communication: quiz.communication,
+    values: quiz.values,
+    lifestyle: quiz.lifestyle,
+    goals: quiz.goals,
   });
 }

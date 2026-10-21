@@ -17,7 +17,7 @@ import {
 } from '@prema/compatibility';
 import { getProfile, useProfile, type Profile } from '../../store/profile';
 import { buildMyProfile, buildTheirProfile, type Mode } from './adapters';
-import { toCompatView, type CompatView } from './view';
+import { toCompatView, chartOf, type CompatView, type ChartView } from './view';
 
 const myProfiles = new WeakMap<Profile, Partial<Record<Mode, MatchProfile>>>();
 const theirProfiles = new Map<string, Partial<Record<Mode, MatchProfile | null>>>();
@@ -103,4 +103,18 @@ export function rankDeck<T extends { id: string; match: number }>(me: Profile, i
 export function useRankedDeck<T extends { id: string; match: number }>(items: T[]): T[] {
   const me = useProfile();
   return useMemo(() => rankDeck(me, items), [me, items]);
+}
+
+/** Your own Kundli summary (moon sign, nakshatra, Lagna, Manglik…), or null if your birth date is invalid. */
+export function myChartFor(me: Profile): ChartView | null {
+  try {
+    return chartOf(mine(me, 'display'));
+  } catch {
+    return null;
+  }
+}
+
+export function useMyChart(): ChartView | null {
+  const me = useProfile();
+  return useMemo(() => myChartFor(me), [me]);
 }

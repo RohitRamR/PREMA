@@ -52,7 +52,7 @@ export type CompatView = {
   reasons: string[];
 };
 
-function chartOf(p: MatchProfile): ChartView {
+export function chartOf(p: MatchProfile): ChartView {
   return {
     moonSign: p.astro.rashi.name,
     moonSignEnglish: p.astro.rashi.englishName,

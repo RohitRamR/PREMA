@@ -2,6 +2,7 @@
 // Screens read with useProfile() and write with updateProfile(); every
 // subscriber re-renders. Swap the body for Supabase calls when the API lands.
 import { useSyncExternalStore } from 'react';
+import type { QuizAnswers } from '../features/compatibility/quiz';
 
 export type Profile = {
   name: string;
@@ -12,6 +13,8 @@ export type Profile = {
   interestedIn: Gender[];
   /** Birth details for the Kundli. Time is local Indian Standard Time (IST). */
   birth: BirthDetails;
+  /** Compatibility quiz answers (question id → answer). */
+  answers: QuizAnswers;
   location: string;
   occupation: string;
   intent: string;
@@ -35,6 +38,8 @@ export type Profile = {
     verifiedOnly: boolean;
     /** Kundli preferences used by the matching engine. */
     kundli: KundliPrefs;
+    /** Dealbreakers: people who don't meet these are never shown. */
+    mustHaves: MustHaves;
   };
   settings: {
     pushIntros: boolean;
@@ -47,7 +52,7 @@ export type Profile = {
   paused: boolean;
 };
 
-export type Gender = 'male' | 'female';
+export type Gender = 'male' | 'female' | 'non_binary';
 
 export type BirthDetails = {
   date: string;   // YYYY-MM-DD
@@ -55,6 +60,13 @@ export type BirthDetails = {
   place: string;  // city name
   lat?: number;
   lon?: number;
+};
+
+export type MustHaves = {
+  vegetarianOnly: boolean;
+  nonSmokersOnly: boolean;
+  nonDrinkersOnly: boolean;
+  sameReligionOnly: boolean;
 };
 
 export type KundliPrefs = {
@@ -152,6 +164,7 @@ let state: Profile = {
   gender: 'male',
   interestedIn: ['female'],
   birth: { date: '1998-02-14', time: '06:20', place: 'Chennai', lat: 13.0827, lon: 80.2707 },
+  answers: {},
   location: 'Bengaluru & Chennai',
   occupation: 'Senior Architect',
   intent: INTENT_OPTIONS[0],
@@ -187,6 +200,7 @@ let state: Profile = {
     intents: ['Intentional life partnership', 'Marriage within 1–2 years'],
     verifiedOnly: true,
     kundli: { minGuna18: false, avoidManglikMismatch: false },
+    mustHaves: { vegetarianOnly: false, nonSmokersOnly: false, nonDrinkersOnly: false, sameReligionOnly: false },
   },
   settings: {
     pushIntros: true,

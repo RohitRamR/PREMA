@@ -14,6 +14,7 @@ import {
   type Vitals,
 } from '../src/store/profile';
 import { goBack } from '../components/nav';
+import { answeredCount, QUESTION_COUNT } from '../src/features/compatibility';
 
 const MAX_VALUES = 3;
 
@@ -158,6 +159,17 @@ function EditProfileInner() {
           >
             <Icon name="visibility" size={18} color={C.accent} />
             <Text style={s.previewText}>See how others see your profile</Text>
+            <Icon name="chevron_right" size={20} color={C.muted} />
+          </Tap>
+
+          <Tap
+            onPress={() => router.push('/CompatibilityQuiz')}
+            style={s.preview}
+            pressedStyle={{ opacity: 0.8 }}
+            accessibilityRole="button"
+          >
+            <Icon name="auto_awesome" size={18} color={C.pink} />
+            <Text style={s.previewText}>Compatibility quiz · {answeredCount(p.answers ?? {})}/{QUESTION_COUNT} answered</Text>
             <Icon name="chevron_right" size={20} color={C.muted} />
           </Tap>
 

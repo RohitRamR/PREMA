@@ -111,11 +111,15 @@ function BreakdownInner() {
           <Text style={s.heroTitle}>You and {them.name}</Text>
           <Text style={s.heroSub}>{compat?.headline ?? 'A strong match on what matters most.'}</Text>
           {compat && compat.confidence !== 'strong' ? (
-            <Text style={s.confidence}>
-              {compat.me.hasBirthTime && compat.them.hasBirthTime
-                ? 'Add more profile answers for a sharper score.'
-                : 'Exact birth times (in IST) make the Kundli more precise.'}
-            </Text>
+            compat.me.hasBirthTime && compat.them.hasBirthTime ? (
+              <Tap onPress={() => router.push('/CompatibilityQuiz')} style={s.hintBtn} accessibilityRole="button">
+                <Icon name="auto_awesome" size={15} color={C.pink} />
+                <Text style={s.hintText}>Answer the compatibility quiz for a sharper score</Text>
+                <Icon name="chevron_right" size={18} color={C.pink} />
+              </Tap>
+            ) : (
+              <Text style={s.confidence}>Exact birth times (in IST) make the Kundli more precise.</Text>
+            )
           ) : null}
         </View>
 
@@ -259,6 +263,8 @@ const s = StyleSheet.create({
   gunaOf: { color: C.muted, fontSize: 15, fontWeight: '800' },
   kootaGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 14 },
   kootaDosha: { backgroundColor: '#FFF1F4', borderWidth: 1, borderColor: '#FFD0DB' },
+  hintBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 10, paddingHorizontal: 14, paddingVertical: 9, borderRadius: 18, backgroundColor: C.pinkSoft },
+  hintText: { color: C.pink, fontSize: 13, fontWeight: '800' },
   confidence: { color: C.muted, fontSize: 12.5, fontWeight: '700', marginTop: 8, textAlign: 'center' },
   koota: { width: '47%', flexGrow: 1, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 14, backgroundColor: '#F6F9FC' },
   kootaName: { color: C.muted, fontSize: 11.5, fontWeight: '700', marginTop: 1 },
