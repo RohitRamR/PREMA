@@ -95,6 +95,26 @@ The mobile app reports errors to [Sentry](https://sentry.io).
   `SENTRY_PROJECT` and `SENTRY_AUTH_TOKEN` as EAS secrets so source maps are
   uploaded. Never commit the auth token.
 
+## Database access rules
+
+Who can see and change what in Supabase is enforced by Row Level Security
+and grants in `supabase/migrations/`. `supabase/tests/access_rules.sh`
+checks them as a logged-out visitor, member A and member B: for example,
+that members can't verify themselves, can't see who passed on them, and
+only see a match's written breakdown after a mutual match.
+
+Run it against the local stack (needs Docker):
+
+```bash
+npx supabase start
+bash supabase/tests/access_rules.sh
+```
+
+It creates its own test members, rolls back every check, and deletes the
+test members when it finishes. It exits non-zero if any check fails. Run it
+after changing a migration, and add a check whenever you add a table or
+policy.
+
 ## Scripts (from the repo root)
 
 | Command | What it does |
