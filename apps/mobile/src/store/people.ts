@@ -51,30 +51,6 @@ export const PEOPLE: Record<string, Person> = {
     interests: ['Tech', 'Reading', 'Road trips', 'Photography'],
     prompt: { question: 'Sundays are sacred for…', answer: 'A bookshop, a bakery and nowhere to be.' },
   },
-  riya: {
-    id: 'riya', name: 'Riya', age: 27, city: 'Bengaluru', job: 'Teacher', match: 94,
-    photos: [u('photo-1494790108377-be9c29b29330')],
-    bio: 'Primary school teacher, amateur gardener and firm believer in quiet weekends.',
-    lookingFor: 'Intentional life partnership',
-    interests: ['Gardening', 'Slow living', 'Reading', 'Cooking'],
-    prompt: { question: 'A boundary I firmly hold…', answer: 'Quiet weekends are non-negotiable.' },
-  },
-  diya: {
-    id: 'diya', name: 'Diya', age: 25, city: 'Chennai', job: 'Photographer', match: 90,
-    photos: [u('photo-1544005313-94ddf0286df2')],
-    bio: 'I chase dawn light around Chennai’s temple tanks and drink far too much filter coffee.',
-    lookingFor: 'Long-term relationship',
-    interests: ['Photography', 'Filter coffee', 'Heritage walks'],
-    prompt: { question: 'I’m weirdly good at…', answer: 'Guessing the exact minute the sun comes up.' },
-  },
-  isha: {
-    id: 'isha', name: 'Isha', age: 28, city: 'Bengaluru', job: 'Chef', match: 87,
-    photos: [u('photo-1531123897727-8f129e1688ce')],
-    bio: 'Chef by trade, decoction purist by conviction.',
-    lookingFor: 'Long-term relationship',
-    interests: ['Cooking', 'Filter coffee', 'Travel'],
-    prompt: { question: 'The way to win me over…', answer: 'Have a strong opinion about decoction.' },
-  },
   tara: {
     id: 'tara', name: 'Tara', age: 26, city: 'Chennai', job: 'Lawyer', match: 85,
     photos: [u('photo-1488426862026-3ee34a7d66df')],
@@ -91,22 +67,6 @@ export const PEOPLE: Record<string, Person> = {
     interests: ['Reading', 'Writing', 'Slow living'],
     prompt: { question: 'Sundays are sacred for…', answer: 'Rain, a window seat and a very long novel.' },
   },
-  aarohi: {
-    id: 'aarohi', name: 'Aarohi', age: 29, city: 'Bengaluru', job: 'Ceramic artist', match: 89,
-    photos: [u('photo-1529626455594-4ff0802cfb7e')],
-    bio: 'I run a small pottery studio and teach Saturday wheel classes.',
-    lookingFor: 'Intentional life partnership',
-    interests: ['Pottery', 'Art', 'Plants'],
-    prompt: { question: 'A perfect first date…', answer: 'Getting clay on our hands at the wheel.' },
-  },
-  sana: {
-    id: 'sana', name: 'Sana', age: 27, city: 'Hyderabad', job: 'Data scientist', match: 88,
-    photos: [u('photo-1536766768598-e09213fdcf22')],
-    bio: 'Data scientist by day, ghazal listener by night. I collect old Hyderabadi recipes and new reasons to visit the Old City.',
-    lookingFor: 'Marriage within 1–2 years',
-    interests: ['Ghazals', 'Cooking', 'Reading', 'Heritage walks', 'Photography'],
-    prompt: { question: 'The way to win me over…', answer: 'Know your Irani chai spot and defend it passionately.' },
-  },
   lakshmi: {
     id: 'lakshmi', name: 'Lakshmi', age: 25, city: 'Chennai', job: 'Bharatanatyam teacher', match: 86,
     photos: [u('photo-1617297873650-aef8f4e00b9b')],
@@ -114,14 +74,6 @@ export const PEOPLE: Record<string, Person> = {
     lookingFor: 'Intentional life partnership',
     interests: ['Dance', 'Carnatic music', 'Filter coffee', 'Temples', 'Yoga'],
     prompt: { question: 'Sundays are sacred for…', answer: 'Morning practice, a long lunch with family, and a nap I never regret.' },
-  },
-  shreya: {
-    id: 'shreya', name: 'Shreya', age: 28, city: 'Pune', job: 'Civil engineer', match: 85,
-    photos: [u('photo-1789500381106-ba13068a6520')],
-    bio: 'I build bridges for a living (literally). Monsoon treks in the Sahyadris are my reset button.',
-    lookingFor: 'Long-term relationship',
-    interests: ['Hiking', 'Travel', 'Road trips', 'Board games', 'Cooking'],
-    prompt: { question: 'A perfect first date…', answer: 'A sunrise trek to a fort, vada pav at the top.' },
   },
 };
 

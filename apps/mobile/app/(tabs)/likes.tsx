@@ -22,21 +22,6 @@ type Like = {
 
 const LIKED_YOU: Like[] = [
   {
-    id: 'riya', name: 'Riya', age: 27, city: 'Bengaluru', match: 94,
-    photo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=600',
-    on: 'Your boundary', note: 'Quiet weekends are non-negotiable for me too.',
-  },
-  {
-    id: 'diya', name: 'Diya', age: 25, city: 'Chennai', match: 90,
-    photo: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=600',
-    on: 'Your photo', note: 'Is that the Kapaleeshwarar tank at dawn?',
-  },
-  {
-    id: 'isha', name: 'Isha', age: 28, city: 'Bengaluru', match: 87,
-    photo: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&q=80&w=600',
-    on: 'Filter coffee lover', note: 'I have strong opinions on decoction.',
-  },
-  {
     id: 'tara', name: 'Tara', age: 26, city: 'Chennai', match: 85,
     photo: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&q=80&w=600',
     on: 'Your values', note: 'Family closeness — yes, always.',
@@ -48,11 +33,6 @@ const YOU_LIKED: (Like & { status: string })[] = [
     id: 'nila', name: 'Nila', age: 26, city: 'Chennai', match: 92, status: 'Viewed your note',
     photo: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=600',
     on: 'Her prompt', note: 'You wrote about monsoon reading corners.',
-  },
-  {
-    id: 'aarohi', name: 'Aarohi', age: 29, city: 'Bengaluru', match: 89, status: 'Waiting for a reply',
-    photo: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&q=80&w=600',
-    on: 'Her photo', note: 'You asked about the pottery studio.',
   },
 ];
 

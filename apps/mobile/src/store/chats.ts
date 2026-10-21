@@ -59,9 +59,6 @@ let conversations: Conversation[] = [
 ];
 
 export const NEW_MATCHES: NewMatch[] = [
-  { id: 'riya', name: 'Riya', match: 94, photo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=300' },
-  { id: 'diya', name: 'Diya', match: 90, photo: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=300' },
-  { id: 'isha', name: 'Isha', match: 87, photo: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&q=80&w=300' },
   { id: 'tara', name: 'Tara', match: 85, photo: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&q=80&w=300' },
 ];
 
