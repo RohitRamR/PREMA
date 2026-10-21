@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Image, ScrollView, TextInput, KeyboardAvoidingView, Platform, StyleSheet, Animated } from 'react-native';
+import { View, Image, ScrollView, TextInput, KeyboardAvoidingView, Platform, StyleSheet, Animated, Alert } from 'react-native';
 import Text, { NunitoScope } from '../components/PremaText';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,7 +8,7 @@ import Icon from '../components/Icon';
 import { AuraRing } from '../components/Aura';
 import { C, Tap, cardShadow, serif } from '../components/prema-ui';
 import {
-  useConversation, sendMessage, markRead, timeLabel, type Message,
+  useConversation, sendMessage, markRead, timeLabel, removeConversation, type Message,
 } from '../src/store/chats';
 
 const GROUP_GAP_MS = 10 * 60_000;
@@ -56,6 +56,17 @@ function ChatScreenInner() {
     }, 2200);
   };
 
+  const openOptions = () => Alert.alert(convo.name, undefined, [
+    { text: 'View profile', onPress: () => router.push({ pathname: '/MatchDetail', params: { id: convo.id } }) },
+    { text: 'Plan a date', onPress: () => router.push({ pathname: '/date/plan', params: { match: convo.id } }) },
+    { text: 'Unmatch', style: 'destructive', onPress: () => Alert.alert(`Unmatch ${convo.name}?`, 'Your chat will be removed for both of you. This can’t be undone.', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Unmatch', style: 'destructive', onPress: () => { removeConversation(convo.id); router.back(); } },
+    ]) },
+    { text: 'Report', style: 'destructive', onPress: () => router.push({ pathname: '/Report', params: { id: convo.id } }) },
+    { text: 'Cancel', style: 'cancel' },
+  ]);
+
   const scrollToEnd = () => requestAnimationFrame(() => scrollRef.current?.scrollToEnd({ animated: true }));
 
   return (
@@ -81,7 +92,9 @@ function ChatScreenInner() {
             </Text>
           </View>
         </Tap>
-
+        <Tap onPress={openOptions} style={s.roundBtn} accessibilityLabel="Chat options">
+          <Icon name="more_horiz" size={22} color={C.pri} />
+        </Tap>
       </View>
 
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>

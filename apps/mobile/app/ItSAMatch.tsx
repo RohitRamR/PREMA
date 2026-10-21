@@ -107,7 +107,7 @@ export default function ItSAMatch() {
         <View style={styles.actionContainer}>
           <Pressable 
             style={styles.primaryButton}
-            onPress={() => (id ? router.replace({ pathname: '/Chat', params: { id } }) : router.push('/SendIntentionalNote'))}
+            onPress={() => (id ? router.replace({ pathname: '/Chat', params: { id } }) : router.replace('/chats'))}
           >
             <Icon name="mark_email_read" size={20} color="#FFF" />
             <Text style={styles.primaryButtonText}>Send Intentional Note</Text>

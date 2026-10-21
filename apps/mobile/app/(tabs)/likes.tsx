@@ -8,6 +8,7 @@ import CelestialBackground from '../../components/CelestialBackground';
 import Icon from '../../components/Icon';
 import Logo from '../../components/Logo';
 import { addMatch } from '../../src/store/chats';
+import { useSafety } from '../../src/store/safety';
 import { AuraFrame, AuraRing } from '../../components/Aura';
 import { C, Tap, cardShadow, serif } from '../../components/prema-ui';
 import StatusFade from '../../components/StatusFade';
@@ -59,7 +60,9 @@ function LikesTabScreen() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const [tab, setTab] = useState<'in' | 'out'>('in');
-  const [incoming, setIncoming] = useState(LIKED_YOU);
+  const [incomingAll, setIncoming] = useState(LIKED_YOU);
+  const { blocked } = useSafety();
+  const incoming = incomingAll.filter((l) => !blocked.includes(l.id));
   const cardW = (width - 40 - 14) / 2;
 
   const pass = (id: string) => setIncoming((l) => l.filter((x) => x.id !== id));

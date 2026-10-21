@@ -10,7 +10,8 @@ import { Tap } from '../components/prema-ui';
 import CupidArrow from '../components/CupidArrow';
 import { sendMessage, hasConversation } from '../src/store/chats';
 import { person, type Person } from '../src/store/people';
-import { Alert } from 'react-native';
+import { Alert, Share } from 'react-native';
+import { blockPerson } from '../src/store/safety';
 import { useProfile, VITAL_FIELDS, type Profile } from '../src/store/profile';
 
 const { width, height } = Dimensions.get('window');
@@ -257,6 +258,21 @@ export default function MatchDetail() {
     if (text) sendMessage(chatId, text);
     router.push({ pathname: '/Chat', params: { id: chatId } });
   };
+  // Safety actions from the ••• menu and the links at the bottom.
+  const targetId = P.chatId ?? 'ananya';
+  const shareProfile = () => Share.share({ message: `Have a look at ${P.name} on Prema.` });
+  const reportProfile = () => router.push({ pathname: '/Report', params: { id: targetId } });
+  const hideProfile = () => Alert.alert(`Hide ${P.name}?`, 'You won’t see each other in Discover again.', [
+    { text: 'Cancel', style: 'cancel' },
+    { text: 'Hide', style: 'destructive', onPress: () => { blockPerson(targetId); router.back(); } },
+  ]);
+  const openMenu = () => Alert.alert(P.name, undefined, [
+    { text: 'Share profile', onPress: shareProfile },
+    { text: `Hide ${P.name}`, onPress: hideProfile },
+    { text: 'Report', style: 'destructive', onPress: reportProfile },
+    { text: 'Cancel', style: 'cancel' },
+  ]);
+
   // Reacting to a photo or answer marks it and opens the note bar.
   const react = (key: string) => () => {
     setReacted((r) => ({ ...r, [key]: true }));
@@ -312,7 +328,7 @@ export default function MatchDetail() {
                   <Icon name="edit" size={20} color="#FFFFFF" />
                 </Tap>
               ) : (
-                <Tap style={s.glassBtn} pressedStyle={{ opacity: 0.7 }} accessibilityLabel="More options">
+                <Tap onPress={openMenu} style={s.glassBtn} pressedStyle={{ opacity: 0.7 }} accessibilityLabel="More options">
                   <Icon name="more_horiz" size={22} color="#FFFFFF" />
                 </Tap>
               )}
@@ -473,8 +489,8 @@ export default function MatchDetail() {
 
           {/* ── Quiet safety links ── */}
           {!isMe ? <View style={s.links}>
-            {['Share profile', 'Hide', 'Report'].map((l) => (
-              <Tap key={l} style={{ paddingVertical: 8 }} accessibilityRole="button">
+            {(['Share profile', 'Hide', 'Report'] as const).map((l) => (
+              <Tap key={l} onPress={l === 'Share profile' ? shareProfile : l === 'Hide' ? hideProfile : reportProfile} style={{ paddingVertical: 8 }} accessibilityRole="button">
                 <Text style={s.linkText}>{l}</Text>
               </Tap>
             ))}

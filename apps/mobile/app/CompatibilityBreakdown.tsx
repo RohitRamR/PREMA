@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from '../components/Icon';
-import { View, Text, ScrollView, Image, Pressable, TextInput } from 'react-native';
+import { View, Text, ScrollView, Image, Pressable, TextInput, Share, Alert } from 'react-native';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 
 export default function CompatibilityBreakdown() {
@@ -19,10 +19,10 @@ export default function CompatibilityBreakdown() {
 <Text className="font-label-md text-label-md text-primary tracking-wide uppercase">Editorial Synergy Report</Text>
 </View>
 <View className="flex items-center gap-space-8 flex-row">
-<Pressable aria-label="Share Compatibility Analysis" className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container text-primary flex-row" >
+<Pressable onPress={() => Share.share({ message: 'Our PREMA compatibility: 96% aligned on values, intent and lifestyle.' })} aria-label="Share Compatibility Analysis" className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container text-primary flex-row" >
 <Icon name="share" size={18} className="text-[18px]" />
 </Pressable>
-<Pressable aria-label="Info on Scoring" className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container text-primary flex-row">
+<Pressable onPress={() => Alert.alert('How scoring works', 'Your score blends shared values, relationship intent, lifestyle rhythm and communication style. It never includes looks or money, and it can’t be bought.')} aria-label="Info on Scoring" className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container text-primary flex-row">
 <Icon name="info" size={18} className="text-[18px]" />
 </Pressable>
 </View>

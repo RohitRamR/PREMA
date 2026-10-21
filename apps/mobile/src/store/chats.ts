@@ -106,6 +106,12 @@ export function addMatch(p: { id: string; name: string; age: number; city: strin
   emit();
 }
 
+/** Unmatch or block: the conversation disappears for both people. */
+export function removeConversation(id: string) {
+  conversations = conversations.filter((c) => c.id !== id);
+  emit();
+}
+
 export const hasConversation = (id: string) => conversations.some((c) => c.id === id);
 
 export function timeLabel(at: number) {
