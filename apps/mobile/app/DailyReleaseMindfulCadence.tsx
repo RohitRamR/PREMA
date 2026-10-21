@@ -1,228 +1,130 @@
+// Curated introductions: how many matches arrive, when, and a quiet-hours curfew. Pause lives here too.
+import React, { useState } from 'react';
+import { View, ScrollView, StyleSheet, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-import React from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import CelestialBackground from '../components/CelestialBackground';
 import Icon from '../components/Icon';
-import { View, Text, ScrollView, Image, Pressable, TextInput, ImageBackground } from 'react-native';
-import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import Text, { NunitoScope } from '../components/PremaText';
+import { C, Card, Chip, PrimaryButton, ScreenHeader, Tap, cardShadow } from '../components/prema-ui';
+import { updateProfile, useProfile } from '../src/store/profile';
+import { goBack } from '../components/nav';
 
-export default function DailyReleaseMindfulCadence() {
-  const router = useRouter();
+const RHYTHMS = [
+  { id: 'slow', title: 'The Slow Horizon', sub: '2 deeply aligned matches a day', icon: 'spa' },
+  { id: 'steady', title: 'The Steady Rhythm', sub: '3 curated matches a day at 9:00 AM', icon: 'wb_sunny' },
+  { id: 'weekend', title: 'Weekend Sabbatical', sub: 'Matches only Friday to Sunday', icon: 'weekend' },
+] as const;
+const TIMES = ['7:00 AM', '9:00 AM', '12:00 PM', '6:00 PM'];
+const CURFEWS = ['Off', '9:00 PM', '10:00 PM', '11:00 PM'];
+
+export default function MindfulCadence() {
   return (
-    <SafeAreaView className="bg-surface text-on-surface font-body-md text-body-md flex flex-1">
-      <View className="bg-surface border-surface-container-highest bg-surface/85 shadow-sm"><View className="h-16 px-space-20 max-w-[480px] mx-auto flex items-center justify-between flex-row"><View className="flex items-center gap-space-12 flex-row"><Image alt="PREMA Logo" className="h-8 w-[76px]" resizeMode="contain" source={require('../assets/images/logo.png')} /><View className="flex"><Text className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">PREMA</Text><Text className="font-headline-sm text-headline-sm text-primary tracking-tight">Prema Daily Intros Cadence &amp; Mindful Pacing</Text></View></View><View className="flex items-center gap-space-8 flex-row"><Pressable aria-label="Safety &amp; Verification" className="w-10 h-10 flex items-center justify-center rounded-full text-secondary flex-row" data-path="prema-safety-verification-center" href="#"><Icon name="verified_user" size={22} className="text-[22px]" /></Pressable><Pressable aria-label="Membership Tier" className="w-10 h-10 flex items-center justify-center rounded-full text-secondary flex-row" data-path="membership" href="#"><Icon name="workspace_premium" size={22} className="text-[22px]" /></Pressable><Pressable className="relative flex items-center justify-center min-w-[36px] min-h-[36px] rounded-full flex-row" data-path="profile" href="#"><Image alt="Profile" className="w-8 h-8 rounded-full" source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBnpv7GVuzd6fs5TliuCiwIlpL0Rt2bVAxsXV2oCjBpVhp4UG2QcSA0fM1E5q0b-Bi3hANo_gxxHA1NjlLrqjE8ohvM6MdNojlI797HuC0AUkvZ0e2I5nz-fDRMdLXKv5aD9DyFmCPwJsDQdw4uv-m2poXm4GRuvfCjVpkLQEOf-1fFeXQOV7jP88Y-BVm6Xpd7_d4ZzQTNKZfgN_NLPKw3_kWAaoVLwLZ_BFzC19ixAfQnTKjdTvg9' }} /><Text className="absolute -bottom-space-2 -right-space-2 w-3.5 h-3.5 bg-secondary-container rounded-full flex items-center justify-center flex-row"><Icon name="verified" size={10} className="text-[10px] text-primary font-bold" /></Text></Pressable></View></View></View><ScrollView className="flex relative w-full max-w-[480px] mx-auto px-margin-mobile pt-16 pb-28 bg-surface"><View className="flex w-full pb-8">
-
-<View className="flex items-center justify-between py-space-12 flex-row">
-<Pressable onPress={() => router.back()} aria-label="Go back" className="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-low text-primary flex-row" data-path="discover" href="#">
-<Icon name="arrow_back" size={20} className="text-[20px]" />
-</Pressable>
-<View className="text-center">
-<Text className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Discovery Settings</Text>
-<Text className="font-headline-sm text-headline-sm text-primary tracking-tight">Daily Cadence &amp; Pacing</Text>
-</View>
-<Pressable aria-label="Day / Night Mindful Mode" className="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-low text-secondary flex-row" >
-<Icon name="routine" size={20} className="text-[20px]" />
-</Pressable>
-</View>
-
-<Text className="font-body-md text-body-md text-on-surface-variant text-center px-space-16 pt-space-4 pb-space-20">
-    Intentional connection is unhurried. Decide how and when PREMA introduces you to thoughtful prospects.
-  </Text>
-
-<View className="w-full rounded-2xl bg-primary-container text-on-primary p-space-24 shadow-md relative overflow-hidden mb-space-24">
-
-<View className="absolute -right-8 -top-8 w-44 h-44 rounded-full bg-secondary/25"></View>
-<View className="absolute right-4 bottom-4 opacity-15">
-<Svg fill="none" height="120" viewBox="0 0 120 120" width="120" xmlns="http://www.w3.org/2000/svg">
-<Circle cx="60" cy="60" r="50" stroke="currentColor" strokeDasharray="3 4" strokeWidth="1" />
-<Circle cx="60" cy="60" r="34" stroke="currentColor" strokeWidth="1.5" />
-<Circle cx="60" cy="60" fill="currentColor" r="8" />
-<Circle cx="94" cy="60" fill="currentColor" r="4" />
-</Svg>
-</View>
-<View className="relative flex gap-space-12">
-<View className="flex items-center justify-between flex-row">
-<Text className="items-center gap-space-4 px-space-12 py-1 rounded-full bg-secondary/30 text-secondary-fixed text-label-sm font-label-sm uppercase tracking-wide">
-<Text className="w-1.5 h-1.5 rounded-full bg-secondary-container animate-pulse"></Text>
-          Next Curated Drop
-        </Text>
-<Text className="font-label-sm text-label-sm text-secondary-fixed-dim">Daily at 9:00 AM</Text>
-</View>
-<View className="pt-space-8">
-<View className="flex items-baseline gap-space-8 flex-row">
-<Text className="font-headline-lg-mobile text-headline-lg-mobile text-surface-lowest tracking-tight">Tomorrow, 9:00 AM</Text>
-</View>
-<View className="flex items-center gap-space-8 text-secondary-fixed-dim font-label-md text-label-md mt-space-2 flex-row">
-<Icon name="hourglass_top" size={16} className="text-[16px] text-secondary-container" />
-<Text id="countdown-text">14 hrs 22 mins remaining</Text>
-</View>
-</View>
-<View className="rounded-xl bg-surface-container-lowest/10 p-space-16 mt-space-8 flex gap-space-8">
-<View className="flex items-center gap-space-8 flex-row">
-<Icon name="auto_awesome" size={20} className="text-[20px] text-secondary-container" />
-<Text className="font-headline-sm text-headline-sm text-on-primary">3 Handcrafted Introductions in Progress</Text>
-</View>
-<Text className="font-body-sm text-body-sm text-primary-fixed-dim">
-          PREMA’s matching engine is currently analyzing your conversation rhythms, values alignment, and non-negotiables to deliver 3 deeply aligned profiles.
-        </Text>
-</View>
-</View>
-</View>
-
-<View className="w-full flex gap-space-12 mb-space-24">
-<View className="flex px-space-4">
-<Text className="font-headline-md text-headline-md text-primary tracking-tight">Your Discovery Rhythm</Text>
-<Text className="font-body-sm text-body-sm text-on-surface-variant">
-        Control the pace of your romantic search. Designed for quality over endless swiping.
-      </Text>
-</View>
-
-<View className="flex gap-space-12" id="rhythm-options">
-
-<Pressable className="rhythm-card relative flex items-start gap-space-16 p-space-16 rounded-2xl bg-surface-container-lowest shadow-sm flex-row">
-<TextInput checked="" className="mt-1 text-primary accent-primary w-4 h-4" name="discovery_rhythm" type="radio" value="slow" />
-<View className="flex flex-1">
-<View className="flex items-center justify-between flex-row">
-<Text className="font-headline-sm text-headline-sm text-primary">The Slow Horizon</Text>
-<Text className="px-space-8 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-label-sm font-label-sm">Recommended</Text>
-</View>
-<Text className="font-body-md text-body-md text-on-surface-variant mt-space-4">
-            2 deeply aligned matches per day. Ideal for contemplative, focused conversations without emotional overwhelm.
-          </Text>
-<View className="flex items-center gap-space-12 mt-space-8 text-secondary font-label-sm text-label-sm flex-row">
-<Text className="flex items-center gap-space-4 flex-row"><Icon name="spa" size={15} className="text-[15px]" /> Deep Dialogue</Text>
-<Text>•</Text>
-<Text className="flex items-center gap-space-4 flex-row"><Icon name="schedule" size={15} className="text-[15px]" /> 9:00 AM Delivery</Text>
-</View>
-</View>
-</Pressable>
-
-<Pressable className="rhythm-card relative flex items-start gap-space-16 p-space-16 rounded-2xl bg-surface-container-lowest shadow-sm flex-row">
-<TextInput className="mt-1 text-primary accent-primary w-4 h-4" name="discovery_rhythm" type="radio" value="steady" />
-<View className="flex flex-1">
-<View className="flex items-center justify-between flex-row">
-<Text className="font-headline-sm text-headline-sm text-primary">The Steady Rhythm</Text>
-</View>
-<Text className="font-body-md text-body-md text-on-surface-variant mt-space-4">
-            3 curated matches per day at 9:00 AM. Balances active discovery with deliberate, single-threaded connection.
-          </Text>
-<View className="flex items-center gap-space-12 mt-space-8 text-secondary font-label-sm text-label-sm flex-row">
-<Text className="flex items-center gap-space-4 flex-row"><Icon name="sync_alt" size={15} className="text-[15px]" /> Moderate Pace</Text>
-<Text>•</Text>
-<Text className="flex items-center gap-space-4 flex-row"><Icon name="done_all" size={15} className="text-[15px]" /> Daily Refresh</Text>
-</View>
-</View>
-</Pressable>
-
-<Pressable className="rhythm-card relative flex items-start gap-space-16 p-space-16 rounded-2xl bg-surface-container-lowest shadow-sm flex-row">
-<TextInput className="mt-1 text-primary accent-primary w-4 h-4" name="discovery_rhythm" type="radio" value="weekend" />
-<View className="flex flex-1">
-<View className="flex items-center justify-between flex-row">
-<Text className="font-headline-sm text-headline-sm text-primary">Weekend Sabbatical</Text>
-</View>
-<Text className="font-body-md text-body-md text-on-surface-variant mt-space-4">
-            Matches delivered only Friday through Sunday, keeping weekdays free for quiet professional and personal focus.
-          </Text>
-<View className="flex items-center gap-space-12 mt-space-8 text-secondary font-label-sm text-label-sm flex-row">
-<Text className="flex items-center gap-space-4 flex-row"><Icon name="coffee" size={15} className="text-[15px]" /> Mon-Thu Muted</Text>
-<Text>•</Text>
-<Text className="flex items-center gap-space-4 flex-row"><Icon name="weekend" size={15} className="text-[15px]" /> Fri Drop</Text>
-</View>
-</View>
-</Pressable>
-</View>
-</View>
-
-<View className="w-full rounded-2xl bg-surface-container-lowest p-space-20 shadow-sm mb-space-24">
-<View className="flex items-start justify-between flex-row">
-<View className="flex items-center gap-space-12 flex-row">
-<View className="w-10 h-10 rounded-full bg-tertiary-fixed flex items-center justify-center text-primary flex-row">
-<Icon name="bedtime" size={20} className="text-[20px]" />
-</View>
-<View>
-<Text className="font-headline-sm text-headline-sm text-primary">Dating Curfew / Quiet Hours</Text>
-<Text className="items-center gap-space-4 text-secondary font-label-sm text-label-sm">
-<Text className="w-2 h-2 rounded-full bg-secondary-container"></Text>
-            Active: 10:00 PM – 8:00 AM
-          </Text>
-</View>
-</View>
-<Pressable className="text-secondary font-label-md text-label-md" id="edit-curfew-btn" ><Text>Edit</Text></Pressable>
-</View>
-<Text className="font-body-sm text-body-sm text-on-surface-variant mt-space-12">
-      Mutes all chat notifications and match alerts overnight so you can sleep peacefully and honor restorative rest without notification anxiety.
-    </Text>
-<View className="flex items-center justify-between mt-space-12 pt-space-12 bg-surface-container-low rounded-xl px-space-16 py-space-8 flex-row">
-<Text className="font-label-md text-label-md text-primary flex items-center gap-space-8 flex-row">
-<Icon name="notifications_paused" size={18} className="text-[18px] text-secondary" />
-        Curfew Enforced Automatically
-      </Text>
-<Text className="font-label-sm text-label-sm text-secondary bg-surface-container-lowest px-space-8 py-0.5 rounded-full">Turned On</Text>
-</View>
-</View>
-
-<View className="w-full rounded-2xl bg-surface-container-lowest p-space-20 shadow-sm mb-space-24">
-<View className="flex items-center gap-space-12 mb-space-12 flex-row">
-<View className="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container flex-row">
-<Icon name="self_improvement" size={22} className="text-[22px]" />
-</View>
-<View>
-<Text className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Mindful Preservation</Text>
-<Text className="font-headline-sm text-headline-sm text-primary">Take an Intentional Sabbatical</Text>
-</View>
-</View>
-<Text className="font-body-md text-body-md text-on-surface-variant">
-      Pause your profile without losing ongoing conversations or compatibility history. Take time to recharge with zero social penalties.
-    </Text>
-
-<View className="my-space-16 p-space-12 rounded-xl bg-surface-container-low flex items-start gap-space-12 flex-row">
-<Icon name="verified" size={20} className="text-secondary text-[20px] mt-0.5" />
-<Text className="font-body-sm text-body-sm text-on-surface-variant">
-        When paused, your profile is hidden from new discovery feeds. We will <Text className="text-primary font-semibold">never</Text> send manipulative “You’re missing out!” notifications.
-      </Text>
-</View>
-
-<View className="grid grid-cols-2 gap-space-12 mt-space-8">
-<Pressable className="flex items-center justify-center gap-space-8 px-space-16 py-space-12 rounded-xl bg-surface-container text-primary font-label-md text-label-md flex-row" id="pause-week-btn" >
-<Icon name="nature" size={18} className="text-[18px]" /><Text>Pause 7 Days</Text></Pressable>
-<Pressable className="flex items-center justify-center gap-space-8 px-space-16 py-space-12 rounded-xl bg-surface-container text-primary font-label-md text-label-md flex-row" id="pause-custom-btn" >
-<Icon name="date_range" size={18} className="text-[18px]" /><Text>Custom Pause</Text></Pressable>
-</View>
-
-<View className="hidden mt-space-12 p-space-12 rounded-xl bg-secondary-container text-on-secondary-container font-label-sm text-label-sm flex items-center justify-between flex-row" id="sabbatical-toast">
-<Text className="flex items-center gap-space-8 flex-row">
-<Icon name="check_circle" size={18} className="text-[18px]" />
-        Sabbatical scheduled for 7 days. Breathe easy.
-      </Text>
-<Pressable className="underline font-bold" id="undo-pause" ><Text>Undo</Text></Pressable>
-</View>
-</View>
-
-<View className="w-full rounded-2xl bg-surface-container-low p-space-16 mb-space-24 flex items-center gap-space-16 flex-row">
-<View className="w-12 h-12 rounded-full bg-surface-container-lowest flex items-center justify-center text-primary shadow-sm flex- flex-row">
-<Icon name="favorite" size={24} className="text-[24px]" />
-</View>
-<View className="flex">
-<Text className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Cadence Evidence</Text>
-<Text className="font-body-sm text-body-sm text-on-surface">
-<Text className="text-primary font-bold">89% of PREMA members</Text> who adopt the Slow Horizon rhythm find meaningful connection within 90 days without experiencing dating fatigue.
-      </Text>
-</View>
-</View>
-
-<View className="w-full rounded-2xl overflow-hidden shadow-sm mb-space-24 relative bg-surface-container-high">
-<ImageBackground source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA39gzY1tlc3iTbWMBT3sStFWTbK8NOw80KaSKrCtNz5M0fOVSkIRnurkw2vy0DX1GesY8EvMcEUn54mTfjDTalm_kbRhfGnJvWmU3LIjEBNKIM0TLU2ESZulkKUPajE5tVJRRiwO4fmQ0-7ZIb4h4zCiwQcNmqL7v38kQ4ASsW2LMD6zyIL2L1OWtwG01A8HBhxvx3eX5T920Nx7w_4hI3bVwPTdmWXAHfxFKWXURYJb02FJ6OYyXg' }} resizeMode="cover" className="w-full h-40"></ImageBackground>
-<View className="absolute inset-0 flex items-end p-space-16 flex-row">
-<Text className="text-on-primary font-label-md text-label-md italic opacity-95">
-        “Love arrives when the mind is tranquil enough to welcome it.”
-      </Text>
-</View>
-</View>
-
-<View className="w-full mt-auto">
-<Pressable className="w-full min-h-[54px] py-space-16 px-space-24 rounded-full bg-primary-container text-on-primary font-label-lg text-label-lg tracking-wide shadow-lg active:scale-[0.98] flex items-center justify-center gap-space-8 flex-row" id="save-cadence-btn" >
-<Icon name="check" size={20} className="text-[20px] text-secondary-container" /><Text>Save Discovery Rhythm</Text></Pressable>
-</View>
-</View>
-</ScrollView></SafeAreaView>
+    <NunitoScope>
+      <CadenceInner />
+    </NunitoScope>
   );
 }
+
+function CadenceInner() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const me = useProfile();
+  const [rhythm, setRhythm] = useState<(typeof RHYTHMS)[number]['id']>('steady');
+  const [time, setTime] = useState('9:00 AM');
+  const [curfew, setCurfew] = useState('10:00 PM');
+
+  const save = () => {
+    updateProfile((p) => ({ settings: { ...p.settings, pushIntros: true } }));
+    Alert.alert('Rhythm saved', `${RHYTHMS.find((r) => r.id === rhythm)!.sub}${rhythm === 'weekend' ? '' : `, arriving at ${time}`}.`);
+    goBack(router);
+  };
+
+  const pauseFor = (days: number) => {
+    updateProfile({ paused: true });
+    Alert.alert('Paused', `You’re hidden for ${days} days. Your matches and chats stay safe.`);
+  };
+
+  return (
+    <View style={{ flex: 1, backgroundColor: C.bg }}>
+      <CelestialBackground />
+      <ScreenHeader eyebrow="Mindful cadence" title="Curated introductions" />
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 130 }} showsVerticalScrollIndicator={false}>
+        <Text style={s.section}>Your rhythm</Text>
+        <View style={{ gap: 10 }}>
+          {RHYTHMS.map((r) => {
+            const on = rhythm === r.id;
+            return (
+              <Tap key={r.id} onPress={() => setRhythm(r.id)} style={[s.option, on ? s.optionOn : null]}
+                accessibilityRole="radio" accessibilityState={{ checked: on }}>
+                <View style={[s.optIcon, on ? { backgroundColor: C.pink } : null]}><Icon name={r.icon} size={21} color={on ? C.white : C.pri} /></View>
+                <View style={{ flex: 1 }}>
+                  <Text style={s.optTitle}>{r.title}</Text>
+                  <Text style={s.optSub}>{r.sub}</Text>
+                </View>
+                <View style={[s.radio, on ? s.radioOn : null]}>{on ? <View style={s.radioDot} /> : null}</View>
+              </Tap>
+            );
+          })}
+        </View>
+
+        {rhythm !== 'weekend' ? (
+          <Card style={{ marginTop: 16 }}>
+            <Text style={s.label}>Arrives at</Text>
+            <View style={s.wrap}>{TIMES.map((t) => <Chip key={t} label={t} selected={time === t} onPress={() => setTime(t)} />)}</View>
+          </Card>
+        ) : null}
+
+        <Card style={{ marginTop: 16 }}>
+          <Text style={s.label}>Quiet hours</Text>
+          <Text style={s.sub}>No notifications after this time.</Text>
+          <View style={s.wrap}>{CURFEWS.map((t) => <Chip key={t} label={t} selected={curfew === t} onPress={() => setCurfew(t)} />)}</View>
+        </Card>
+
+        <Text style={s.section}>Need a pause?</Text>
+        {me.paused ? (
+          <View style={s.paused}>
+            <Icon name="pause_circle" size={22} color={C.pink} />
+            <Text style={s.pausedText}>Your profile is paused.</Text>
+            <Tap onPress={() => updateProfile({ paused: false })} style={s.undo}><Text style={s.undoText}>Resume</Text></Tap>
+          </View>
+        ) : (
+          <View style={{ flexDirection: 'row', gap: 10 }}>
+            <Tap onPress={() => pauseFor(7)} style={s.pauseBtn}><Icon name="pause" size={18} color={C.pri} /><Text style={s.pauseText}>Pause 7 days</Text></Tap>
+            <Tap onPress={() => Alert.alert('Pause for how long?', undefined, [
+              { text: '3 days', onPress: () => pauseFor(3) },
+              { text: '14 days', onPress: () => pauseFor(14) },
+              { text: '30 days', onPress: () => pauseFor(30) },
+              { text: 'Cancel', style: 'cancel' },
+            ])} style={s.pauseBtn}><Icon name="event" size={18} color={C.pri} /><Text style={s.pauseText}>Custom pause</Text></Tap>
+          </View>
+        )}
+      </ScrollView>
+      <View style={[s.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+        <PrimaryButton label="Save rhythm" onPress={save} />
+      </View>
+    </View>
+  );
+}
+
+const s = StyleSheet.create({
+  section: { color: C.pri, fontSize: 17, fontWeight: '900', marginTop: 18, marginBottom: 10, marginLeft: 4 },
+  option: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: 20, backgroundColor: C.white, borderWidth: 2, borderColor: 'transparent', ...cardShadow },
+  optionOn: { borderColor: C.pink, backgroundColor: '#FFF4F7' },
+  optIcon: { width: 42, height: 42, borderRadius: 21, backgroundColor: C.accentSoft, alignItems: 'center', justifyContent: 'center' },
+  optTitle: { color: C.pri, fontSize: 16, fontWeight: '800' },
+  optSub: { color: C.muted, fontSize: 13, marginTop: 2 },
+  radio: { width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: '#C9D5E3', alignItems: 'center', justifyContent: 'center' },
+  radioOn: { borderColor: C.pink },
+  radioDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: C.pink },
+  label: { color: C.pri, fontSize: 15.5, fontWeight: '800', marginBottom: 10 },
+  sub: { color: C.muted, fontSize: 13, marginTop: -6, marginBottom: 10 },
+  wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  pauseBtn: { flex: 1, height: 52, borderRadius: 26, backgroundColor: C.white, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, ...cardShadow },
+  pauseText: { color: C.pri, fontSize: 14.5, fontWeight: '800' },
+  paused: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 14, borderRadius: 18, backgroundColor: C.pinkSoft },
+  pausedText: { flex: 1, color: C.pri, fontSize: 15, fontWeight: '800' },
+  undo: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 16, backgroundColor: C.white },
+  undoText: { color: C.pink, fontSize: 13.5, fontWeight: '900' },
+  footer: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: 20, paddingTop: 12, backgroundColor: 'rgba(241,247,253,0.96)' },
+});

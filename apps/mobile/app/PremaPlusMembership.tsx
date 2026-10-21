@@ -9,6 +9,7 @@ import Icon from '../components/Icon';
 import Logo from '../components/Logo';
 import Text, { NunitoScope } from '../components/PremaText';
 import { C, Tap, cardShadow } from '../components/prema-ui';
+import { goBack } from '../components/nav';
 
 // The member's active subscription (mock until billing is connected).
 const CURRENT = {
@@ -92,7 +93,7 @@ function MembershipInner() {
           </Svg>
 
           <View style={s.heroTop}>
-            <Tap onPress={() => router.back()} style={s.glassBtn} accessibilityLabel="Go back">
+            <Tap onPress={() => goBack(router)} style={s.glassBtn} accessibilityLabel="Go back">
               <Icon name="arrow_back" size={22} color={C.white} />
             </Tap>
           </View>

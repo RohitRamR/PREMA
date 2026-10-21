@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
-import { 
+import {
   View, 
-  Text, 
   StyleSheet, 
   Image, 
   Pressable, 
@@ -21,11 +20,21 @@ import Animated, {
 import { colors, spacing, radii } from '../src/theme/theme';
 import Icon from '../components/Icon';
 import CelestialBackground from '../components/CelestialBackground';
+import Text, { NunitoScope } from '../components/PremaText';
 import { useProfile } from '../src/store/profile';
+import { goBack } from '../components/nav';
 
 const PREMA_THEME = { colors, spacing, radii };
 
 export default function ItSAMatch() {
+  return (
+    <NunitoScope>
+      <MatchInner />
+    </NunitoScope>
+  );
+}
+
+function MatchInner() {
   const router = useRouter();
   // Who you just matched with, and your own main photo.
   const { id, name, photo } = useLocalSearchParams<{ id?: string; name?: string; photo?: string }>();
@@ -67,7 +76,7 @@ export default function ItSAMatch() {
         {/* Dismiss Button */}
         <Pressable 
           style={styles.dismissButton} 
-          onPress={() => router.back()}
+          onPress={() => goBack(router)}
         >
           <Icon name="close" size={20} color={PREMA_THEME.colors.deepNavy} />
         </Pressable>
@@ -107,7 +116,7 @@ export default function ItSAMatch() {
         <View style={styles.actionContainer}>
           <Pressable 
             style={styles.primaryButton}
-            onPress={() => (id ? router.replace({ pathname: '/Chat', params: { id } }) : router.push('/SendIntentionalNote'))}
+            onPress={() => (id ? router.replace({ pathname: '/Chat', params: { id } }) : router.replace('/chats'))}
           >
             <Icon name="mark_email_read" size={20} color="#FFF" />
             <Text style={styles.primaryButtonText}>Send Intentional Note</Text>
@@ -217,7 +226,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   primaryButton: {
-    backgroundColor: PREMA_THEME.colors.deepNavy,
+    backgroundColor: "#FF6B8B",
     borderRadius: 999,
     height: 56,
     flexDirection: 'row',

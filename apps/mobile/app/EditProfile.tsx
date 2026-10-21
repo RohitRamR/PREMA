@@ -13,6 +13,7 @@ import {
   VITAL_FIELDS, PROMPT_OPTIONS, VOICE_OPTIONS, INTEREST_SUGGESTIONS, INTEREST_MAX,
   type Vitals,
 } from '../src/store/profile';
+import { goBack } from '../components/nav';
 
 const MAX_VALUES = 3;
 const ABOUT_MAX = 280;
@@ -104,7 +105,7 @@ function EditProfileInner() {
       interests, photoCaption: photoCaption.trim(),
       voice: { ...voice, question: voice.question.trim() || VOICE_OPTIONS[0] },
     });
-    router.back();
+    goBack(router);
   };
 
   return (

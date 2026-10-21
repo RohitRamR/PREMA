@@ -9,6 +9,7 @@ import { C, ScreenHeader, Tap, PrimaryButton, cardShadow, serif } from '../../..
 import { describe, submitReview, useDateState } from '../../../src/features/date/store';
 import { MissingListing } from '../../../src/features/date/ui';
 import type { Review } from '../../../src/features/date/types';
+import { goBack } from '../../../components/nav';
 
 const DIMENSIONS: { key: keyof Omit<Review, 'note' | 'safetyConcern'>; label: string }[] = [
   { key: 'venue', label: 'Venue' },
@@ -44,7 +45,7 @@ export default function ReviewScreen() {
     Alert.alert(
       safety ? 'Report received' : 'Thank you',
       safety ? 'Our safety team will review this privately and may contact you. The other person is not told who reported.' : 'Your feedback is private and helps keep PREMA Date venues great.',
-      [{ text: 'Done', onPress: () => router.back() }],
+      [{ text: 'Done', onPress: () => goBack(router) }],
     );
   };
 

@@ -2,14 +2,15 @@ import { useRouter } from 'expo-router';
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from '../components/Icon';
-import { View, Text, ScrollView, Image, Pressable, TextInput } from 'react-native';
+import { View, Text, ScrollView, Image, Pressable, TextInput, Share, Alert } from 'react-native';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import { goBack } from '../components/nav';
 
 export default function CompatibilityBreakdown() {
   const router = useRouter();
   return (
     <SafeAreaView className="bg-surface text-on-surface font-body-md text-body-md flex flex-1">
-      <View className="bg-surface border-surface-container-highest bg-surface/85"><View className="h-16 px-space-16 max-w-[480px] mx-auto flex items-center justify-between flex-row"><View className="flex items-center gap-space-8 flex-row"><Pressable onPress={() => router.back()} aria-label="Go Back" className="w-11 h-11 -ml-space-8 flex items-center justify-center text-primary rounded-full flex-row" ><Icon name="arrow_back_ios_new" size={22} className="text-[22px]" /></Pressable><Image alt="PREMA Logo" className="h-7 w-[67px]" resizeMode="contain" source={require('../assets/images/logo.png')} /><Text className="font-headline-sm text-headline-sm text-primary tracking-tight">Profile Deep Dive</Text></View><View className="flex items-center gap-space-4 flex-row"><Image alt="Profile" className="w-8 h-8 rounded-full" source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBnpv7GVuzd6fs5TliuCiwIlpL0Rt2bVAxsXV2oCjBpVhp4UG2QcSA0fM1E5q0b-Bi3hANo_gxxHA1NjlLrqjE8ohvM6MdNojlI797HuC0AUkvZ0e2I5nz-fDRMdLXKv5aD9DyFmCPwJsDQdw4uv-m2poXm4GRuvfCjVpkLQEOf-1fFeXQOV7jP88Y-BVm6Xpd7_d4ZzQTNKZfgN_NLPKw3_kWAaoVLwLZ_BFzC19ixAfQnTKjdTvg9' }} /></View></View></View><ScrollView className="flex relative w-full max-w-[480px] mx-auto px-margin-mobile pt-16 bg-surface"><View className="flex w-full pb-28">
+      <View className="bg-surface border-surface-container-highest bg-surface/85"><View className="h-16 px-space-16 max-w-[480px] mx-auto flex items-center justify-between flex-row"><View className="flex items-center gap-space-8 flex-row"><Pressable onPress={() => goBack(router)} aria-label="Go Back" className="w-11 h-11 -ml-space-8 flex items-center justify-center text-primary rounded-full flex-row" ><Icon name="arrow_back_ios_new" size={22} className="text-[22px]" /></Pressable><Image alt="PREMA Logo" className="h-7 w-[67px]" resizeMode="contain" source={require('../assets/images/logo.png')} /><Text className="font-headline-sm text-headline-sm text-primary tracking-tight">Profile Deep Dive</Text></View><View className="flex items-center gap-space-4 flex-row"><Image alt="Profile" className="w-8 h-8 rounded-full" source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBnpv7GVuzd6fs5TliuCiwIlpL0Rt2bVAxsXV2oCjBpVhp4UG2QcSA0fM1E5q0b-Bi3hANo_gxxHA1NjlLrqjE8ohvM6MdNojlI797HuC0AUkvZ0e2I5nz-fDRMdLXKv5aD9DyFmCPwJsDQdw4uv-m2poXm4GRuvfCjVpkLQEOf-1fFeXQOV7jP88Y-BVm6Xpd7_d4ZzQTNKZfgN_NLPKw3_kWAaoVLwLZ_BFzC19ixAfQnTKjdTvg9' }} /></View></View></View><ScrollView className="flex relative w-full max-w-[480px] mx-auto px-margin-mobile pt-16 bg-surface"><View className="flex w-full pb-28">
 
 <View className="flex items-center justify-between py-space-8 mb-space-12 flex-row">
 <View className="flex items-center gap-space-8 flex-row">
@@ -19,10 +20,10 @@ export default function CompatibilityBreakdown() {
 <Text className="font-label-md text-label-md text-primary tracking-wide uppercase">Editorial Synergy Report</Text>
 </View>
 <View className="flex items-center gap-space-8 flex-row">
-<Pressable aria-label="Share Compatibility Analysis" className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container text-primary flex-row" >
+<Pressable onPress={() => Share.share({ message: 'Our PREMA compatibility: 96% aligned on values, intent and lifestyle.' })} aria-label="Share Compatibility Analysis" className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container text-primary flex-row" >
 <Icon name="share" size={18} className="text-[18px]" />
 </Pressable>
-<Pressable aria-label="Info on Scoring" className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container text-primary flex-row">
+<Pressable onPress={() => Alert.alert('How scoring works', 'Your score blends shared values, relationship intent, lifestyle rhythm and communication style. It never includes looks or money, and it can’t be bought.')} aria-label="Info on Scoring" className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container text-primary flex-row">
 <Icon name="info" size={18} className="text-[18px]" />
 </Pressable>
 </View>

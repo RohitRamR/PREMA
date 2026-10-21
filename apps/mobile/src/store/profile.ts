@@ -5,6 +5,8 @@ import { useSyncExternalStore } from 'react';
 
 export type Profile = {
   name: string;
+  phone: string; // 10 digits, +91
+  email: string; // recovery email, '' if not added
   age: number;
   location: string;
   occupation: string;
@@ -104,6 +106,8 @@ export const LIFESTYLE_OPTIONS: { label: string; icon: string }[] = [
 
 let state: Profile = {
   name: 'Vikram',
+  phone: '9876543210',
+  email: '',
   age: 28,
   location: 'Bengaluru & Chennai',
   occupation: 'Senior Architect',

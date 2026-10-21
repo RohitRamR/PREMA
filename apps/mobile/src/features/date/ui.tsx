@@ -11,6 +11,7 @@ import {
   STATUS_COPY, catalogue, dayLabel, duration, keyOf, rupees, timeLabel, toggleSave, useDateState,
 } from './store';
 import type { Activity, BookingStatus, Slot, Subject } from './types';
+import { goBack } from '../../../components/nav';
 
 export const D = {
   green: '#2E8A5D', greenSoft: '#E8F7EF',
@@ -183,7 +184,7 @@ export function DetailHero({ photo, subject, height = 320, children }: {
     <ImageBackground source={{ uri: photo }} style={{ height, justifyContent: 'space-between', paddingTop: insets.top + 6, padding: 20 }}>
       <Veil id="hero" from={0.3} to={0.75} />
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-        <Tap onPress={() => router.back()} style={ds.glassBtn} accessibilityLabel="Go back">
+        <Tap onPress={() => goBack(router)} style={ds.glassBtn} accessibilityLabel="Go back">
           <Icon name="arrow_back" size={22} color={C.white} />
         </Tap>
         {subject ? <SaveButton subject={subject} size={42} /> : null}
@@ -230,7 +231,7 @@ export function MissingListing() {
       <Icon name="search" size={28} color={C.accent} />
       <Text style={{ color: C.pri, fontSize: 20, marginTop: 10, ...serif }}>This listing isn’t available</Text>
       <Text style={{ color: C.muted, fontSize: 14, marginTop: 6, textAlign: 'center' }}>It may have been paused by the venue.</Text>
-      <Tap onPress={() => router.back()} style={{ marginTop: 16, backgroundColor: C.pri, paddingHorizontal: 18, height: 42, borderRadius: 21, justifyContent: 'center' }}>
+      <Tap onPress={() => goBack(router)} style={{ marginTop: 16, backgroundColor: C.pri, paddingHorizontal: 18, height: 42, borderRadius: 21, justifyContent: 'center' }}>
         <Text style={{ color: C.white, fontWeight: '600' }}>Go back</Text>
       </Tap>
     </View>

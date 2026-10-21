@@ -19,12 +19,10 @@ export default function Settings() {
 
 function SettingsInner() {
   const router = useRouter();
-  const { settings } = useProfile();
+  const me = useProfile();
+  const { settings } = me;
   const set = (k: keyof Profile['settings']) => (v: boolean) =>
     updateProfile((p) => ({ settings: { ...p.settings, [k]: v } }));
-
-  const comingSoon = (what: string) => () =>
-    Alert.alert(what, 'This will open once your account is connected.');
 
   return (
     <View style={{ flex: 1, backgroundColor: C.bg }}>
@@ -34,8 +32,8 @@ function SettingsInner() {
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 48 }} showsVerticalScrollIndicator={false}>
         <SectionLabel>Account</SectionLabel>
         <Card style={s.list}>
-          <Row icon="phone" title="Phone number" sub="+91 98•••• ••210" onPress={comingSoon('Phone number')} />
-          <Row icon="message" title="Email" sub="Add a recovery email" onPress={comingSoon('Email')} />
+          <Row icon="phone" title="Phone number" sub={`+91 ${me.phone.slice(0, 2)}•••• ••${me.phone.slice(-3)}`} onPress={() => router.push({ pathname: '/AccountDetails', params: { focus: 'phone' } })} />
+          <Row icon="message" title="Email" sub={me.email || 'Add a recovery email'} onPress={() => router.push({ pathname: '/AccountDetails', params: { focus: 'email' } })} />
           <Row icon="workspace_premium" title="Membership" sub="Founding Member · Tier I" onPress={() => router.push('/PremaPlusMembership')} last />
         </Card>
 
@@ -56,9 +54,9 @@ function SettingsInner() {
 
         <SectionLabel>Support</SectionLabel>
         <Card style={s.list}>
-          <Row icon="help" title="Help centre" onPress={comingSoon('Help centre')} />
-          <Row icon="info" title="Community guidelines" onPress={comingSoon('Community guidelines')} />
-          <Row icon="lock" title="Privacy policy & terms" onPress={comingSoon('Privacy policy & terms')} last />
+          <Row icon="help" title="Help centre" onPress={() => router.push({ pathname: '/Help', params: { topic: 'help' } })} />
+          <Row icon="info" title="Community guidelines" onPress={() => router.push({ pathname: '/Help', params: { topic: 'guidelines' } })} />
+          <Row icon="lock" title="Privacy policy & terms" onPress={() => router.push({ pathname: '/Help', params: { topic: 'privacy' } })} last />
         </Card>
 
         <Tap
@@ -73,11 +71,7 @@ function SettingsInner() {
 
         <Tap
           style={s.delete}
-          onPress={() => Alert.alert(
-            'Delete your account?',
-            'Your profile, matches and conversations will be permanently removed. This can’t be undone.',
-            [{ text: 'Keep account', style: 'cancel' }, { text: 'Delete account', style: 'destructive', onPress: comingSoon('Delete account') }],
-          )}
+          onPress={() => router.push('/DeleteAccount')}
         >
           <Text style={s.deleteText}>Delete account</Text>
         </Tap>

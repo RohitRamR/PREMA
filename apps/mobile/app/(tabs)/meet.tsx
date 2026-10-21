@@ -83,6 +83,9 @@ function MeetScreen() {
             <Tap onPress={() => router.push('/date/explore')} style={s.iconBtn} accessibilityLabel="Search experiences">
               <Icon name="search" size={21} color={C.pri} />
             </Tap>
+            <Tap onPress={() => router.push('/date/bookings')} style={s.iconBtn} accessibilityLabel="My dates">
+              <Icon name="event_note" size={21} color={C.pri} />
+            </Tap>
             <Tap onPress={() => router.push('/date/saved')} style={s.iconBtn} accessibilityLabel={`Saved, ${saved.length}`}>
               <Icon name="bookmark_border" size={21} color={C.pri} />
             </Tap>

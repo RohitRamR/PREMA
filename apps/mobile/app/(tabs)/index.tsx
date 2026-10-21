@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { View, Text, Image, Dimensions, Pressable, FlatList, Animated } from 'react-native';
+import { View, Image, Dimensions, Pressable, FlatList, Animated, Share } from 'react-native';
+import Text, { NunitoScope } from '../../components/PremaText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Icon from '../../components/Icon';
@@ -7,6 +8,7 @@ import { BlurView } from 'expo-blur';
 import CelestialBackground from '../../components/CelestialBackground';
 import Svg, { Path } from 'react-native-svg';
 import { AuraFrame } from '../../components/Aura';
+import { useSafety } from '../../src/store/safety';
 
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
 
@@ -66,13 +68,23 @@ const PROFILES = [
 ];
 
 export default function DiscoverScreen() {
+  return (
+    <NunitoScope>
+      <DiscoverInner />
+    </NunitoScope>
+  );
+}
+
+function DiscoverInner() {
   const router = useRouter();
   const [activeIdx, setActiveIdx] = useState(0);
   const scrollX = useRef(new Animated.Value(0)).current;
   const flatListRef = useRef<any>(null);
 
   // Profiles you've passed on or liked leave the deck.
-  const [deck, setDeck] = useState(PROFILES);
+  const [deckAll, setDeck] = useState(PROFILES);
+  const { blocked } = useSafety();
+  const deck = deckAll.filter((p) => !blocked.includes(p.id));
   const [toast, setToast] = useState('');
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const safeIdx = Math.min(activeIdx, Math.max(deck.length - 1, 0));
@@ -151,7 +163,7 @@ export default function DiscoverScreen() {
           
           {/* Cosmic Share Button */}
           <View style={{ position: 'absolute', top: 16, right: 16, zIndex: 30 }}>
-            <Pressable style={({ pressed }) => ({
+            <Pressable onPress={() => Share.share({ message: `Have a look at ${item.name} on Prema.` })} accessibilityLabel={`Share ${item.name}`} style={({ pressed }) => ({
               width: 44, height: 44, borderRadius: 22,
               backgroundColor: 'rgba(0,0,0,0.35)',
               borderWidth: 1, borderColor: 'rgba(255,255,255,0.25)', 
@@ -169,7 +181,7 @@ export default function DiscoverScreen() {
 
           <View className="absolute bottom-0 left-0 right-0 pt-8 pb-5 px-6">
             <View className="flex-row items-center z-10">
-              <Text className="text-white text-3xl font-bold" style={{ textShadowColor: "rgba(0,0,0,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 6 }}>{item.name}, {item.age}</Text>
+              <Text className="text-white text-3xl font-bold" style={{ fontWeight: "900", textShadowColor: "rgba(0,0,0,0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 6 }}>{item.name}, {item.age}</Text>
               {item.verified && (
                 <View className="ml-2 w-6 h-6 bg-[#3EA9F5] rounded-full items-center justify-center">
                   <Icon name="check" size={16} color="white" />
@@ -215,7 +227,7 @@ export default function DiscoverScreen() {
           </View>
 
           <View className="flex-row items-center gap-3">
-            <Pressable className="relative w-10 h-10 bg-[#F1F7FD] rounded-full items-center justify-center border border-[#E3EDF7]">
+            <Pressable onPress={() => router.push('/Notifications')} accessibilityLabel="Notifications" className="relative w-10 h-10 bg-[#F1F7FD] rounded-full items-center justify-center border border-[#E3EDF7]">
               <Icon name="notifications-none" size={22} color="#2B4A6A" />
               <View className="absolute top-2 right-2.5 w-2.5 h-2.5 bg-[#FF6B8B] rounded-full border-2 border-[#F1F7FD]" />
             </Pressable>
@@ -290,7 +302,7 @@ export default function DiscoverScreen() {
           <Pressable 
             onPress={() => act('like')}
             accessibilityLabel="Like"
-            className="w-20 h-20 bg-[#74B4F2] rounded-full items-center justify-center shadow-lg shadow-[#74B4F2]/50"
+            className="w-20 h-20 bg-[#FF6B8B] rounded-full items-center justify-center shadow-lg shadow-[#FF6B8B]/50"
           >
             <Icon name="favorite" size={38} color="white" />
           </Pressable>
@@ -300,7 +312,7 @@ export default function DiscoverScreen() {
             accessibilityLabel="Super like"
             className="w-16 h-16 bg-white rounded-full items-center justify-center shadow-md shadow-[#E3EDF7]"
           >
-            <Icon name="star" size={28} color="#74B4F2" />
+            <Icon name="star" size={28} color="#FF6B8B" />
           </Pressable>
         </View>
       </View>

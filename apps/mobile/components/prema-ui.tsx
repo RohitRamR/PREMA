@@ -6,6 +6,7 @@ import Text from './PremaText';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from './Icon';
+import { goBack } from './nav';
 
 export const C = {
   bg: '#F1F7FD',
@@ -66,7 +67,7 @@ export function ScreenHeader({
   const insets = useSafeAreaInsets();
   return (
     <View style={[ui.header, { paddingTop: insets.top + 6 }]}>
-      <Tap onPress={() => router.back()} style={ui.roundBtn} accessibilityLabel="Go back">
+      <Tap onPress={() => goBack(router)} style={ui.roundBtn} accessibilityLabel="Go back">
         <Icon name="arrow_back" size={22} color={C.pri} />
       </Tap>
       <View style={{ flex: 1, marginLeft: 14 }}>
