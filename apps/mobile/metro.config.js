@@ -1,8 +1,10 @@
 const path = require("path");
-const { getDefaultConfig } = require("expo/metro-config");
+const { getSentryExpoConfig } = require("@sentry/react-native/metro");
 const { withNativeWind } = require("nativewind/metro");
 
-const config = getDefaultConfig(__dirname);
+// Expo's default Metro config plus Sentry's debug IDs, so crash reports map
+// back to the original source files.
+const config = getSentryExpoConfig(__dirname);
 
 // Monorepo: web/admin/ui use a different React version that gets hoisted to the
 // root node_modules. Force every import of React to resolve to this app's copy

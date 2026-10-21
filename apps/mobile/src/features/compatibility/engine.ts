@@ -18,6 +18,7 @@ import {
 import { getProfile, useProfile, type Profile } from '../../store/profile';
 import { buildMyProfile, buildTheirProfile, type Mode } from './adapters';
 import { toCompatView, chartOf, type CompatView, type ChartView } from './view';
+import { reportError } from '../../lib/report-error';
 
 const myProfiles = new WeakMap<Profile, Partial<Record<Mode, MatchProfile>>>();
 const theirProfiles = new Map<string, Partial<Record<Mode, MatchProfile | null>>>();
@@ -44,8 +45,10 @@ function run(me: Profile, id: string, mode: Mode): Run | null {
     if (!them) return null;
     const my = mine(me, mode);
     return { output: calculateFullCompatibility(toCompatibilityInput(my, them)), me: my, them };
-  } catch {
-    // Bad profile data (e.g. an impossible birth date) must never crash a screen.
+  } catch (error) {
+    // Bad profile data (e.g. an impossible birth date) must never crash a screen,
+    // but we still want to hear about it.
+    reportError(error, { where: 'compatibility.run', personId: id, mode });
     return null;
   }
 }
@@ -63,7 +66,8 @@ export function compatibilityFor(me: Profile, id: string | undefined): CompatVie
   if (display?.output.detailedBreakdown) {
     try {
       view = toCompatView(display, discover);
-    } catch {
+    } catch (error) {
+      reportError(error, { where: 'compatibility.toCompatView', personId: id });
       view = null;
     }
   }
@@ -109,7 +113,8 @@ export function useRankedDeck<T extends { id: string; match: number }>(items: T[
 export function myChartFor(me: Profile): ChartView | null {
   try {
     return chartOf(mine(me, 'display'));
-  } catch {
+  } catch (error) {
+    reportError(error, { where: 'compatibility.myChart' });
     return null;
   }
 }
