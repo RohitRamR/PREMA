@@ -1,5 +1,6 @@
 // In-memory conversations store (mock data until the messaging API lands).
 import { useSyncExternalStore } from 'react';
+import { PEOPLE, thumb } from './people';
 
 export type Message = {
   id: string; from: 'me' | 'them'; text: string; at: number;
@@ -24,10 +25,15 @@ export type NewMatch = { id: string; name: string; photo: string; match: number 
 const min = 60_000;
 const now = Date.now();
 
+/** Name, age, city, photo and match % come from the shared people list. */
+const basics = (id: keyof typeof PEOPLE) => {
+  const p = PEOPLE[id]!;
+  return { id: p.id, name: p.name, age: p.age, city: p.city, match: p.match, photo: thumb(p.photos[0]!) };
+};
+
 let conversations: Conversation[] = [
   {
-    id: 'ananya', name: 'Ananya', age: 24, city: 'Chennai', match: 96, online: true,
-    photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
+    ...basics('ananya'), online: true,
     prompt: 'What does a perfect slow Sunday look like for you?',
     unread: 2,
     messages: [
@@ -38,8 +44,7 @@ let conversations: Conversation[] = [
     ],
   },
   {
-    id: 'meera', name: 'Meera', age: 27, city: 'Bengaluru', match: 91,
-    photo: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=300',
+    ...basics('meera'),
     prompt: 'Which tradition from your family do you want to carry forward?',
     unread: 0,
     messages: [
@@ -48,8 +53,7 @@ let conversations: Conversation[] = [
     ],
   },
   {
-    id: 'kavya', name: 'Kavya', age: 26, city: 'Hyderabad', match: 88,
-    photo: 'https://images.unsplash.com/photo-1513207565459-d7f36bfa1222?auto=format&fit=crop&q=80&w=300',
+    ...basics('kavya'),
     prompt: 'What’s a small ritual that keeps you grounded?',
     unread: 0,
     messages: [
@@ -59,7 +63,7 @@ let conversations: Conversation[] = [
 ];
 
 export const NEW_MATCHES: NewMatch[] = [
-  { id: 'tara', name: 'Tara', match: 85, photo: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&q=80&w=300' },
+  basics('tara'),
 ];
 
 const listeners = new Set<() => void>();

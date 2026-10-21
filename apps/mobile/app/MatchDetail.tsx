@@ -31,54 +31,14 @@ const C = {
   navy: '#1A2E44',
 };
 
-// Demo match. Your own profile renders through the same layout via ?me=1.
-const ANANYA = {
-  chatId: 'ananya',
-  name: 'Ananya',
-  age: 24,
-  location: 'Chennai • Alwarpet',
-  occupation: 'Architectural Historian',
-  match: '96%',
-  bio: 'I spend my days tracing the forgotten histories of Chettinad homes and my evenings trying to perfect my grandmother’s rasam recipe.',
-  lookingFor: 'Life partner · in the next 1–2 years',
-  vitals: {
-    height: '5′4″', religion: 'Hindu', languages: 'Tamil, English',
-    education: 'M.Arch, SPA', diet: 'Vegetarian', family: 'Close-knit',
-  },
+// Shown when no specific person is requested. Your own profile renders
+// through the same layout via ?me=1.
+const DEFAULT_PERSON_ID = 'ananya';
 
-  photoCaption: 'Kanadukathan, last monsoon',
-  voice: { question: 'My grandmother taught me…', recorded: true, seconds: 24 },
-  prompts: [
-    {
-      question: 'Sundays are sacred for…',
-      answer: 'Slow filter coffee, hunting for vintage maps in Moore Market, and dinners cooked together without any screens.'
-    },
-    {
-      question: 'A boundary I firmly hold…',
-      answer: 'No work talk after 8 PM. Life is too short to optimize every hour.'
-    }
-  ],
-  // How well you fit, shown as a ring + three bars.
-  fit: {
-    score: 96,
-    summary: 'Same intent, same pace, three shared loves.',
-    parts: [
-      { label: 'Values', value: 98, color: '#FF6B8B' },
-      { label: 'Intent', value: 100, color: '#FF6B8B' },
-      { label: 'Lifestyle', value: 89, color: '#74B4F2' },
-    ],
-  },
-  interests: ['Filter coffee', 'Architecture', 'Slow living', 'Carnatic music', 'Heritage walks', 'Sketching', 'Rasam perfectionist'],
-
-  photos: [
-    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=1200',
-    'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=1200',
-    'https://images.unsplash.com/photo-1513207565459-d7f36bfa1222?auto=format&fit=crop&q=80&w=1200'
-  ],
-  archetype: {
-    title: 'Vrishabha · Taurus Earth',
-    desc: 'Her Earth core grounds your Water placements: steady, warm, unhurried.'
-  }
+type Fit = {
+  score: number;
+  summary: string;
+  parts: { label: string; value: number; color: string }[];
 };
 
 type ProfileView = {
@@ -94,7 +54,7 @@ type ProfileView = {
   photoCaption: string;
   voice: { question: string; recorded: boolean; seconds: number };
   interests: { label: string; shared: boolean }[];
-  fit?: typeof ANANYA.fit;
+  fit?: Fit;
   archetype?: { title: string; desc: string };
 };
 
@@ -129,20 +89,19 @@ function withEngine(view: ProfileView, c: CompatView | null): ProfileView {
 const fmtGuna = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
 
 /** Someone else's profile, with interests you both listed marked as shared. */
-/** Someone other than Ananya: built from the shared people list. */
 function personView(mine: Profile, p: Person): ProfileView {
   return {
     chatId: p.id,
     name: p.name,
     age: p.age,
-    location: p.city,
+    location: p.area ?? p.city,
     bio: p.bio,
     lookingFor: p.lookingFor,
-    vitals: [{ icon: 'work_outline', k: 'Works as', v: p.job }],
-    prompts: [p.prompt, { question: '', answer: '' }],
+    vitals: p.vitals ? vitalList(p.vitals) : [{ icon: 'work_outline', k: 'Works as', v: p.job }],
+    prompts: [p.prompt, p.secondPrompt ?? { question: '', answer: '' }],
     photos: p.photos,
-    photoCaption: '',
-    voice: { question: '', recorded: false, seconds: 0 },
+    photoCaption: p.photoCaption ?? '',
+    voice: p.voice ?? { question: '', recorded: false, seconds: 0 },
     interests: p.interests
       .map((t) => ({ label: t, shared: mine.interests.some((m) => sameText(m, t)) }))
       .sort((x, y) => Number(y.shared) - Number(x.shared)),
@@ -155,17 +114,6 @@ function personView(mine: Profile, p: Person): ProfileView {
         { label: 'Lifestyle', value: Math.max(60, p.match - 6), color: '#74B4F2' },
       ],
     },
-  };
-}
-
-function matchView(mine: Profile): ProfileView {
-  return {
-    ...ANANYA,
-    lookingFor: ANANYA.lookingFor,
-    vitals: vitalList(ANANYA.vitals),
-    interests: ANANYA.interests
-      .map((t) => ({ label: t, shared: mine.interests.some((m) => sameText(m, t)) }))
-      .sort((x, y) => Number(y.shared) - Number(x.shared)),
   };
 }
 
@@ -245,10 +193,10 @@ export default function MatchDetail() {
   const router = useRouter();
   const { me, id } = useLocalSearchParams<{ me?: string; id?: string }>();
   const isMe = me === '1';
-  const other = person(id);
+  const other = person(id) ?? person(DEFAULT_PERSON_ID)!;
   const mine = useProfile();
-  const compat = useCompatibility(isMe ? undefined : other?.id ?? 'ananya');
-  const P = isMe ? myView(mine) : withEngine(other ? personView(mine, other) : matchView(mine), compat);
+  const compat = useCompatibility(isMe ? undefined : other.id);
+  const P = isMe ? myView(mine) : withEngine(personView(mine, other), compat);
   const sharedCount = P.interests.filter((t) => t.shared).length;
   const insets = useSafeAreaInsets();
   const [activePhoto, setActivePhoto] = useState(0);
@@ -274,7 +222,7 @@ export default function MatchDetail() {
   // Send the note into her conversation and jump straight to the chat.
   const sendNote = () => {
     const text = note.trim();
-    const chatId = P.chatId ?? 'ananya';
+    const chatId = P.chatId ?? DEFAULT_PERSON_ID;
     setNote('');
     dock.setValue(0);
     setIsDockExpanded(false);
@@ -287,7 +235,7 @@ export default function MatchDetail() {
     router.push({ pathname: '/Chat', params: { id: chatId } });
   };
   // Safety actions from the ••• menu and the links at the bottom.
-  const targetId = P.chatId ?? 'ananya';
+  const targetId = P.chatId ?? DEFAULT_PERSON_ID;
   const shareProfile = () => Share.share({ message: `Have a look at ${P.name} on Prema.` });
   const reportProfile = () => router.push({ pathname: '/Report', params: { id: targetId } });
   const hideProfile = () => Alert.alert(`Hide ${P.name}?`, 'You won’t see each other in Discover again.', [
