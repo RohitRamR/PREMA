@@ -78,6 +78,62 @@ and each person's profile into `@prema/compatibility`.
 People profiles are sample data until the Supabase API is connected; their
 birth details live in `src/features/compatibility/sample-births.ts`.
 
+## How data flows today
+
+> **The mobile app isn't connected to a backend yet.** Everything runs on the
+> phone: there's no sign-in, and nothing is sent to or saved on a server
+> (the only network use is loading sample photos and, once a DSN is set,
+> Sentry error reports). All state lives in memory and **resets when the app restarts**. The
+> Supabase schema in `supabase/` exists, but the app doesn't use it yet.
+
+```
+ Onboarding ──saveOnboarding()──┐
+ Edit profile, Settings, Quiz ──┴─updateProfile()──▶ store/profile.ts   (you)
+                                                            │
+ store/people.ts + sample-births.ts  (sample people) ───────┤
+                                                            ▼
+                                       features/compatibility  (adapters → @prema/compatibility engine)
+                                                            │  cached per profile version
+                                                            ▼
+                         Discover deck, Match detail, Why you match, Likes, Chats  (scores, Kundli, "why you match")
+
+ Chat, Match detail ──sendMessage()──▶ store/chats.ts        (conversations, new matches)
+ Report, Hide ─blockPerson()/reportPerson()─▶ store/safety.ts  (also removes their chat)
+ PREMA Date screens ─────────────────▶ features/date/store.ts (saves, invitations, bookings, passes)
+                                         └─ catalogue from features/date/mock.ts (venues, activities, events)
+```
+
+Every store follows the same pattern: a module-level value, a `useX()` hook
+built on `useSyncExternalStore`, and functions that replace the value and
+notify subscribers. Screens never talk to the engine directly; they go
+through `src/features/compatibility` (see above).
+
+| Store | Holds | Seeded from |
+|---|---|---|
+| `src/store/profile.ts` | Your profile, birth details, quiz answers, discovery filters, settings | A built-in sample profile, then whatever you enter |
+| `src/store/people.ts` | Everyone you can see (read-only) | Hard-coded sample people |
+| `src/store/chats.ts` | Conversations and new matches | Hard-coded sample chats |
+| `src/store/safety.ts` | Who you've blocked or reported | Empty |
+| `src/features/date/store.ts` | Saved places, date invitations, bookings, QR passes | `features/date/mock.ts` |
+
+**What's simulated, and must move to the server before launch:**
+
+- **Sign-up checks are off.** `SKIP_SIGNUP_CHECKS = true` in
+  `app/(onboarding)/index.tsx` skips phone/OTP and all required fields.
+- **Invite codes** are accepted if they're 6–12 characters; nothing checks
+  them.
+- **The other person** never really replies: buttons such as
+  `simulateTheyAccept`, `previewPartnerPaysHalf` and `previewVenueConfirms`
+  in `features/date/store.ts` stand in for them.
+- **Payments** aren't connected to a payment provider; paying just flips a
+  flag in the date store.
+- **QR date passes** are generated on the phone with `Math.random()`.
+- **Photos** you pick stay as local file paths on the device.
+
+**When the backend lands**, each store's body becomes Supabase calls behind
+the same hooks and functions, so screens shouldn't need to change. Server
+rules are already defined: see [Database access rules](#database-access-rules).
+
 ## Error tracking
 
 The mobile app reports errors to [Sentry](https://sentry.io).
