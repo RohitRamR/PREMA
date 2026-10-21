@@ -1,0 +1,598 @@
+<!DOCTYPE html><html class="h-full" lang="en"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"><title>PREMA — Slow &amp; Intentional Dating</title><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base { html, body { width: 100%; min-height: 100%; margin: 0; padding: 0; } body { overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; } .pb-safe { padding-bottom: env(safe-area-inset-bottom, 16px); } .pt-safe { padding-top: env(safe-area-inset-top, 0px); } } ::-webkit-scrollbar { display: none; }
+.story-indicator { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+</style><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "secondary": "#34647d", "on-surface-variant": "#43474c", "on-surface": "#1b1c19", "on-primary-fixed-variant": "#354959", "tertiary-fixed": "#d2e5f0", "primary": "#021625", "on-secondary": "#ffffff", "on-primary-container": "#7e93a5", "secondary-container": "#b1e0fe", "surface-bright": "#faf9f4", "surface-container-low": "#f5f4ef", "surface-container": "#efeee9", "on-secondary-container": "#35647d", "on-secondary-fixed-variant": "#184c64", "on-tertiary-fixed": "#0c1e26", "on-tertiary": "#ffffff", "surface": "#faf9f4", "inverse-surface": "#30312e", "on-primary": "#ffffff", "on-primary-fixed": "#081d2c", "background": "#faf9f4", "on-tertiary-fixed-variant": "#384952", "inverse-primary": "#b4c9dc", "error": "#ba1a1a", "on-error": "#ffffff", "surface-container-high": "#e9e8e3", "surface-dim": "#dbdad5", "primary-container": "#172b3a", "outline-variant": "#c3c7cc", "error-container": "#ffdad6", "surface-container-lowest": "#ffffff", "tertiary-fixed-dim": "#b7c9d4", "surface-variant": "#e3e3de", "on-error-container": "#93000a", "primary-fixed-dim": "#b4c9dc", "on-background": "#1b1c19", "inverse-on-surface": "#f2f1ec", "secondary-fixed": "#c3e8ff", "primary-fixed": "#d0e5f9", "surface-tint": "#4d6171", "tertiary": "#04171e", "tertiary-container": "#1a2b33", "secondary-fixed-dim": "#9ecde9", "on-secondary-fixed": "#001e2c", "outline": "#73777c", "surface-container-highest": "#e3e3de", "on-tertiary-container": "#80939d" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "space-24": "1.5rem", "space-2": "0.125rem", "space-32": "2rem", "space-12": "0.75rem", "space-16": "1rem", "margin-mobile": "1.25rem", "space-40": "2.5rem", "space-20": "1.25rem", "space-48": "3rem", "margin-tablet": "2rem", "space-8": "0.5rem", "gutter-mobile": "1rem", "space-4": "0.25rem" }, fontFamily: { "body-md": ["Plus Jakarta Sans"], "headline-lg": ["Plus Jakarta Sans"], "body-sm": ["Plus Jakarta Sans"], "label-md": ["Plus Jakarta Sans"], "body-lg": ["Plus Jakarta Sans"], "label-sm": ["Plus Jakarta Sans"], "label-lg": ["Plus Jakarta Sans"], "headline-md": ["Plus Jakarta Sans"], "headline-display": ["Plus Jakarta Sans"], "headline-lg-mobile": ["Plus Jakarta Sans"], "headline-sm": ["Plus Jakarta Sans"] }, fontSize: { "body-md": ["14px", { "lineHeight": "21px", "letterSpacing": "0.005em", "fontWeight": "400" }], "headline-lg": ["32px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "body-sm": ["13px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "400" }], "label-md": ["13px", { "lineHeight": "18px", "letterSpacing": "0.02em", "fontWeight": "600" }], "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "700" }], "label-lg": ["15px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }], "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "headline-display": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "700" }], "headline-lg-mobile": ["26px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }] } } } };</script></head><body class="bg-surface text-on-surface font-body-md text-body-md flex flex-col min-h-full selection:bg-secondary-container selection:text-on-secondary-container"><header class="fixed top-0 inset-x-0 z-50 bg-surface/90 backdrop-blur-xl border-b border-surface-container pt-safe"><div class="h-16 px-space-20 max-w-[480px] mx-auto flex items-center justify-between"><div class="flex items-center gap-space-12"><img alt="PREMA Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VM45GEZBPj60GU3lUxrX02_9csI3xGwJGj1_YRcDcPBcjkFd1AlMfbMGppvASCkdI81DZeJFFxjjJQFBOHy5aW2Vhlyn5_kFM81B4CaiRW2A8r18PFj5FmiUDGoVXED_w8UmZ5LXAumb1C3F55WsxJZoIVU1eeJoJXMpRn7DzyG9LkCGLHwrohKxElpqq1RmqF3ZtaOIS4bnShH6qd2uCELI2sQXoRigEq-KEclY_sRN-WKipyLKp81aQ"><div class="flex flex-col"><span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-bold">PREMA</span><span class="font-headline-sm text-headline-sm text-primary tracking-tight font-bold">Home</span></div></div><div class="flex items-center gap-space-8"><button aria-label="Notifications" class="w-10 h-10 flex items-center justify-center rounded-full text-secondary hover:text-primary transition-colors focus:outline-none"><span class="material-symbols-outlined text-[22px]">notifications</span></button><div class="relative flex items-center justify-center"><img alt="Profile" class="w-8 h-8 rounded-full object-cover border border-secondary-container" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnpv7GVuzd6fs5TliuCiwIlpL0Rt2bVAxsXV2oCjBpVhp4UG2QcSA0fM1E5q0b-Bi3hANo_gxxHA1NjlLrqjE8ohvM6MdNojlI797HuC0AUkvZ0e2I5nz-fDRMdLXKv5aD9DyFmCPwJsDQdw4uv-m2poXm4GRuvfCjVpkLQEOf-1fFeXQOV7jP88Y-BVm6Xpd7_d4ZzQTNKZfgN_NLPKw3_kWAaoVLwLZ_BFzC19ixAfQnTKjdTvg9"><span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-secondary-container rounded-full flex items-center justify-center ring-2 ring-surface"><span class="material-symbols-outlined text-[10px] text-primary font-bold">verified</span></span></div></div></div></header><main class="flex flex-col relative w-full max-w-[480px] mx-auto px-margin-mobile pt-16 pb-28 bg-surface"><div class="flex flex-col w-full">
+<!-- Editorial Cadence Banner -->
+<div class="flex items-center justify-between py-space-12">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-8">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+<span class="font-label-sm text-label-sm tracking-wider uppercase text-secondary font-bold">Today's Selection</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Meet fewer people. Meet the right people.</p>
+</div>
+<div class="flex items-center gap-space-4 px-space-12 py-space-4 rounded-full bg-surface-container text-primary font-medium">
+<span class="font-label-sm text-label-sm tracking-wide" id="selectionCounter">1 of 3</span>
+</div>
+</div>
+<!-- Hero Interactive Multi-Photo Slideshow Card -->
+<div class="relative w-full flex flex-col rounded-[24px] bg-surface-container-lowest shadow-xl shadow-primary/5 overflow-hidden transition-all duration-300 border border-surface-container">
+<!-- Multi-photo Image Viewport -->
+<div class="relative w-full aspect-[4/5] overflow-hidden select-none bg-primary/10" id="photoCardViewport">
+<img class="w-full h-full object-cover transition-opacity duration-300" data-alt="Editorial portrait of match" id="mainProfileHeroImg" src="https://lh3.googleusercontent.com/aida/AEtjO1VaA4lcpqeir9INywcIvQJXgX6k8LmxNxF_38xNaezr3_WJjGflap1QPWEJClyz6xqS49AemEGlnzzdUNTgr3p_7YIOphbW5D2TMl9ozydCacvomOgjftGo9cIb4ODtVJp74FF_TCI1zQ1xkQ9OFfJlGjZ5f-7ktyzxm7Olv3UNbow7xs-2PTQeOxEx5tAzyr_bniGjp1KlyRU-KU5JKdMvcUsFihnqU5lyJtW51IhsNMrt9E5Rm1fyuno">
+<!-- Editorial Gradient Scrims -->
+<div class="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/25 to-transparent pointer-events-none"></div>
+<div class="absolute top-0 inset-x-0 h-28 bg-gradient-to-b from-primary/60 to-transparent pointer-events-none"></div>
+<!-- Story-Style Segmented Progress Bars -->
+<div class="absolute top-space-12 inset-x-space-16 z-20 flex items-center gap-1.5" id="storyBarContainer">
+<div class="h-1 flex-1 rounded-full bg-white/40 overflow-hidden story-bar"><div class="h-full bg-white rounded-full transition-all duration-300 w-full" id="bar-0"></div></div>
+<div class="h-1 flex-1 rounded-full bg-white/40 overflow-hidden story-bar"><div class="h-full bg-white rounded-full transition-all duration-300 w-0" id="bar-1"></div></div>
+<div class="h-1 flex-1 rounded-full bg-white/40 overflow-hidden story-bar"><div class="h-full bg-white rounded-full transition-all duration-300 w-0" id="bar-2"></div></div>
+</div>
+<!-- Tap Zones for Seamless Story Progression -->
+<div aria-label="Previous photo" class="absolute inset-y-16 left-0 w-1/3 z-10 cursor-pointer" id="prevTapZone"></div>
+<div aria-label="Next photo" class="absolute inset-y-16 right-0 w-1/3 z-10 cursor-pointer" id="nextTapZone"></div>
+<!-- Top Micro-Badges Floating Ribbon -->
+<div class="absolute top-space-24 inset-x-space-16 z-20 flex items-center justify-between pointer-events-none mt-2">
+<div class="flex items-center gap-space-8 px-space-12 py-space-6 rounded-full bg-secondary-container/95 backdrop-blur-md shadow-sm pointer-events-auto">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-label-md text-label-md text-primary font-bold tracking-tight" id="matchPercentageBadge">96% PREMA MATCH</span>
+</div>
+<div class="flex items-center gap-space-4 px-space-8 py-space-4 rounded-full bg-surface-container-lowest/85 backdrop-blur-md text-primary pointer-events-auto shadow-sm">
+<span class="material-symbols-outlined text-[16px] text-secondary">tune</span>
+<span class="font-label-sm text-label-sm font-semibold">High Value Sync</span>
+</div>
+</div>
+<!-- Photo Context Caption Pill & Manual Nav Arrows -->
+<div class="absolute top-16 right-space-16 z-20 flex items-center gap-1.5">
+<span class="px-space-8 py-1 rounded-full bg-primary/60 backdrop-blur-md text-white font-label-sm text-[10px] tracking-wider uppercase font-semibold" id="photoCaptionTag">1/3 · Daily Cadence</span>
+</div>
+<!-- Subtle Floating Arrow Indicators on Left & Right -->
+<button aria-label="Previous photo" class="absolute left-space-12 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-primary/40 hover:bg-primary/70 text-white flex items-center justify-center backdrop-blur-sm transition-opacity opacity-75 hover:opacity-100 focus:outline-none" id="prevPhotoBtn">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button aria-label="Next photo" class="absolute right-space-12 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-primary/40 hover:bg-primary/70 text-white flex items-center justify-center backdrop-blur-sm transition-opacity opacity-75 hover:opacity-100 focus:outline-none" id="nextPhotoBtn">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+<!-- Overlaid Profile Bio Header -->
+<div class="absolute bottom-space-20 inset-x-space-20 z-20 flex flex-col gap-space-8 text-on-primary">
+<div class="flex items-center gap-space-8">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile font-bold tracking-tight text-on-primary drop-shadow-sm" id="heroProfileName">Ananya, 24</h2>
+<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-secondary-container text-primary shadow-sm" title="Verified Profile">
+<span class="material-symbols-outlined text-[16px] font-bold">verified_user</span>
+</span>
+</div>
+<div class="flex items-center gap-space-8 text-on-primary/90 font-body-sm text-body-sm" id="heroProfileSub">
+<span class="flex items-center gap-space-4">
+<span class="material-symbols-outlined text-[16px]">location_on</span> <span id="heroLocation">Chennai • Alwarpet</span>
+</span>
+<span>•</span>
+<span id="heroOccupation">Architectural Historian</span>
+</div>
+<!-- Serious Intent Badges -->
+<div class="flex flex-wrap gap-space-8 pt-space-4" id="heroIntentBadges">
+<span class="inline-flex items-center gap-space-4 px-space-12 py-space-4 rounded-full bg-surface-container-lowest/25 backdrop-blur-md text-on-primary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">favorite</span> Looking for a serious relationship
+</span>
+<span class="inline-flex items-center gap-space-4 px-space-12 py-space-4 rounded-full bg-surface-container-lowest/20 backdrop-blur-md text-on-primary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">spa</span> Grounded &amp; Spiritual
+</span>
+</div>
+</div>
+</div>
+<!-- Alignment Intelligence & Value Breakdown (Card Body) -->
+<div class="flex flex-col p-space-20 gap-space-20 bg-surface-container-lowest">
+<!-- Thoughtful Prompt Card with Reply Action -->
+<div class="flex flex-col gap-space-8 p-space-16 rounded-[16px] bg-surface-container-low border border-surface-container transition-all hover:border-secondary/30">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-bold">Her Thoughtful Prompt</span>
+<button class="inline-flex items-center gap-1 text-[11px] font-semibold text-secondary hover:text-primary transition-colors focus:outline-none prompt-reply-btn">
+<span class="material-symbols-outlined text-[14px]">reply</span> Reply
+</button>
+</div>
+<p class="font-headline-sm text-headline-sm text-primary italic leading-snug" id="heroPromptQuote">"Sundays are sacred: slow south filter coffee, vintage maps, and dinner cooked together."</p>
+</div>
+<!-- Expandable Profile & Match Breakdown Trigger -->
+<div class="flex flex-col border border-surface-container rounded-[16px] overflow-hidden bg-surface-container-low/50">
+<button class="w-full flex items-center justify-between p-space-16 text-left hover:bg-surface-container-low transition-colors focus:outline-none" id="deepDiveToggleBtn">
+<div class="flex items-center gap-space-8">
+<span class="material-symbols-outlined text-secondary text-[20px]">insights</span>
+<span class="font-label-md text-label-md font-bold text-primary">In-Depth Profile &amp; Match Breakdown</span>
+</div>
+<span class="material-symbols-outlined text-secondary text-[20px] transition-transform duration-300" id="deepDiveCaret">expand_more</span>
+</button>
+<!-- Collapsible Accordion Drawer -->
+<div class="hidden flex-col gap-space-16 px-space-16 pb-space-16 pt-0 border-t border-surface-container transition-all duration-300" id="deepDiveDrawer">
+<!-- Compatibility DNA Metrics Bar -->
+<div class="pt-space-12 flex flex-col gap-space-8">
+<span class="font-label-sm text-label-sm tracking-wider uppercase text-secondary font-bold">Compatibility DNA</span>
+<div class="grid grid-cols-3 gap-2 text-center">
+<div class="p-space-8 rounded-[12px] bg-surface-container-lowest border border-surface-container flex flex-col">
+<span class="text-xs font-bold text-primary" id="dnaValues">96%</span>
+<span class="text-[10px] text-on-surface-variant leading-tight mt-0.5">Core Values</span>
+</div>
+<div class="p-space-8 rounded-[12px] bg-surface-container-lowest border border-surface-container flex flex-col">
+<span class="text-xs font-bold text-primary" id="dnaComm">91%</span>
+<span class="text-[10px] text-on-surface-variant leading-tight mt-0.5">Communication</span>
+</div>
+<div class="p-space-8 rounded-[12px] bg-surface-container-lowest border border-surface-container flex flex-col">
+<span class="text-xs font-bold text-primary" id="dnaPace">84%</span>
+<span class="text-[10px] text-on-surface-variant leading-tight mt-0.5">Daily Pace</span>
+</div>
+</div>
+</div>
+<!-- 3 Pillars Breakdown -->
+<div class="flex flex-col gap-space-8 pt-space-4">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-bold">Alignment Dimensions</span>
+<!-- Pillar 1 -->
+<div class="flex items-center justify-between p-space-12 rounded-[12px] bg-surface-container-lowest border border-surface-container">
+<div class="flex items-center gap-space-12">
+<span class="flex items-center justify-center w-8 h-8 rounded-full bg-secondary-container text-primary shrink-0">
+<span class="material-symbols-outlined text-[18px]">psychology</span>
+</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-primary font-semibold">Emotional Connection</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant" id="pillarEmotionalDesc">Strong intuitive resonance</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm text-secondary bg-surface-container-low px-space-8 py-space-4 rounded-full font-bold shrink-0" id="pillarEmotionalVal">98% Sync</span>
+</div>
+<!-- Pillar 2 -->
+<div class="flex items-center justify-between p-space-12 rounded-[12px] bg-surface-container-lowest border border-surface-container">
+<div class="flex items-center gap-space-12">
+<span class="flex items-center justify-center w-8 h-8 rounded-full bg-secondary-container text-primary shrink-0">
+<span class="material-symbols-outlined text-[18px]">forum</span>
+</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-primary font-semibold">Communication</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant" id="pillarCommDesc">Direct, vulnerable &amp; considerate</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm text-secondary bg-surface-container-low px-space-8 py-space-4 rounded-full font-bold shrink-0" id="pillarCommVal">94% Sync</span>
+</div>
+<!-- Pillar 3 -->
+<div class="flex items-center justify-between p-space-12 rounded-[12px] bg-surface-container-lowest border border-surface-container">
+<div class="flex items-center gap-space-12">
+<span class="flex items-center justify-center w-8 h-8 rounded-full bg-secondary-container text-primary shrink-0">
+<span class="material-symbols-outlined text-[18px]">balance</span>
+</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-primary font-semibold">Long-term Horizons</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant" id="pillarHorizonDesc">Family closeness &amp; intentional career growth</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm text-secondary bg-surface-container-low px-space-8 py-space-4 rounded-full font-bold shrink-0" id="pillarHorizonVal">96% Sync</span>
+</div>
+</div>
+<!-- Radical Transparency / Constructive Friction Module -->
+<div class="flex items-start gap-space-12 p-space-12 rounded-[14px] bg-secondary-container/20 border border-secondary-container/40">
+<span class="material-symbols-outlined text-secondary text-[20px] shrink-0 mt-space-2">sync_problem</span>
+<div class="flex flex-col gap-space-2 min-w-0">
+<span class="font-label-sm text-label-sm text-primary uppercase tracking-wider font-bold">Radical Transparency</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant" id="heroTransparencyText">
+<span class="font-semibold text-primary">Lifestyle Pace:</span> She is a dedicated night-owl and researcher; your daily habits indicate a 6:00 AM morning riser cadence.
+</p>
+</div>
+</div>
+<!-- Shared Ground Tags -->
+<div class="flex flex-col gap-space-8">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-bold">Shared Ground</span>
+<div class="flex flex-wrap gap-2" id="sharedGroundTags">
+<span class="px-space-12 py-1 rounded-full bg-surface-container text-on-surface-variant text-xs font-medium">Filter Coffee</span>
+<span class="px-space-12 py-1 rounded-full bg-surface-container text-on-surface-variant text-xs font-medium">Indie Cinema</span>
+<span class="px-space-12 py-1 rounded-full bg-surface-container text-on-surface-variant text-xs font-medium">Architecture</span>
+<span class="px-space-12 py-1 rounded-full bg-surface-container text-on-surface-variant text-xs font-medium">Ceramics</span>
+<span class="px-space-12 py-1 rounded-full bg-surface-container text-on-surface-variant text-xs font-medium">ECR Coastal Runs</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Decision Action Dock -->
+<div class="flex items-center gap-space-12 pt-space-4">
+<!-- Pass Button -->
+<button aria-label="Respectfully pass" class="flex items-center justify-center w-14 h-14 rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-primary transition-all active:scale-95 shadow-sm border border-surface-container focus:outline-none" id="passAction">
+<span class="material-symbols-outlined text-[24px]">close</span>
+</button>
+<!-- Save / Bookmark Button -->
+<button aria-label="Save for evening contemplation" class="flex items-center justify-center w-14 h-14 rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-secondary transition-all active:scale-95 shadow-sm border border-surface-container focus:outline-none" id="saveAction">
+<span class="material-symbols-outlined text-[22px]" id="saveIcon">bookmark_border</span>
+</button>
+<!-- Connect Button -->
+<button class="flex-1 h-14 rounded-full bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center gap-space-8 px-space-20 shadow-lg shadow-primary/10 transition-all duration-200 active:scale-[0.98] focus:outline-none" id="connectAction">
+<span class="material-symbols-outlined text-[20px] text-secondary-container">mark_chat_unread</span>
+<span class="font-label-lg text-label-lg font-semibold tracking-tight">Connect &amp; Say Hello</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Interactive Toast Feedback Banner -->
+<div class="fixed top-20 inset-x-space-20 max-w-[440px] mx-auto z-50 transform -translate-y-10 opacity-0 pointer-events-none transition-all duration-300 flex items-center justify-between p-space-16 rounded-[16px] bg-primary text-on-primary shadow-xl" id="toastMessage">
+<div class="flex items-center gap-space-12">
+<span class="material-symbols-outlined text-secondary-container text-[22px]">check_circle</span>
+<span class="font-body-md text-body-md" id="toastText">Connection invitation opened.</span>
+</div>
+</div>
+<!-- Daily Batch Queue Section ("Upcoming Today" Profile Switcher) -->
+<div class="flex flex-col gap-space-16 mt-space-32">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<h3 class="font-headline-sm text-headline-sm text-primary tracking-tight font-bold">Upcoming Today</h3>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Tap to inspect and switch the hero profile</span>
+</div>
+<span class="font-label-sm text-label-sm text-secondary font-bold bg-surface-container-high px-space-8 py-1 rounded-full">3 in Daily Batch</span>
+</div>
+<!-- Queue Preview Cards (Profile Switcher Carousel) -->
+<div class="flex flex-col gap-space-12" id="profilePickerList">
+<!-- Profile Card 1 (Ananya) -->
+<div class="profile-card-item flex items-center gap-space-16 p-space-16 rounded-[20px] bg-surface-container-lowest shadow-sm hover:shadow-md transition-all cursor-pointer border-2 border-primary" data-profile-idx="0">
+<div class="relative w-20 h-20 rounded-[14px] overflow-hidden shrink-0 bg-surface-container">
+<img alt="Ananya" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1VaA4lcpqeir9INywcIvQJXgX6k8LmxNxF_38xNaezr3_WJjGflap1QPWEJClyz6xqS49AemEGlnzzdUNTgr3p_7YIOphbW5D2TMl9ozydCacvomOgjftGo9cIb4ODtVJp74FF_TCI1zQ1xkQ9OFfJlGjZ5f-7ktyzxm7Olv3UNbow7xs-2PTQeOxEx5tAzyr_bniGjp1KlyRU-KU5JKdMvcUsFihnqU5lyJtW51IhsNMrt9E5Rm1fyuno">
+<div class="absolute bottom-space-2 right-space-2 px-space-4 rounded bg-primary/80 backdrop-blur-sm text-[10px] text-on-primary font-bold">
+96%
+</div>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-primary truncate font-bold">Ananya, 24</span>
+<span class="font-label-sm text-label-sm text-primary bg-secondary-container px-space-8 py-space-2 rounded-full font-bold active-badge">Viewing</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate mt-0.5">Chennai • Architectural Historian</p>
+<div class="flex items-center gap-space-6 mt-space-4">
+<span class="inline-flex items-center px-space-8 py-space-2 rounded-full bg-secondary-container/40 text-primary font-label-sm text-label-sm">
+Emotional Sync
+</span>
+<span class="inline-flex items-center px-space-8 py-space-2 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">
+Architecture
+</span>
+</div>
+</div>
+</div>
+<!-- Profile Card 2 (Siddharth) -->
+<div class="profile-card-item flex items-center gap-space-16 p-space-16 rounded-[20px] bg-surface-container-lowest shadow-sm hover:shadow-md transition-all cursor-pointer border-2 border-transparent" data-profile-idx="1">
+<div class="relative w-20 h-20 rounded-[14px] overflow-hidden shrink-0 bg-surface-container">
+<img alt="Siddharth" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1WiGYv625CkSVDqr8CWYMtSZHD8CB9all8HQqd0Taic23IQIErGWFUAuf8eGLt60K-i2zmStJSqPCRGWz52aijsKIl_5n0ml0_a5VJDlgQWETUdXAxHUlKO3KnUuIkVjgj5dW2KOADsSkHxrcaMzuOx3HqUxaNex5QW14PATNV7ZVIjRHsdTjXygM88kE6_LIGE80x2FeXh2ElQMcwQS65NKxGyM2E_ofxofVcPNgS0ChySVCxB9qlP3g">
+<div class="absolute bottom-space-2 right-space-2 px-space-4 rounded bg-primary/80 backdrop-blur-sm text-[10px] text-on-primary font-bold">
+92%
+</div>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-primary truncate font-bold">Siddharth, 26</span>
+<span class="font-label-sm text-label-sm text-secondary bg-surface-container-low px-space-8 py-space-2 rounded-full font-medium active-badge">Next up</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate mt-0.5">Bengaluru • Product Lead &amp; Musician</p>
+<div class="flex items-center gap-space-6 mt-space-4">
+<span class="inline-flex items-center px-space-8 py-space-2 rounded-full bg-secondary-container/40 text-primary font-label-sm text-label-sm">
+Deep Conversations
+</span>
+<span class="inline-flex items-center px-space-8 py-space-2 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">
+Art &amp; Design
+</span>
+</div>
+</div>
+</div>
+<!-- Profile Card 3 (Meera) -->
+<div class="profile-card-item flex items-center gap-space-16 p-space-16 rounded-[20px] bg-surface-container-lowest shadow-sm hover:shadow-md transition-all cursor-pointer border-2 border-transparent" data-profile-idx="2">
+<div class="relative w-20 h-20 rounded-[14px] overflow-hidden shrink-0 bg-surface-container">
+<img alt="Meera" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCeTmkDxAQvAuGyeMNSx65uwaRv5_31UYO1vGZbYE7qYEYYc378EU1weymvieVVG62-U2DoHbW3iPlux2HeHDAm5ZVYREUwI5IaB__lJ_OUwN4_f3gLjmD5YplXb64O6Ez9VgtMdwQ_T9hmfa0AZBu0W8fqcLh8sfUA80C1IJBI9yuCoBorKDMLzRfA5v6YfFccwJG6cz_mXWomxU-SB1dAbkrIpYAUSh8VQ1b97BE5-CsXrrOzeBmM">
+<div class="absolute bottom-space-2 right-space-2 px-space-4 rounded bg-primary/80 backdrop-blur-sm text-[10px] text-on-primary font-bold">
+89%
+</div>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-primary truncate font-bold">Meera, 25</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant bg-surface-container-low px-space-8 py-space-2 rounded-full font-medium active-badge">Curated</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate mt-0.5">Mumbai • Ecology &amp; Slow Living</p>
+<div class="flex items-center gap-space-6 mt-space-4">
+<span class="inline-flex items-center px-space-8 py-space-2 rounded-full bg-secondary-container/40 text-primary font-label-sm text-label-sm">
+Sustainable Living
+</span>
+<span class="inline-flex items-center px-space-8 py-space-2 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">
+Literature
+</span>
+</div>
+</div>
+</div>
+</div>
+<!-- PREMA Slow Dating Ethos Statement -->
+<div class="flex items-center gap-space-12 p-space-16 rounded-[16px] bg-surface-container-low border border-surface-container mt-space-8">
+<span class="material-symbols-outlined text-secondary text-[24px] shrink-0">hourglass_top</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-snug">
+<span class="font-bold text-primary">No endless swiping.</span> PREMA delivers up to 3 vetted individuals daily so you can reflect before deciding. Next recommendations reload at 12:00 PM.
+</p>
+</div>
+</div>
+</div>
+<!-- Interactive Multi-Photo & Profile Switcher Script -->
+<script>
+  (function() {
+    // 3 Profile Data Store
+    const profiles = [
+      {
+        name: "Ananya, 24",
+        city: "Chennai • Alwarpet",
+        occupation: "Architectural Historian",
+        matchPct: "96% PREMA MATCH",
+        counter: "1 of 3",
+        prompt: '"Sundays are sacred: slow south filter coffee, vintage maps, and dinner cooked together."',
+        transparency: "Lifestyle Pace: She is a dedicated night-owl and researcher; your daily habits indicate a 6:00 AM morning riser cadence.",
+        dna: { values: "96%", comm: "91%", pace: "84%" },
+        pillars: {
+          emotional: { desc: "Strong intuitive resonance", sync: "98% Sync" },
+          comm: { desc: "Direct, vulnerable & considerate", sync: "94% Sync" },
+          horizon: { desc: "Family closeness & intentional career growth", sync: "96% Sync" }
+        },
+        tags: ["Filter Coffee", "Indie Cinema", "Architecture", "Ceramics", "ECR Coastal Runs"],
+        photos: [
+          { src: "https://lh3.googleusercontent.com/aida/AEtjO1VaA4lcpqeir9INywcIvQJXgX6k8LmxNxF_38xNaezr3_WJjGflap1QPWEJClyz6xqS49AemEGlnzzdUNTgr3p_7YIOphbW5D2TMl9ozydCacvomOgjftGo9cIb4ODtVJp74FF_TCI1zQ1xkQ9OFfJlGjZ5f-7ktyzxm7Olv3UNbow7xs-2PTQeOxEx5tAzyr_bniGjp1KlyRU-KU5JKdMvcUsFihnqU5lyJtW51IhsNMrt9E5Rm1fyuno", caption: "1/3 · Daily Cadence" },
+          { src: "https://lh3.googleusercontent.com/aida-public/AB6AXuA58kgE9nwWCqmPtB3NPQYfGaD6qbuCHtxwxRSij2D-OGpXV4eKjD3tW_X7ajAzBqqFSoQgmK5TAZ4PHHMcQg9CCV9k_-Q3OjWtwJRJ95Ly1GWJlcCfujyffJ3_8UJBzQV3i8rbzz3YYQjpzDO4j8iwl45r60DajTx4eGhgvwxHX9T-u30iZXrHIevMHgA3XTSV4kS5yBNOJPcniN7QRS_WQFwtdO9aTHqPdqzk-lc_5kjbxf7e4GGd", caption: "2/3 · Courtyard Art Walk" },
+          { src: "https://lh3.googleusercontent.com/aida-public/AB6AXuB8MvXZDNNEBLNY74vgp18ZiS93NpoF-eiZEuheQyhOhKqqzc8HOxhvF6suRAhuX6sy6wnyA9yQ13rgckB5KnMQy3cyXShkyiK23VcUEf1ys2n18Ot4h8-dzedUQ3va1EtNSHS7fecoGUxrIFQYL8Cow33fdCL6XXFyVHVHQoAsU8tD3rmBtWrh7h2kX5B155U3d7y6BvKLIMD-D0NJb1fe4Rn5md47sl5TJ8X-8yJsDaKQUazKSOLr", caption: "3/3 · Slow Reading Hour" }
+        ]
+      },
+      {
+        name: "Siddharth, 26",
+        city: "Bengaluru • Indiranagar",
+        occupation: "Product Lead & Musician",
+        matchPct: "92% PREMA MATCH",
+        counter: "2 of 3",
+        prompt: '"The best conversations unfold after 10 PM over acoustic vinyl and pour-overs."',
+        transparency: "Creative Sprints: He spends alternate weekends isolated in studio recording; your style favors steady weekly routines.",
+        dna: { values: "94%", comm: "93%", pace: "88%" },
+        pillars: {
+          emotional: { desc: "Mutual artistic sensitivity", sync: "95% Sync" },
+          comm: { desc: "Deep analytical curiosity", sync: "92% Sync" },
+          horizon: { desc: "Urban independence & creative entrepreneurship", sync: "90% Sync" }
+        },
+        tags: ["Deep Conversations", "Art & Design", "Acoustic Guitar", "Coffee Cupping", "Indie Rock"],
+        photos: [
+          { src: "https://lh3.googleusercontent.com/aida/AEtjO1WiGYv625CkSVDqr8CWYMtSZHD8CB9all8HQqd0Taic23IQIErGWFUAuf8eGLt60K-i2zmStJSqPCRGWz52aijsKIl_5n0ml0_a5VJDlgQWETUdXAxHUlKO3KnUuIkVjgj5dW2KOADsSkHxrcaMzuOx3HqUxaNex5QW14PATNV7ZVIjRHsdTjXygM88kE6_LIGE80x2FeXh2ElQMcwQS65NKxGyM2E_ofxofVcPNgS0ChySVCxB9qlP3g", caption: "1/3 · Studio & Coffee" },
+          { src: "https://lh3.googleusercontent.com/aida-public/AB6AXuB8MvXZDNNEBLNY74vgp18ZiS93NpoF-eiZEuheQyhOhKqqzc8HOxhvF6suRAhuX6sy6wnyA9yQ13rgckB5KnMQy3cyXShkyiK23VcUEf1ys2n18Ot4h8-dzedUQ3va1EtNSHS7fecoGUxrIFQYL8Cow33fdCL6XXFyVHVHQoAsU8tD3rmBtWrh7h2kX5B155U3d7y6BvKLIMD-D0NJb1fe4Rn5md47sl5TJ8X-8yJsDaKQUazKSOLr", caption: "2/3 · Morning Cafe Read" },
+          { src: "https://lh3.googleusercontent.com/aida-public/AB6AXuA58kgE9nwWCqmPtB3NPQYfGaD6qbuCHtxwxRSij2D-OGpXV4eKjD3tW_X7ajAzBqqFSoQgmK5TAZ4PHHMcQg9CCV9k_-Q3OjWtwJRJ95Ly1GWJlcCfujyffJ3_8UJBzQV3i8rbzz3YYQjpzDO4j8iwl45r60DajTx4eGhgvwxHX9T-u30iZXrHIevMHgA3XTSV4kS5yBNOJPcniN7QRS_WQFwtdO9aTHqPdqzk-lc_5kjbxf7e4GGd", caption: "3/3 · Weekend Gallery" }
+        ]
+      },
+      {
+        name: "Meera, 25",
+        city: "Mumbai • Bandra West",
+        occupation: "Ecology & Slow Living",
+        matchPct: "89% PREMA MATCH",
+        counter: "3 of 3",
+        prompt: '"Looking for someone who respects quiet mornings as deeply as spirited community gatherings."',
+        transparency: "Geographic Rhythm: Spends monsoons on field conservation projects across Western Ghats.",
+        dna: { values: "92%", comm: "87%", pace: "89%" },
+        pillars: {
+          emotional: { desc: "Compassionate grounded outlook", sync: "91% Sync" },
+          comm: { desc: "Thoughtful letter-style texting", sync: "88% Sync" },
+          horizon: { desc: "Eco-conscious sustainable homemaking", sync: "90% Sync" }
+        },
+        tags: ["Sustainable Living", "Literature", "Wilderness Trekking", "Pottery", "Botanical Herbarium"],
+        photos: [
+          { src: "https://lh3.googleusercontent.com/aida-public/AB6AXuCeTmkDxAQvAuGyeMNSx65uwaRv5_31UYO1vGZbYE7qYEYYc378EU1weymvieVVG62-U2DoHbW3iPlux2HeHDAm5ZVYREUwI5IaB__lJ_OUwN4_f3gLjmD5YplXb64O6Ez9VgtMdwQ_T9hmfa0AZBu0W8fqcLh8sfUA80C1IJBI9yuCoBorKDMLzRfA5v6YfFccwJG6cz_mXWomxU-SB1dAbkrIpYAUSh8VQ1b97BE5-CsXrrOzeBmM", caption: "1/3 · Studio Daylight" },
+          { src: "https://lh3.googleusercontent.com/aida-public/AB6AXuA58kgE9nwWCqmPtB3NPQYfGaD6qbuCHtxwxRSij2D-OGpXV4eKjD3tW_X7ajAzBqqFSoQgmK5TAZ4PHHMcQg9CCV9k_-Q3OjWtwJRJ95Ly1GWJlcCfujyffJ3_8UJBzQV3i8rbzz3YYQjpzDO4j8iwl45r60DajTx4eGhgvwxHX9T-u30iZXrHIevMHgA3XTSV4kS5yBNOJPcniN7QRS_WQFwtdO9aTHqPdqzk-lc_5kjbxf7e4GGd", caption: "2/3 · Courtyard Garden" },
+          { src: "https://lh3.googleusercontent.com/aida/AEtjO1VaA4lcpqeir9INywcIvQJXgX6k8LmxNxF_38xNaezr3_WJjGflap1QPWEJClyz6xqS49AemEGlnzzdUNTgr3p_7YIOphbW5D2TMl9ozydCacvomOgjftGo9cIb4ODtVJp74FF_TCI1zQ1xkQ9OFfJlGjZ5f-7ktyzxm7Olv3UNbow7xs-2PTQeOxEx5tAzyr_bniGjp1KlyRU-KU5JKdMvcUsFihnqU5lyJtW51IhsNMrt9E5Rm1fyuno", caption: "3/3 · Coastal Sunset" }
+        ]
+      }
+    ];
+
+    let currentProfileIdx = 0;
+    let currentPhotoIdx = 0;
+    let isDrawerExpanded = false;
+    let isSaved = false;
+
+    // Elements
+    const heroImg = document.getElementById('mainProfileHeroImg');
+    const photoCaptionTag = document.getElementById('photoCaptionTag');
+    const heroProfileName = document.getElementById('heroProfileName');
+    const heroLocation = document.getElementById('heroLocation');
+    const heroOccupation = document.getElementById('heroOccupation');
+    const matchPercentageBadge = document.getElementById('matchPercentageBadge');
+    const selectionCounter = document.getElementById('selectionCounter');
+    const heroPromptQuote = document.getElementById('heroPromptQuote');
+    const heroTransparencyText = document.getElementById('heroTransparencyText');
+    const dnaValues = document.getElementById('dnaValues');
+    const dnaComm = document.getElementById('dnaComm');
+    const dnaPace = document.getElementById('dnaPace');
+    const pillarEmotionalDesc = document.getElementById('pillarEmotionalDesc');
+    const pillarEmotionalVal = document.getElementById('pillarEmotionalVal');
+    const pillarCommDesc = document.getElementById('pillarCommDesc');
+    const pillarCommVal = document.getElementById('pillarCommVal');
+    const pillarHorizonDesc = document.getElementById('pillarHorizonDesc');
+    const pillarHorizonVal = document.getElementById('pillarHorizonVal');
+    const sharedGroundTags = document.getElementById('sharedGroundTags');
+
+    const deepDiveToggleBtn = document.getElementById('deepDiveToggleBtn');
+    const deepDiveDrawer = document.getElementById('deepDiveDrawer');
+    const deepDiveCaret = document.getElementById('deepDiveCaret');
+
+    const saveAction = document.getElementById('saveAction');
+    const saveIcon = document.getElementById('saveIcon');
+    const connectAction = document.getElementById('connectAction');
+    const passAction = document.getElementById('passAction');
+    const toast = document.getElementById('toastMessage');
+    const toastText = document.getElementById('toastText');
+
+    function updateStoryBars() {
+      for (let i = 0; i < 3; i++) {
+        const bar = document.getElementById('bar-' + i);
+        if (bar) {
+          if (i < currentPhotoIdx) {
+            bar.style.width = '100%';
+            bar.classList.add('bg-white');
+          } else if (i === currentPhotoIdx) {
+            bar.style.width = '100%';
+            bar.classList.add('bg-white');
+          } else {
+            bar.style.width = '0%';
+          }
+        }
+      }
+    }
+
+    function renderPhoto() {
+      const p = profiles[currentProfileIdx];
+      const photo = p.photos[currentPhotoIdx];
+      heroImg.style.opacity = '0.7';
+      setTimeout(() => {
+        heroImg.src = photo.src;
+        heroImg.style.opacity = '1';
+        photoCaptionTag.textContent = photo.caption;
+      }, 100);
+      updateStoryBars();
+    }
+
+    function nextPhoto() {
+      const p = profiles[currentProfileIdx];
+      currentPhotoIdx = (currentPhotoIdx + 1) % p.photos.length;
+      renderPhoto();
+    }
+
+    function prevPhoto() {
+      const p = profiles[currentProfileIdx];
+      currentPhotoIdx = (currentPhotoIdx - 1 + p.photos.length) % p.photos.length;
+      renderPhoto();
+    }
+
+    function renderProfile(index) {
+      currentProfileIdx = index;
+      currentPhotoIdx = 0;
+      const p = profiles[index];
+
+      heroProfileName.textContent = p.name;
+      heroLocation.textContent = p.city;
+      heroOccupation.textContent = p.occupation;
+      matchPercentageBadge.textContent = p.matchPct;
+      selectionCounter.textContent = p.counter;
+      heroPromptQuote.textContent = p.prompt;
+      heroTransparencyText.innerHTML = '<span class="font-semibold text-primary">Lifestyle Pace:</span> ' + p.transparency;
+
+      dnaValues.textContent = p.dna.values;
+      dnaComm.textContent = p.dna.comm;
+      dnaPace.textContent = p.dna.pace;
+
+      pillarEmotionalDesc.textContent = p.pillars.emotional.desc;
+      pillarEmotionalVal.textContent = p.pillars.emotional.sync;
+      pillarCommDesc.textContent = p.pillars.comm.desc;
+      pillarCommVal.textContent = p.pillars.comm.sync;
+      pillarHorizonDesc.textContent = p.pillars.horizon.desc;
+      pillarHorizonVal.textContent = p.pillars.horizon.sync;
+
+      // Update Shared Ground tags
+      sharedGroundTags.innerHTML = p.tags.map(t => `<span class="px-space-12 py-1 rounded-full bg-surface-container text-on-surface-variant text-xs font-medium">${t}</span>`).join('');
+
+      renderPhoto();
+
+      // Highlight active card in "Upcoming Today"
+      const cards = document.querySelectorAll('.profile-card-item');
+      cards.forEach((card, idx) => {
+        const badge = card.querySelector('.active-badge');
+        if (idx === index) {
+          card.classList.remove('border-transparent');
+          card.classList.add('border-primary');
+          if (badge) {
+            badge.textContent = 'Viewing';
+            badge.className = 'font-label-sm text-label-sm text-primary bg-secondary-container px-space-8 py-space-2 rounded-full font-bold active-badge';
+          }
+        } else {
+          card.classList.remove('border-primary');
+          card.classList.add('border-transparent');
+          if (badge) {
+            badge.textContent = idx === (index + 1) % 3 ? 'Next up' : 'Curated';
+            badge.className = 'font-label-sm text-label-sm text-on-surface-variant bg-surface-container-low px-space-8 py-space-2 rounded-full font-medium active-badge';
+          }
+        }
+      });
+    }
+
+    // Story tap zones and buttons
+    document.getElementById('nextTapZone')?.addEventListener('click', nextPhoto);
+    document.getElementById('prevTapZone')?.addEventListener('click', prevPhoto);
+    document.getElementById('nextPhotoBtn')?.addEventListener('click', nextPhoto);
+    document.getElementById('prevPhotoBtn')?.addEventListener('click', prevPhoto);
+
+    // Profile picker cards
+    document.querySelectorAll('.profile-card-item').forEach(card => {
+      card.addEventListener('click', () => {
+        const idx = parseInt(card.getAttribute('data-profile-idx'), 10);
+        renderProfile(idx);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    });
+
+    // Expandable In-Depth Profile Accordion
+    if (deepDiveToggleBtn && deepDiveDrawer && deepDiveCaret) {
+      deepDiveToggleBtn.addEventListener('click', () => {
+        isDrawerExpanded = !isDrawerExpanded;
+        if (isDrawerExpanded) {
+          deepDiveDrawer.classList.remove('hidden');
+          deepDiveDrawer.classList.add('flex');
+          deepDiveCaret.style.transform = 'rotate(180deg)';
+        } else {
+          deepDiveDrawer.classList.add('hidden');
+          deepDiveDrawer.classList.remove('flex');
+          deepDiveCaret.style.transform = 'rotate(0deg)';
+        }
+      });
+    }
+
+    function showToast(message) {
+      if (!toast || !toastText) return;
+      toastText.textContent = message;
+      toast.classList.remove('opacity-0', '-translate-y-10', 'pointer-events-none');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      
+      setTimeout(function() {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', '-translate-y-10', 'pointer-events-none');
+      }, 2600);
+    }
+
+    // Save toggle
+    if (saveAction && saveIcon) {
+      saveAction.addEventListener('click', function() {
+        isSaved = !isSaved;
+        const p = profiles[currentProfileIdx];
+        if (isSaved) {
+          saveIcon.textContent = 'bookmark';
+          saveIcon.style.fontVariationSettings = "'FILL' 1";
+          saveAction.classList.add('text-secondary');
+          showToast(`${p.name.split(',')[0]} saved for evening contemplation.`);
+        } else {
+          saveIcon.textContent = 'bookmark_border';
+          saveIcon.style.fontVariationSettings = "'FILL' 0";
+          saveAction.classList.remove('text-secondary');
+          showToast(`Removed from saved profiles.`);
+        }
+      });
+    }
+
+    // Connect action
+    if (connectAction) {
+      connectAction.addEventListener('click', function() {
+        const p = profiles[currentProfileIdx];
+        showToast(`Thoughtful connection invitation opened for ${p.name.split(',')[0]}.`);
+      });
+    }
+
+    // Pass action advances to next candidate smoothly
+    if (passAction) {
+      passAction.addEventListener('click', function() {
+        const currentName = profiles[currentProfileIdx].name.split(',')[0];
+        showToast(`Respectfully passed ${currentName}. Advancing profile...`);
+        setTimeout(() => {
+          renderProfile((currentProfileIdx + 1) % profiles.length);
+        }, 300);
+      });
+    }
+
+    // Prompt reply action
+    document.querySelectorAll('.prompt-reply-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const p = profiles[currentProfileIdx];
+        showToast(`Composing response to ${p.name.split(',')[0]}'s prompt...`);
+      });
+    });
+
+    // Initialise story bars
+    updateStoryBars();
+  })();
+</script></main><nav class="fixed bottom-0 inset-x-0 z-50 pb-safe bg-surface/90 backdrop-blur-xl border-t border-surface-container shadow-[0_-4px_24px_rgba(23,43,58,0.04)]" data-active-classes="text-primary font-semibold [&amp;_.nav-pill]:opacity-100 [&amp;_.nav-pill]:scale-100"><div class="h-16 max-w-[480px] mx-auto px-space-12 flex items-center justify-around"><a aria-current="page" class="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] transition-all duration-200 text-primary font-semibold [&amp;_.nav-pill]:opacity-100 [&amp;_.nav-pill]:scale-100" data-path="home" href="#"><span class="material-symbols-outlined text-[24px]">home</span><span class="font-label-sm text-label-sm mt-space-2">Home</span><span class="nav-pill w-1.5 h-1.5 rounded-full bg-secondary transition-all duration-200 mt-space-2 opacity-100 scale-100"></span></a><a class="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] text-on-surface-variant hover:text-primary transition-all duration-200" data-path="discover" href="#"><span class="material-symbols-outlined text-[24px]">explore</span><span class="font-label-sm text-label-sm mt-space-2">Discover</span><span class="nav-pill w-1.5 h-1.5 rounded-full bg-secondary opacity-0 scale-75 transition-all duration-200 mt-space-2"></span></a><a class="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] text-on-surface-variant hover:text-primary transition-all duration-200" data-path="matches" href="#"><span class="material-symbols-outlined text-[24px]">chat_bubble</span><span class="font-label-sm text-label-sm mt-space-2">Matches</span><span class="nav-pill w-1.5 h-1.5 rounded-full bg-secondary opacity-0 scale-75 transition-all duration-200 mt-space-2"></span></a><a class="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] text-on-surface-variant hover:text-primary transition-all duration-200" data-path="dates" href="#"><span class="material-symbols-outlined text-[24px]">event_available</span><span class="font-label-sm text-label-sm mt-space-2">Dates</span><span class="nav-pill w-1.5 h-1.5 rounded-full bg-secondary opacity-0 scale-75 transition-all duration-200 mt-space-2"></span></a><a class="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] text-on-surface-variant hover:text-primary transition-all duration-200" data-path="profile" href="#"><span class="material-symbols-outlined text-[24px]">person</span><span class="font-label-sm text-label-sm mt-space-2">Profile</span><span class="nav-pill w-1.5 h-1.5 rounded-full bg-secondary opacity-0 scale-75 transition-all duration-200 mt-space-2"></span></a></div></nav></body></html>

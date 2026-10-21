@@ -1,0 +1,371 @@
+<!DOCTYPE html><html class="h-full" lang="en"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"><title>PREMA</title><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base { html, body { width: 100%; min-height: 100%; margin: 0; padding: 0; } body { overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; } .pb-safe { padding-bottom: env(safe-area-inset-bottom, 16px); } .pt-safe { padding-top: env(safe-area-inset-top, 0px); } } ::-webkit-scrollbar { display: none; }</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "secondary": "#34647d", "on-surface-variant": "#43474c", "on-surface": "#1b1c19", "on-primary-fixed-variant": "#354959", "tertiary-fixed": "#d2e5f0", "primary": "#021625", "on-secondary": "#ffffff", "on-primary-container": "#7e93a5", "secondary-container": "#b1e0fe", "surface-bright": "#faf9f4", "surface-container-low": "#f5f4ef", "surface-container": "#efeee9", "on-secondary-container": "#35647d", "on-secondary-fixed-variant": "#184c64", "on-tertiary-fixed": "#0c1e26", "on-tertiary": "#ffffff", "surface": "#faf9f4", "inverse-surface": "#30312e", "on-primary": "#ffffff", "on-primary-fixed": "#081d2c", "background": "#faf9f4", "on-tertiary-fixed-variant": "#384952", "inverse-primary": "#b4c9dc", "error": "#ba1a1a", "on-error": "#ffffff", "surface-container-high": "#e9e8e3", "surface-dim": "#dbdad5", "primary-container": "#172b3a", "outline-variant": "#c3c7cc", "error-container": "#ffdad6", "surface-container-lowest": "#ffffff", "tertiary-fixed-dim": "#b7c9d4", "surface-variant": "#e3e3de", "on-error-container": "#93000a", "primary-fixed-dim": "#b4c9dc", "on-background": "#1b1c19", "inverse-on-surface": "#f2f1ec", "secondary-fixed": "#c3e8ff", "primary-fixed": "#d0e5f9", "surface-tint": "#4d6171", "tertiary": "#04171e", "tertiary-container": "#1a2b33", "secondary-fixed-dim": "#9ecde9", "on-secondary-fixed": "#001e2c", "outline": "#73777c", "surface-container-highest": "#e3e3de", "on-tertiary-container": "#80939d" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "space-24": "1.5rem", "space-2": "0.125rem", "space-32": "2rem", "space-12": "0.75rem", "space-16": "1rem", "margin-mobile": "1.25rem", "space-40": "2.5rem", "space-20": "1.25rem", "space-48": "3rem", "margin-tablet": "2rem", "space-8": "0.5rem", "gutter-mobile": "1rem", "space-4": "0.25rem" }, fontFamily: { "body-md": ["Plus Jakarta Sans"], "headline-lg": ["Plus Jakarta Sans"], "body-sm": ["Plus Jakarta Sans"], "label-md": ["Plus Jakarta Sans"], "body-lg": ["Plus Jakarta Sans"], "label-sm": ["Plus Jakarta Sans"], "label-lg": ["Plus Jakarta Sans"], "headline-md": ["Plus Jakarta Sans"], "headline-display": ["Plus Jakarta Sans"], "headline-lg-mobile": ["Plus Jakarta Sans"], "headline-sm": ["Plus Jakarta Sans"] }, fontSize: { "body-md": ["14px", { "lineHeight": "21px", "letterSpacing": "0.005em", "fontWeight": "400" }], "headline-lg": ["32px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "body-sm": ["13px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "400" }], "label-md": ["13px", { "lineHeight": "18px", "letterSpacing": "0.02em", "fontWeight": "600" }], "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "700" }], "label-lg": ["15px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }], "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "headline-display": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "700" }], "headline-lg-mobile": ["26px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface text-on-surface font-body-md text-body-md flex flex-col min-h-full selection:bg-secondary-container selection:text-on-secondary-container"><header class="fixed top-0 inset-x-0 z-50 bg-surface/85 backdrop-blur-xl pt-safe"><div class="h-16 px-space-20 max-w-[480px] mx-auto flex items-center justify-between"><div class="flex items-center gap-space-12"><img alt="PREMA Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VM45GEZBPj60GU3lUxrX02_9csI3xGwJGj1_YRcDcPBcjkFd1AlMfbMGppvASCkdI81DZeJFFxjjJQFBOHy5aW2Vhlyn5_kFM81B4CaiRW2A8r18PFj5FmiUDGoVXED_w8UmZ5LXAumb1C3F55WsxJZoIVU1eeJoJXMpRn7DzyG9LkCGLHwrohKxElpqq1RmqF3ZtaOIS4bnShH6qd2uCELI2sQXoRigEq-KEclY_sRN-WKipyLKp81aQ"><div class="flex flex-col"><span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary">PREMA</span><span class="font-headline-sm text-headline-sm text-primary tracking-tight">Prema   Sanctuary Venues &amp; Curated Dates</span></div></div><div class="flex items-center gap-space-8"><button aria-label="Notifications" class="w-11 h-11 flex items-center justify-center rounded-full text-secondary hover:text-primary transition-colors focus:outline-none"><span class="material-symbols-outlined text-[22px]">notifications</span></button><div class="relative flex items-center justify-center"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnpv7GVuzd6fs5TliuCiwIlpL0Rt2bVAxsXV2oCjBpVhp4UG2QcSA0fM1E5q0b-Bi3hANo_gxxHA1NjlLrqjE8ohvM6MdNojlI797HuC0AUkvZ0e2I5nz-fDRMdLXKv5aD9DyFmCPwJsDQdw4uv-m2poXm4GRuvfCjVpkLQEOf-1fFeXQOV7jP88Y-BVm6Xpd7_d4ZzQTNKZfgN_NLPKw3_kWAaoVLwLZ_BFzC19ixAfQnTKjdTvg9"><span class="absolute -bottom-space-2 -right-space-2 w-3.5 h-3.5 bg-secondary-container rounded-full flex items-center justify-center"><span class="material-symbols-outlined text-[10px] text-primary font-bold">verified</span></span></div></div></div></header><main class="flex flex-col relative w-full max-w-[480px] mx-auto px-margin-mobile pt-16 pb-28 bg-surface"><div class="flex flex-col w-full pb-8">
+<!-- Page Header & Cultural Editorial Framing -->
+<section class="flex flex-col pt-2 pb-6 px-1">
+<div class="flex items-center gap-2 mb-2">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-secondary">Prema Sanctuary Partners</span>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary tracking-tight mb-2">
+      Curated Spaces for Real Presence.
+    </h1>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+      Quiet, architecturally serene cafes, garden courtyards, and tea rooms with verified low ambient noise, discreet staff, and guaranteed reserved quiet corners.
+    </p>
+<!-- Quiet Search Bar -->
+<div class="mt-5 relative w-full">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-on-surface-variant/70">search</span>
+<input class="w-full h-12 pl-12 pr-11 bg-surface-container-low rounded-full font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none focus:bg-surface-container-lowest transition-colors shadow-sm" placeholder="Search calm spots, neighborhood, decibels..." type="text">
+<button aria-label="Filters" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-primary active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[18px]">tune</span>
+</button>
+</div>
+<!-- Vibe / Decibel Filter Horizontal Rail -->
+<div class="flex items-center gap-2 overflow-x-auto pt-4 pb-1 -mx-margin-mobile px-margin-mobile scrollbar-none">
+<button class="shrink-0 px-4 py-2 rounded-full bg-primary text-on-primary font-label-md text-label-md flex items-center gap-1.5 shadow-sm active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[16px] text-secondary-container">park</span>
+<span>Courtyard &amp; Nature</span>
+</button>
+<button class="shrink-0 px-4 py-2 rounded-full bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center gap-1.5 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[16px] text-secondary">volume_down</span>
+<span>Low Decibel (&lt;55dB)</span>
+</button>
+<button class="shrink-0 px-4 py-2 rounded-full bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center gap-1.5 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[16px] text-secondary">coffee</span>
+<span>Artisanal Coffee</span>
+</button>
+<button class="shrink-0 px-4 py-2 rounded-full bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center gap-1.5 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[16px] text-secondary">palette</span>
+<span>Art Galleries &amp; Tea</span>
+</button>
+<button class="shrink-0 px-4 py-2 rounded-full bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center gap-1.5 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[16px] text-secondary">spa</span>
+<span>Vegetarian-Friendly</span>
+</button>
+</div>
+</section>
+<!-- Confirmed Reservation Card -->
+<section class="mb-8">
+<div class="bg-surface-container-lowest rounded-3xl p-5 shadow-[0_4px_24px_-4px_rgba(2,22,37,0.06)] relative overflow-hidden">
+<!-- Subtle top tint accent -->
+<div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-secondary-container via-secondary to-primary-container"></div>
+<div class="flex items-center justify-between mb-4 pt-1">
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-secondary-container text-on-secondary-container">
+<span class="material-symbols-outlined text-[14px]">event_available</span>
+</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Confirmed Sanctuary Date</span>
+</div>
+<span class="font-label-sm text-label-sm px-2.5 py-1 bg-surface-container-high rounded-full text-on-surface-variant">In 2 days</span>
+</div>
+<div class="flex items-start justify-between gap-4 mb-4">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-primary">Amethyst Café</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[15px] text-secondary">location_on</span>
+            Royapettah, Chennai • Garden Verandah
+          </p>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-label-md text-label-md text-primary">Saturday, 5:30 PM</span>
+<span class="font-body-sm text-body-sm text-secondary flex items-center gap-1 mt-0.5">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+            Table #14 (Reserved)
+          </span>
+</div>
+</div>
+<!-- Partner preview pill -->
+<div class="flex items-center justify-between bg-surface-container-low rounded-2xl p-3 mb-4">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover shadow-sm" data-alt="Editorial portrait of Ananya, a thoughtful 28-year-old South Asian woman with gentle eyes and relaxed authentic expression, natural soft lighting, warm textured studio background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmZ5bSgZ1saBmNhGj6MlbD44NL5S3t-0YvCnpkxoql7lnbTcEmhVctnZ30CwCL0RcxHmlfVe3J9nMxgkMlchpaBVe8SL4A1g_sJrJtVEx_MGpPmjtwesyFOLXUChOlTtI8XEDiq80FYxE6ZPyNbEJkyp_WTv-KcS1HDCsgi2QQZFph7yTb-wBfiL13f1I2kcT3ZhQIv8m-yTuZCwvo250chU1xKXVEJyUDEGMk_984lc98Eo2zOTuM">
+<div>
+<div class="font-label-md text-label-md text-primary">Meeting Ananya</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-container"></span>
+<span>96% Alignment • Core Values</span>
+</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-[20px] text-on-surface-variant/70">shield</span>
+</div>
+<!-- Sanctuary Perks & Safe Pass Actions -->
+<div class="bg-tertiary-fixed/30 rounded-2xl p-3 mb-4 flex items-center gap-3">
+<span class="material-symbols-outlined text-[20px] text-secondary shrink-0">local_cafe</span>
+<p class="font-body-sm text-body-sm text-primary">
+<strong class="font-label-md text-label-md">Sanctuary Perk:</strong> 2 Complimentary Artisanal Pour-overs included with your Safe Date Pass.
+        </p>
+</div>
+<div class="grid grid-cols-2 gap-2.5">
+<button class="w-full py-3 px-3 rounded-full bg-primary text-on-primary font-label-md text-label-md flex items-center justify-center gap-1.5 active:scale-98 transition-all">
+<span class="material-symbols-outlined text-[16px] text-secondary-container">badge</span>
+<span>Safe Date Pass</span>
+</button>
+<button class="w-full py-3 px-3 rounded-full bg-surface-container text-on-surface font-label-md text-label-md flex items-center justify-center gap-1.5 active:scale-98 transition-all">
+<span class="material-symbols-outlined text-[16px] text-secondary">map</span>
+<span>Quiet Corner Map</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Curated Sanctuary Venues List -->
+<section class="flex flex-col gap-6">
+<div class="flex items-end justify-between px-1">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-secondary">Verified Acoustic Sanctuaries</span>
+<h2 class="font-headline-md text-headline-md text-primary tracking-tight">Spaces for Meaningful Conversation</h2>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant/80">Chennai &amp; BLR</span>
+</div>
+<!-- SPOT 1: Amethyst -->
+<article class="bg-surface-container-lowest rounded-3xl overflow-hidden shadow-[0_4px_20px_-2px_rgba(23,43,58,0.05)] transition-all">
+<div class="relative w-full h-56 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Sunlit colonial courtyard cafe in Royapettah with terracotta tiled verandah, lush green frangipani trees, shaded rustic stone tables, quiet atmosphere, architectural photography, soft natural daylight, deep calm mood." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSob5A_lQZp0BaZOM1bFjIlpHz7MlLVFunnY42r8QLeXHlIHTlkZEA2TvTTxrnnFffY3R68kSrGNS9zNg3mF4FkOSvrwY1wS0ctr7OJ2quKvL7LcNfR1cWjqU8X177r_Zxtk6zRNCJV8jZTjh27FJyM81O8MlUICF2mINs-Dd30SVZxoiEuoyZRQqd0T_gjhNYaqybLSTv2gkrj-7eoOBlkCdXj17ncl8VKmsjY4UA0IfuSsuk5bCA">
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent"></div>
+<!-- Live Acoustic Badge -->
+<div class="absolute top-3 left-3 bg-surface/90 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+<span class="font-label-sm text-label-sm text-primary">48 dB • Whisper Calm</span>
+</div>
+<div class="absolute top-3 right-3 bg-surface/90 backdrop-blur-md w-8 h-8 rounded-full flex items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined text-[18px]">favorite</span>
+</div>
+<div class="absolute bottom-3 left-4 right-4 flex items-end justify-between text-surface">
+<div>
+<span class="font-label-sm text-label-sm text-secondary-fixed uppercase tracking-wider">Heritage Garden &amp; Verandah</span>
+<h3 class="font-headline-sm text-headline-sm text-surface-bright">Amethyst Café &amp; Wild Garden</h3>
+</div>
+<span class="font-label-sm text-label-sm bg-surface-bright/20 backdrop-blur-md px-2.5 py-1 rounded-full text-surface-bright">3.2 km</span>
+</div>
+</div>
+<div class="p-5 flex flex-col gap-3.5">
+<div class="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] text-secondary">yard</span>
+<span>Colonial verandah, tropical canopy, secluded stone tables for two.</span>
+</div>
+<!-- Prema Perk Pill -->
+<div class="bg-secondary-fixed/40 rounded-2xl p-3 flex items-start gap-2.5">
+<span class="material-symbols-outlined text-[18px] text-secondary mt-0.5 shrink-0">workspace_premium</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-primary">PREMA Sanctuary Perk</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Complimentary single-origin pour-over or artisanal dessert with your check-in Safe Pass.</span>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-2 pt-1">
+<button class="flex-1 py-3 px-4 rounded-full bg-primary text-on-primary font-label-md text-label-md flex items-center justify-center gap-2 shadow-sm active:scale-98 transition-all">
+<span class="material-symbols-outlined text-[18px] text-secondary-container">calendar_month</span>
+<span>Reserve Quiet Corner</span>
+</button>
+<button aria-label="Share venue with match" class="w-11 h-11 rounded-full bg-surface-container-low flex items-center justify-center text-secondary active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[20px]">share</span>
+</button>
+</div>
+</div>
+</article>
+<!-- SPOT 2: The English Tearoom -->
+<article class="bg-surface-container-lowest rounded-3xl overflow-hidden shadow-[0_4px_20px_-2px_rgba(23,43,58,0.05)] transition-all">
+<div class="relative w-full h-56 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Intimate sun-drenched conservatory tea room in Alwarpet with white vaulted glass ceiling, delicate cast iron furnishings, rare teas served in porcelain pots, soft ivory linen, peaceful warm library aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7MypNtfkBjng7zgFGt-AoranGJpgJJ2ADzaRQ5K_-K6vGpKx0Ic-3qlZ8qscQ8LT_d-3WBJ_sFDOIvj2glUjcrZePTBy1o2P7KFbPon8ZZYlt1UJSJe07t1ubIrlM3uK4ZsyeA0Q6EUTtNquT6QcA6ecA7aQGpCNMXdFCw6mUd6FBGfsCOpFjpQW6OVN-0kd2c-5bg_cDBRxR4nc5VdAd44NFNMqX5uQsPOZ3j9WhUHxoDWOb83US">
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent"></div>
+<div class="absolute top-3 left-3 bg-surface/90 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm text-primary">42 dB • Library Quiet</span>
+</div>
+<div class="absolute bottom-3 left-4 right-4 flex items-end justify-between text-surface">
+<div>
+<span class="font-label-sm text-label-sm text-secondary-fixed uppercase tracking-wider">Artisanal Tea &amp; Botany</span>
+<h3 class="font-headline-sm text-headline-sm text-surface-bright">The English Tearoom</h3>
+</div>
+<span class="font-label-sm text-label-sm bg-surface-bright/20 backdrop-blur-md px-2.5 py-1 rounded-full text-surface-bright">4.5 km</span>
+</div>
+</div>
+<div class="p-5 flex flex-col gap-3.5">
+<div class="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] text-secondary">menu_book</span>
+<span>Skylit conservatory, curated rare Darjeeling flushes, acoustic intimacy.</span>
+</div>
+<div class="bg-secondary-fixed/40 rounded-2xl p-3 flex items-start gap-2.5">
+<span class="material-symbols-outlined text-[18px] text-secondary mt-0.5 shrink-0">chair</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-primary">PREMA Dedicated Corner</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Guaranteed alcove seating with discreet arrival notification (no waiting in foyer).</span>
+</div>
+</div>
+<div class="flex items-center gap-2 pt-1">
+<button class="flex-1 py-3 px-4 rounded-full bg-primary text-on-primary font-label-md text-label-md flex items-center justify-center gap-2 shadow-sm active:scale-98 transition-all">
+<span class="material-symbols-outlined text-[18px] text-secondary-container">near_me</span>
+<span>Suggest to Match</span>
+</button>
+<button aria-label="Share venue with match" class="w-11 h-11 rounded-full bg-surface-container-low flex items-center justify-center text-secondary active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[20px]">share</span>
+</button>
+</div>
+</div>
+</article>
+<!-- SPOT 3: Chamiers Anokhi Café -->
+<article class="bg-surface-container-lowest rounded-3xl overflow-hidden shadow-[0_4px_20px_-2px_rgba(23,43,58,0.05)] transition-all">
+<div class="relative w-full h-56 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Charming vintage cafe interior in RA Puram with aged terracotta tiles, soft ambient daylight filtering through wooden louvers, leafy potted plants, handcrafted block print cushions, quiet morning coffee vibe." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHEodHD7CEL2HwfXabDXaZ2f_2YINUhnEz39w3idEXMdsqLvJ_0mQ63owzevXF2vUnLne8Sw3HGKfwMGxOwjnQu5l6z3lEJTdHlw_A5CY8fqf1ijkLO_4GBSNm8R4wq4RSRVWNnO57oq2rpcW1zBdrVKS4QgSXBFcGUIYA5OE_ceTNlO3qcAPOG933SueZFADtmocC_vm2KiGwdK2YzFNW2n37EX2CSSLpok-hXfwygF7bSSwijz08">
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent"></div>
+<div class="absolute top-3 left-3 bg-surface/90 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm text-primary">50 dB • Gentle Murmur</span>
+</div>
+<div class="absolute bottom-3 left-4 right-4 flex items-end justify-between text-surface">
+<div>
+<span class="font-label-sm text-label-sm text-secondary-fixed uppercase tracking-wider">Vintage Botanical Verandah</span>
+<h3 class="font-headline-sm text-headline-sm text-surface-bright">Chamiers Anokhi Café</h3>
+</div>
+<span class="font-label-sm text-label-sm bg-surface-bright/20 backdrop-blur-md px-2.5 py-1 rounded-full text-surface-bright">5.1 km</span>
+</div>
+</div>
+<div class="p-5 flex flex-col gap-3.5">
+<div class="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] text-secondary">bakery_dining</span>
+<span>Vintage terracotta floors, botanical plants, organic artisanal bites.</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm px-3 py-1 bg-surface-container-high text-primary rounded-full">
+            Ideal for Sunday Morning Filter Coffee
+          </span>
+<span class="font-label-sm text-label-sm px-3 py-1 bg-surface-container-high text-on-surface-variant rounded-full">
+            Pre-paid Tab Enabled
+          </span>
+</div>
+<div class="flex items-center gap-2 pt-1">
+<button class="flex-1 py-3 px-4 rounded-full bg-primary text-on-primary font-label-md text-label-md flex items-center justify-center gap-2 shadow-sm active:scale-98 transition-all">
+<span class="material-symbols-outlined text-[18px] text-secondary-container">calendar_month</span>
+<span>Reserve Quiet Corner</span>
+</button>
+<button aria-label="Share venue with match" class="w-11 h-11 rounded-full bg-surface-container-low flex items-center justify-center text-secondary active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[20px]">share</span>
+</button>
+</div>
+</div>
+</article>
+<!-- SPOT 4: Gallery Veda & Sculpture Courtyard -->
+<article class="bg-surface-container-lowest rounded-3xl overflow-hidden shadow-[0_4px_20px_-2px_rgba(23,43,58,0.05)] transition-all">
+<div class="relative w-full h-56 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Quiet contemporary South Asian art gallery courtyard in Nungambakkam with minimal stone sculptures, reflecting pool, gentle filtered shade from bamboo trees, zen peaceful atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxKDkuE_wRpFEDiPS3ejxtMRgiMqBRjBLtLXEVbPG-K2R7F1uXXg1Ed3Q3elrUJ9hDghTanh6FG4jq9WeCj0bbj0USMRnuGOwYsXboN1w3TleT_cfjv904Cj-FpOtm6Cgqa3sipZUUi_WMIV2rpkrOf8mrjAYWomvLzm6agjXmTzgsdWH97S9NLgFOBGwFIELsTNUqeFPuuCcgA3zFbGzw5VCnyah6NYFAtpUIHOgEI4eMPryvoAEG">
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent"></div>
+<div class="absolute top-3 left-3 bg-surface/90 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm text-primary">38 dB • Meditative Calm</span>
+</div>
+<div class="absolute bottom-3 left-4 right-4 flex items-end justify-between text-surface">
+<div>
+<span class="font-label-sm text-label-sm text-secondary-fixed uppercase tracking-wider">Contemporary Art &amp; Tea</span>
+<h3 class="font-headline-sm text-headline-sm text-surface-bright">Gallery Veda Courtyard</h3>
+</div>
+<span class="font-label-sm text-label-sm bg-surface-bright/20 backdrop-blur-md px-2.5 py-1 rounded-full text-surface-bright">6.0 km</span>
+</div>
+</div>
+<div class="p-5 flex flex-col gap-3.5">
+<div class="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] text-secondary">museum</span>
+<span>South Asian curated exhibits with private bamboo courtyard seating.</span>
+</div>
+<div class="bg-secondary-fixed/40 rounded-2xl p-3 flex items-start gap-2.5">
+<span class="material-symbols-outlined text-[18px] text-secondary mt-0.5 shrink-0">visibility_off</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-primary">Private Gallery Walkway</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Includes quiet admission pass to current contemporary showcase for two.</span>
+</div>
+</div>
+<div class="flex items-center gap-2 pt-1">
+<button class="flex-1 py-3 px-4 rounded-full bg-primary text-on-primary font-label-md text-label-md flex items-center justify-center gap-2 shadow-sm active:scale-98 transition-all">
+<span class="material-symbols-outlined text-[18px] text-secondary-container">near_me</span>
+<span>Suggest to Match</span>
+</button>
+<button aria-label="Share venue with match" class="w-11 h-11 rounded-full bg-surface-container-low flex items-center justify-center text-secondary active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[20px]">share</span>
+</button>
+</div>
+</div>
+</article>
+</section>
+<!-- PREMA Sanctuary Standard Box -->
+<section class="mt-10 mb-6 bg-surface-container-low rounded-3xl p-6 relative overflow-hidden">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-[22px] text-secondary">verified_user</span>
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-secondary">The PREMA Sanctuary Guarantee</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary mb-3">
+      Designed for Emotional Safety &amp; Pure Focus
+    </h3>
+<div class="flex flex-col gap-3.5 mt-4">
+<div class="flex items-start gap-3">
+<span class="w-6 h-6 rounded-full bg-surface-container-highest flex items-center justify-center shrink-0 mt-0.5 text-primary">
+<span class="material-symbols-outlined text-[14px]">volume_off</span>
+</span>
+<div>
+<span class="font-label-md text-label-md text-primary">Acoustic Decibel Vetting</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Venues tested periodically during peak hours; always guaranteed below 52 dB.</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="w-6 h-6 rounded-full bg-surface-container-highest flex items-center justify-center shrink-0 mt-0.5 text-primary">
+<span class="material-symbols-outlined text-[14px]">table_restaurant</span>
+</span>
+<div>
+<span class="font-label-md text-label-md text-primary">Discreet Reserved Seating</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Tables positioned with ample spacing away from entrances, kitchens, and loud speaker arrays.</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="w-6 h-6 rounded-full bg-surface-container-highest flex items-center justify-center shrink-0 mt-0.5 text-primary">
+<span class="material-symbols-outlined text-[14px]">credit_card</span>
+</span>
+<div>
+<span class="font-label-md text-label-md text-primary">Seamless Digital Bill Settlement</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Optional pre-paid tabs or automated silent split bill via PREMA to eliminate awkward payment dances.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Community Sanctuary Recommendation CTA -->
+<section class="bg-surface-container-lowest rounded-3xl p-6 text-center flex flex-col items-center shadow-sm mb-4">
+<div class="w-12 h-12 rounded-full bg-secondary-fixed flex items-center justify-center text-primary mb-3">
+<span class="material-symbols-outlined text-[24px]">add_location_alt</span>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-primary mb-1">Know a Hidden Calm Spot?</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant max-w-[340px] mb-5">
+      Recommend an architecturally tranquil garden, tea house, or quiet corner in your city. Our concierge acoustic team visits every submission.
+    </p>
+<button class="px-6 py-3 rounded-full bg-surface-container text-primary font-label-md text-label-md flex items-center gap-2 hover:bg-surface-container-high active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[18px]">edit_note</span>
+<span>Submit a Sanctuary Venue</span>
+</button>
+</section>
+</div>
+<script>
+  // Ensure Dates tab reflects active state in App Shell
+  (function() {
+    try {
+      const navLinks = document.querySelectorAll('nav a[data-path]');
+      navLinks.forEach(link => {
+        const pill = link.querySelector('.nav-pill');
+        if (link.getAttribute('data-path') === 'dates') {
+          link.classList.remove('text-on-surface-variant');
+          link.classList.add('text-primary', 'font-semibold');
+          if (pill) {
+            pill.classList.remove('opacity-0', 'scale-75');
+            pill.classList.add('opacity-100', 'scale-100');
+          }
+        } else {
+          link.classList.remove('text-primary', 'font-semibold');
+          link.classList.add('text-on-surface-variant');
+          if (pill) {
+            pill.classList.remove('opacity-100', 'scale-100');
+            pill.classList.add('opacity-0', 'scale-75');
+          }
+        }
+      });
+    } catch(e) {}
+  })();
+</script></main><nav class="fixed bottom-0 inset-x-0 z-50 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-4px_24px_rgba(23,43,58,0.04)]" data-active-classes="text-primary font-semibold [&amp;_.nav-pill]:opacity-100 [&amp;_.nav-pill]:scale-100"><div class="h-16 max-w-[480px] mx-auto px-space-12 flex items-center justify-around"><a class="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] text-on-surface-variant hover:text-primary transition-all duration-200" data-path="home" href="#"><span class="material-symbols-outlined text-[24px]">home</span><span class="font-label-sm text-label-sm mt-space-2">Home</span><span class="nav-pill w-1.5 h-1.5 rounded-full bg-secondary-container opacity-0 scale-75 transition-all duration-200 mt-space-2"></span></a><a class="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] text-on-surface-variant hover:text-primary transition-all duration-200" data-path="discover" href="#"><span class="material-symbols-outlined text-[24px]">explore</span><span class="font-label-sm text-label-sm mt-space-2">Discover</span><span class="nav-pill w-1.5 h-1.5 rounded-full bg-secondary-container opacity-0 scale-75 transition-all duration-200 mt-space-2"></span></a><a class="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] text-on-surface-variant hover:text-primary transition-all duration-200" data-path="matches" href="#"><span class="material-symbols-outlined text-[24px]">chat_bubble</span><span class="font-label-sm text-label-sm mt-space-2">Matches</span><span class="nav-pill w-1.5 h-1.5 rounded-full bg-secondary-container opacity-0 scale-75 transition-all duration-200 mt-space-2"></span></a><a class="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] text-on-surface-variant hover:text-primary transition-all duration-200" data-path="dates" href="#"><span class="material-symbols-outlined text-[24px]">event_available</span><span class="font-label-sm text-label-sm mt-space-2">Dates</span><span class="nav-pill w-1.5 h-1.5 rounded-full bg-secondary-container opacity-0 scale-75 transition-all duration-200 mt-space-2"></span></a><a class="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] text-on-surface-variant hover:text-primary transition-all duration-200" data-path="profile" href="#"><span class="material-symbols-outlined text-[24px]">person</span><span class="font-label-sm text-label-sm mt-space-2">Profile</span><span class="nav-pill w-1.5 h-1.5 rounded-full bg-secondary-container opacity-0 scale-75 transition-all duration-200 mt-space-2"></span></a></div></nav></body></html>
