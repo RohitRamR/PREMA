@@ -6,7 +6,7 @@
 //   • a booking only exists once BOTH people have accepted (consent.me + consent.them)
 //   • request-mode activities wait for the venue; paid ones wait for payment
 //   • QR passes are issued only for confirmed bookings and are single-use
-import { useSyncExternalStore } from 'react';
+import { createStore } from '../../store/create-store';
 import {
   ACTIVITIES, CATEGORIES, EVENTS, INITIAL_BOOKINGS, INITIAL_INVITATIONS, OFFERS, VENUES,
 } from './mock';
@@ -59,21 +59,21 @@ type State = {
   waitlist: string[]; // event ids
 };
 
-let state: State = {
+const store = createStore<State>({
   saved: ['activity:a-canvas', 'event:e-clay'],
   invitations: INITIAL_INVITATIONS,
   bookings: INITIAL_BOOKINGS,
   waitlist: [],
-};
+});
 
-const listeners = new Set<() => void>();
-const set = (next: Partial<State>) => { state = { ...state, ...next }; listeners.forEach((l) => l()); };
-const subscribe = (l: () => void) => { listeners.add(l); return () => listeners.delete(l); };
-const get = () => state;
+const set = (next: Partial<State>) => store.set((s) => ({ ...s, ...next }));
 
 export function useDateState() {
-  return useSyncExternalStore(subscribe, get, get);
+  return store.use();
 }
+
+/** Current saves, invitations, bookings and waitlist (outside React). */
+export const getDateState = () => store.get();
 
 const uid = (p: string) => `${p}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
 const nowIso = () => new Date().toISOString();
@@ -81,11 +81,11 @@ export const keyOf = (s: Subject) => `${s.type}:${s.id}`;
 
 export function toggleSave(subject: Subject) {
   const k = keyOf(subject);
-  set({ saved: state.saved.includes(k) ? state.saved.filter((x) => x !== k) : [...state.saved, k] });
+  set({ saved: store.get().saved.includes(k) ? store.get().saved.filter((x) => x !== k) : [...store.get().saved, k] });
 }
 
 export function toggleWaitlist(eventId: string) {
-  set({ waitlist: state.waitlist.includes(eventId) ? state.waitlist.filter((x) => x !== eventId) : [...state.waitlist, eventId] });
+  set({ waitlist: store.get().waitlist.includes(eventId) ? store.get().waitlist.filter((x) => x !== eventId) : [...store.get().waitlist, eventId] });
 }
 
 /** Proposer sends an invitation. Nothing is booked until the other person accepts. */
@@ -93,7 +93,7 @@ export function proposeDate(input: {
   matchId: string; subject: Subject; slotId: string | null; requestedTime: string | null; message: string; parentId?: string;
 }) {
   const inv: Invitation = { id: uid('inv'), fromMe: true, status: 'sent', createdAt: nowIso(), ...input };
-  set({ invitations: [inv, ...state.invitations] });
+  set({ invitations: [inv, ...store.get().invitations] });
   return inv;
 }
 
@@ -128,40 +128,40 @@ function bookFromInvitation(inv: Invitation, myConsent: string, theirConsent: st
     totalPaise: info?.priceForTwo ?? 0, consent: { me: myConsent, them: theirConsent },
     pass: status === 'confirmed' ? makePass(startsAt) : null, review: null, createdAt: nowIso(),
   };
-  set({ bookings: [booking, ...state.bookings] });
+  set({ bookings: [booking, ...store.get().bookings] });
   return booking;
 }
 
 export function respondToInvitation(id: string, response: 'accept' | 'decline') {
-  const inv = state.invitations.find((i) => i.id === id);
+  const inv = store.get().invitations.find((i) => i.id === id);
   if (!inv || inv.status !== 'sent' || inv.fromMe) return null;
-  set({ invitations: state.invitations.map((i) => (i.id === id ? { ...i, status: response === 'accept' ? 'accepted' : 'declined' } : i)) });
+  set({ invitations: store.get().invitations.map((i) => (i.id === id ? { ...i, status: response === 'accept' ? 'accepted' : 'declined' } : i)) });
   if (response === 'accept') return bookFromInvitation(inv, nowIso(), inv.createdAt);
   return null;
 }
 
 /** Counter-proposal: mark the original as countered and send a new one back. */
 export function counterInvitation(id: string, slotId: string | null, requestedTime: string | null, message: string) {
-  const inv = state.invitations.find((i) => i.id === id);
+  const inv = store.get().invitations.find((i) => i.id === id);
   if (!inv) return null;
-  set({ invitations: state.invitations.map((i) => (i.id === id ? { ...i, status: 'countered' } : i)) });
+  set({ invitations: store.get().invitations.map((i) => (i.id === id ? { ...i, status: 'countered' } : i)) });
   return proposeDate({ matchId: inv.matchId, subject: inv.subject, slotId, requestedTime, message, parentId: id });
 }
 
 export function cancelInvitation(id: string) {
-  set({ invitations: state.invitations.map((i) => (i.id === id && i.status === 'sent' ? { ...i, status: 'cancelled' } : i)) });
+  set({ invitations: store.get().invitations.map((i) => (i.id === id && i.status === 'sent' ? { ...i, status: 'cancelled' } : i)) });
 }
 
 /** PREVIEW ONLY — stands in for the match accepting on their phone. */
 export function simulateTheyAccept(id: string) {
-  const inv = state.invitations.find((i) => i.id === id);
+  const inv = store.get().invitations.find((i) => i.id === id);
   if (!inv || !inv.fromMe || inv.status !== 'sent') return null;
-  set({ invitations: state.invitations.map((i) => (i.id === id ? { ...i, status: 'accepted' } : i)) });
+  set({ invitations: store.get().invitations.map((i) => (i.id === id ? { ...i, status: 'accepted' } : i)) });
   return bookFromInvitation(inv, inv.createdAt, nowIso());
 }
 
 function patchBooking(id: string, fn: (b: Booking) => Booking) {
-  set({ bookings: state.bookings.map((b) => (b.id === id ? fn(b) : b)) });
+  set({ bookings: store.get().bookings.map((b) => (b.id === id ? fn(b) : b)) });
 }
 
 /** PREVIEW ONLY — real confirmation happens after server-side payment verification. */
