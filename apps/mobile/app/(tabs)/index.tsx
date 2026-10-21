@@ -283,7 +283,7 @@ function DiscoverInner() {
             <Text className="text-[#3E5C7D] text-sm font-medium mb-2 text-center">{currentProfile?.quote}</Text>
             <View className="flex-row flex-wrap justify-center gap-2 w-full">
               {currentProfile?.interests.map((interest) => (
-                <View key={interest.id} className="flex-row items-center bg-white rounded-full px-3 py-1.5 gap-1.5 shadow-sm shadow-[#E3EDF7]">
+                <View key={interest.id} className="flex-row items-center bg-white rounded-full px-3 py-1.5 gap-1.5 shadow-sm shadow-surface-variant">
                   <Icon name={interest.icon} size={12} color="#3E5C7D" />
                   <Text className="text-[#3E5C7D] font-medium text-xs">{interest.name}</Text>
                 </View>
@@ -297,7 +297,7 @@ function DiscoverInner() {
           <Pressable 
             onPress={() => act('pass')}
             accessibilityLabel="Pass"
-            className="w-16 h-16 bg-white rounded-full items-center justify-center shadow-md shadow-[#E3EDF7]"
+            className="w-16 h-16 bg-white rounded-full items-center justify-center shadow-md shadow-surface-variant"
           >
             <Icon name="close" size={28} color="#8892A3" />
           </Pressable>
@@ -305,7 +305,7 @@ function DiscoverInner() {
           <Pressable 
             onPress={() => act('like')}
             accessibilityLabel="Like"
-            className="w-20 h-20 bg-[#FF6B8B] rounded-full items-center justify-center shadow-lg shadow-[#FF6B8B]/50"
+            className="w-20 h-20 bg-[#FF6B8B] rounded-full items-center justify-center shadow-lg shadow-coral/50"
           >
             <Icon name="favorite" size={38} color="white" />
           </Pressable>
@@ -313,7 +313,7 @@ function DiscoverInner() {
           <Pressable 
             onPress={() => act('star')}
             accessibilityLabel="Super like"
-            className="w-16 h-16 bg-white rounded-full items-center justify-center shadow-md shadow-[#E3EDF7]"
+            className="w-16 h-16 bg-white rounded-full items-center justify-center shadow-md shadow-surface-variant"
           >
             <Icon name="star" size={28} color="#FF6B8B" />
           </Pressable>
