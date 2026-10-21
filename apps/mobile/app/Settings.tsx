@@ -54,6 +54,7 @@ function SettingsInner() {
 
         <SectionLabel>Support</SectionLabel>
         <Card style={s.list}>
+          <Row icon="auto_awesome" title="How Prema matches" sub="Cosmo & Heart ratings explained" onPress={() => router.push('/HowPremaMatches')} />
           <Row icon="help" title="Help centre" onPress={() => router.push({ pathname: '/Help', params: { topic: 'help' } })} />
           <Row icon="info" title="Community guidelines" onPress={() => router.push({ pathname: '/Help', params: { topic: 'guidelines' } })} />
           <Row icon="lock" title="Privacy policy & terms" onPress={() => router.push({ pathname: '/Help', params: { topic: 'privacy' } })} last />

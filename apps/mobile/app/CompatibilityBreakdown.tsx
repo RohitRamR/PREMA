@@ -114,7 +114,7 @@ function BreakdownInner() {
             compat.me.hasBirthTime && compat.them.hasBirthTime ? (
               <Tap onPress={() => router.push('/CompatibilityQuiz')} style={s.hintBtn} accessibilityRole="button">
                 <Icon name="auto_awesome" size={15} color={C.pink} />
-                <Text style={s.hintText}>Answer the compatibility quiz for a sharper score</Text>
+                <Text style={s.hintText}>Sharpen your ratings</Text>
                 <Icon name="chevron_right" size={18} color={C.pink} />
               </Tap>
             ) : (
@@ -176,20 +176,22 @@ function BreakdownInner() {
         ) : null}
 
         {/* Breakdown */}
-        <Text style={s.section}>How the {score}% adds up</Text>
-        <View style={s.card}>
-          {[...(compat?.stars ?? []), ...(compat?.everyday ?? [])].map((x, i, parts) => (
-            <View key={x.label} style={[s.part, i < parts.length - 1 ? s.divider : null]}>
-              <View style={s.partHead}>
-                <View style={s.partIcon}><Icon name={x.icon} size={17} color={C.pink} /></View>
-                <Text style={s.partLabel}>{x.label}</Text>
-                <Text style={s.partValue}>{x.value}%</Text>
-              </View>
-              <View style={s.track}><View style={[s.fill, { width: `${x.value}%` }]} /></View>
-              <Text style={s.partNote}>{x.note}</Text>
+        {compat ? (
+          <>
+            <Text style={s.section}>Your ratings</Text>
+            <View style={s.card}>
+              <RatingRow icon="auto_awesome" name="Cosmo rating" rating={compat.ratings.cosmo} />
+              {compat.ratings.heart ? (
+                <RatingRow icon="favorite" name="Heart rating" rating={compat.ratings.heart} divider />
+              ) : null}
+              <Tap onPress={() => router.push('/HowPremaMatches')} style={s.howLink} accessibilityRole="link">
+                <Icon name="info" size={16} color={C.muted} />
+                <Text style={s.howText}>How we calculate</Text>
+                <Icon name="chevron_right" size={18} color={C.muted} />
+              </Tap>
             </View>
-          ))}
-        </View>
+          </>
+        ) : null}
 
         {/* Shared and different */}
         {shared.length ? (
@@ -217,6 +219,20 @@ function BreakdownInner() {
           </Tap>
         ) : null}
       </ScrollView>
+    </View>
+  );
+}
+
+function RatingRow({ icon, name, rating, divider }: { icon: string; name: string; rating: { value: number; line: string }; divider?: boolean }) {
+  return (
+    <View style={[s.part, divider ? s.dividerTop : null]}>
+      <View style={s.partHead}>
+        <View style={s.partIcon}><Icon name={icon} size={17} color={C.pink} /></View>
+        <Text style={s.partLabel}>{name}</Text>
+        <Text style={s.partValue}>{rating.value}%</Text>
+      </View>
+      <View style={s.track}><View style={[s.fill, { width: `${rating.value}%` }]} /></View>
+      <Text style={s.partNote}>{rating.line}</Text>
     </View>
   );
 }
@@ -286,6 +302,9 @@ const s = StyleSheet.create({
   card: { backgroundColor: C.white, borderRadius: 24, paddingHorizontal: 18, ...cardShadow },
   part: { paddingVertical: 15 },
   divider: { borderBottomWidth: 1, borderBottomColor: C.line },
+  dividerTop: { borderTopWidth: 1, borderTopColor: C.line },
+  howLink: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 14, borderTopWidth: 1, borderTopColor: C.line },
+  howText: { flex: 1, color: C.muted, fontSize: 14, fontWeight: '700' },
   partHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   partIcon: { width: 32, height: 32, borderRadius: 16, backgroundColor: C.pinkSoft, alignItems: 'center', justifyContent: 'center' },
   partLabel: { flex: 1, color: C.pri, fontSize: 15.5, fontWeight: '800' },

@@ -23,6 +23,9 @@ export type ChartView = {
   hasBirthTime: boolean;
 };
 
+/** A friendly headline rating (Cosmo or Heart) built from several engine layers. */
+export type RatingView = { value: number; line: string };
+
 export type PartView = { key: string; label: string; icon: string; value: number; note: string };
 
 export type CompatView = {
@@ -48,6 +51,11 @@ export type CompatView = {
   stars: PartView[];
   /** Everyday layers that both of you have filled in. */
   everyday: PartView[];
+  /**
+   * Plain ratings for the screen: Cosmo = Kundli + numerology + sun signs,
+   * Heart = everything else (null until questionnaire or preference data exists).
+   */
+  ratings: { cosmo: RatingView; heart: RatingView | null };
   strengths: string[];
   reasons: string[];
 };
@@ -145,7 +153,51 @@ export function toCompatView(
     horoscope: d.horoscope ? { score: d.horoscope.score, text: d.horoscope.interpretation } : null,
     stars,
     everyday,
+    ratings: {
+      cosmo: rating(output, COSMO_KEYS, COSMO_LINES),
+      heart: hasAny(output, HEART_KEYS) ? rating(output, HEART_KEYS, HEART_LINES) : null,
+    },
     strengths: r.strengths,
     reasons: r.reasons,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Cosmo & Heart ratings
+// ---------------------------------------------------------------------------
+
+type Key = keyof FullCompatibilityOutput['result']['breakdown'];
+
+const COSMO_KEYS: Key[] = ['astrology', 'numerology', 'horoscope'];
+const HEART_KEYS: Key[] = ['preferences', 'relationshipGoals', 'values', 'lifestyle', 'communication', 'personality', 'interests'];
+
+const COSMO_LINES: [number, string][] = [
+  [85, 'Written in the stars'],
+  [70, 'Your stars align beautifully'],
+  [55, 'A gentle cosmic pull'],
+  [0, 'Different skies, open hearts'],
+];
+const HEART_LINES: [number, string][] = [
+  [85, 'You want the same life'],
+  [70, 'So much in common'],
+  [55, 'Plenty of common ground'],
+  [0, 'Different paths to explore'],
+];
+
+function hasAny(output: FullCompatibilityOutput, keys: Key[]): boolean {
+  return keys.some((k) => output.appliedWeights[k] !== undefined);
+}
+
+/** Weighted average of the given layers, using the weights the engine actually applied. */
+function rating(output: FullCompatibilityOutput, keys: Key[], lines: [number, string][]): RatingView {
+  let sum = 0;
+  let w = 0;
+  for (const k of keys) {
+    const weight = output.appliedWeights[k];
+    if (weight === undefined) continue;
+    sum += output.result.breakdown[k] * weight;
+    w += weight;
+  }
+  const value = w > 0 ? Math.round(sum / w) : 0;
+  return { value, line: lines.find(([min]) => value >= min)![1] };
 }
