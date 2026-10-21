@@ -10,7 +10,7 @@ import {
 } from '@prema/compatibility';
 import type { Profile } from '../../store/profile';
 import { person } from '../../store/people';
-import { SAMPLE_BIRTHS, EXTRA_BASICS } from './sample-births';
+import { SAMPLE_BIRTHS } from './sample-births';
 import { quizToProfiles, sampleAnswers } from './quiz';
 
 /**
@@ -142,10 +142,9 @@ export function buildTheirProfile(id: string, mode: Mode, given?: PersonBasics):
   const b = SAMPLE_BIRTHS[id];
   if (!b) return null;
   const p = person(id);
-  const fallback = given ?? EXTRA_BASICS[id];
-  const name = p?.name ?? fallback?.name ?? id;
-  const age = p?.age ?? fallback?.age ?? 25;
-  const intention = parseIntention(p?.lookingFor ?? fallback?.lookingFor ?? 'Long-term relationship');
+  const name = p?.name ?? given?.name ?? id;
+  const age = p?.age ?? given?.age ?? 25;
+  const intention = parseIntention(p?.lookingFor ?? given?.lookingFor ?? 'Long-term relationship');
   const quiz = quizToProfiles(id, sampleAnswers(id), intention);
   return buildMatchProfile({
     user: {
@@ -166,7 +165,7 @@ export function buildTheirProfile(id: string, mode: Mode, given?: PersonBasics):
         : { userId: id, targetGender: [b.gender === 'female' ? 'male' : 'female', 'non_binary'], minAge: 21, maxAge: 40, maxDistanceKm: 100000 },
     birthData: { dateOfBirth: b.date, exactBirthTime: b.time, birthPlaceLat: b.place.lat, birthPlaceLon: b.place.lon },
     fullName: name,
-    interests: { userId: id, interests: p?.interests ?? fallback?.interests ?? [] },
+    interests: { userId: id, interests: p?.interests ?? given?.interests ?? [] },
     personality: quiz.personality,
     communication: quiz.communication,
     values: quiz.values,

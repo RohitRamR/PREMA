@@ -15,11 +15,8 @@ import { person } from '../src/store/people';
 import { useConversations } from '../src/store/chats';
 import { useCompatibility } from '../src/features/compatibility';
 
-const ANANYA = {
-  id: 'ananya', name: 'Ananya', match: 96,
-  photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400',
-  interests: ['Filter coffee', 'Architecture', 'Slow living', 'Carnatic music', 'Heritage walks', 'Sketching'],
-};
+// Shown when the page is opened without a known person.
+const DEFAULT_PERSON_ID = 'ananya';
 
 // Plain-English meaning of each of the eight kootas (total 36 points).
 const KOOTA_INFO: Record<string, [plain: string, why: string]> = {
@@ -52,12 +49,10 @@ function BreakdownInner() {
   const me = useProfile();
   const convos = useConversations();
   const convo = convos.find((c) => c.id === id);
-  const p = person(id);
+  const p = person(id) ?? (convo ? undefined : person(DEFAULT_PERSON_ID));
   const them = p
     ? { id: p.id, name: p.name, match: p.match, photo: p.photos[0], interests: p.interests }
-    : convo
-      ? { id: convo.id, name: convo.name, match: convo.match, photo: convo.photo, interests: [] as string[] }
-      : ANANYA;
+    : { id: convo!.id, name: convo!.name, match: convo!.match, photo: convo!.photo, interests: [] as string[] };
   const canChat = convos.some((c) => c.id === them.id);
 
   const compat = useCompatibility(them.id);

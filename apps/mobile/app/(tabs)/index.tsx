@@ -29,29 +29,8 @@ const INTEREST_ICONS: [RegExp, string][] = [
 ];
 const iconFor = (interest: string) => INTEREST_ICONS.find(([re]) => re.test(interest))?.[1] ?? 'favorite-border';
 
-// Ananya is the hand-made demo card; everyone else comes from the shared people list.
-const ANANYA_CARD = {
-  id: 'ananya',
-  name: 'Ananya',
-  match: 96, // fallback only — the matching engine supplies the real score
-  age: 24,
-  verified: true,
-  occupation: 'Design Student',
-  distance: '3 km away',
-  image: 'https://images.unsplash.com/photo-1524250502761-1ac6f2e30d43?q=80&w=800&auto=format&fit=crop',
-  photoCount: 3, // her profile page (MatchDetail) shows 3 photos
-  quote: '"Coffee, good people and a better tomorrow"',
-  interests: [
-    { id: '1', name: 'Coffee', icon: 'local-cafe' },
-    { id: '2', name: 'Music', icon: 'music-note' },
-    { id: '3', name: 'Travel', icon: 'flight' },
-    { id: '4', name: 'Dogs', icon: 'pets' },
-  ]
-};
-
-const PROFILES = [
-  ANANYA_CARD,
-  ...Object.values(PEOPLE).map((p) => ({
+// Every card comes from the shared people list (src/store/people.ts).
+const PROFILES = Object.values(PEOPLE).map((p) => ({
     id: p.id,
     name: p.name,
     match: p.match, // fallback only — the matching engine supplies the real score
@@ -63,8 +42,7 @@ const PROFILES = [
     photoCount: p.photos.length,
     quote: `"${p.prompt.answer}"`,
     interests: p.interests.slice(0, 4).map((name, i) => ({ id: `${p.id}-${i}`, name, icon: iconFor(name) })),
-  })),
-];
+}));
 
 export default function DiscoverScreen() {
   return (
