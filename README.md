@@ -187,6 +187,10 @@ test members when it finishes. It exits non-zero if any check fails. Run it
 after changing a migration, and add a check whenever you add a table or
 policy.
 
+CI runs it too: the **Database** workflow (`.github/workflows/database.yml`)
+applies every migration to a fresh database and runs these checks on any pull
+request that changes `supabase/`.
+
 ## Scripts (from the repo root)
 
 | Command | What it does |

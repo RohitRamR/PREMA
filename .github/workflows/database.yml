@@ -1,0 +1,51 @@
+# Applies every migration to a fresh local Supabase database and runs the
+# access-rule checks (supabase/tests/access_rules.sh) as a logged-out visitor,
+# member A and member B. Runs only when the database or this workflow changes,
+# so app-only pull requests stay fast.
+name: Database
+
+on:
+  pull_request:
+    paths:
+      - 'supabase/**'
+      - '.github/workflows/database.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/**'
+      - '.github/workflows/database.yml'
+
+permissions:
+  contents: read
+
+# A new push to the same PR cancels the run that's still going.
+concurrency:
+  group: db-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  access-rules:
+    name: Migrations and access rules
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v5
+
+      - name: Install Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: 2.121.0
+
+      # Postgres only (no API, auth or studio containers). A fresh database
+      # applies every file in supabase/migrations, so a broken migration fails here.
+      - name: Start database and apply migrations
+        run: supabase db start
+
+      - name: Check access rules
+        run: bash supabase/tests/access_rules.sh
+
+      - name: Stop database
+        if: always()
+        run: supabase stop --no-backup
