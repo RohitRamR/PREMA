@@ -100,8 +100,8 @@ contrast tests on every PR.
 
 | Phase | What | Screens change? | Size |
 |---|---|---|---|
-| **0** (this PR) | Palette, tokens, tests, generator, docs | No | Done |
-| **1** | Point the shared `C` in `components/prema-ui.tsx` at the palette, keeping the key names. 33 screens follow automatically. `C.muted` and `C.danger` keep their exact current shades (neutral-400, danger-500) until Phase 5. | Barely: every `C` value moves by ΔE 0.025 or less | 1 file |
+| **0** | Palette, tokens, tests, generator, docs | No | Done |
+| **1** | Point the shared `C` in `components/prema-ui.tsx` at the palette, keeping the key names. 33 screens follow automatically. `C.muted` and `C.danger` keep their exact current shades (neutral-400, danger-500) until Phase 5. | Barely: every `C` value moves by ΔE 0.025 or less | Done |
 | **2** | Replace the four copied palettes (`MatchDetail`, `(tabs)/profile`, onboarding, `CelestialBackground`) with `C` or tokens. Wait for in-progress work on `MatchDetail` and `profile` to merge first. | Slightly: `MatchDetail`'s drifted greys (`#4A6585`, `#7D8DA3`) line up with the rest of the app | 4 files |
 | **3** | Generate the Tailwind colours in `tailwind.config.js` from `palette.json`, so NativeWind classes and tokens can't drift apart | Barely | 1 file |
 | **4** | Swap the 507 hard-coded hex values, screen by screen, using the [map](colour-migration-map.md): **exact** (181 uses) first, then **close** (212), then **review** (103) by hand. The 9 **warm art** colours (gold and peach glows in `Aura` and `CelestialBackground`) stay as named constants in those components; they're illustration, not UI. Then the ~180 `rgba()` and short-hex values. | Exact: no. Close: barely. Review: yes, check each | ~40 files |
