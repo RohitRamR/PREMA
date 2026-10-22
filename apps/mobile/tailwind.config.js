@@ -27,35 +27,11 @@ const colors = {
   danger: ramp('danger', '500'), // red #D64545
   success: ramp('success', '300'), // green #3BB273
 
-  // Names from the original design mockups that screens still use
-  // (SendIntentionalNote, Discover). Prefer the ramps above in new code; these
-  // go away as screens migrate (Phase 4).
-  //
-  // Text and accent names point at the palette shade used for the same role in
-  // src/theme/tokens.ts:
-  'on-surface': P['700'],
-  'on-surface-variant': P['500'], // was #62758C
-  'primary-container': P['800'], // was #1A2E44, = colors.background.inverse
-  'on-primary': white,
-  'on-primary-container': P['200'], // was #A9C3DD
-  // Was #4A90D9. accent-500 rather than the nearest (400) so this blue text gets
-  // easier to read, not harder: 4.23:1 on white vs 3.34 before (400 would be 3.01).
-  secondary: A['500'],
-  'on-secondary': white,
-  'on-secondary-container': A['600'], // was #2C5F8F
-  //
-  // Surface names keep their exact original values for now. These pale layers
-  // are 1–8% lightness apart, and the palette has no shade between 50 and 100,
-  // so mapping them would make panels vanish into the card or page behind
-  // them. Pending a decision on finer light stops (docs/colour-system.md).
-  surface: '#F1F7FD',
+  // The two names from the original design mockups that are still used: shadow
+  // colours on the Discover action buttons (app/(tabs)/index.tsx). Prefer the
+  // ramps above in new code. surface-variant keeps its original value: it's one
+  // of the pale surfaces waiting on the light-stops decision (docs/colour-system.md).
   'surface-variant': '#E3EDF7',
-  'surface-container-lowest': white,
-  'surface-container-low': '#F6F9FC',
-  'surface-container': '#EDF3F9',
-  'surface-container-high': '#E6EEF6',
-  'surface-container-highest': '#DDE7F1',
-  'secondary-container': '#DCEBFA',
   coral: B['300'], // #FF6B8B
 };
 
