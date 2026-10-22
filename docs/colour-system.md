@@ -93,6 +93,20 @@ labels on a darker pink (brand-500 `#BF405F`, 5.10:1). Pressed pink goes
 *lighter* (brand-200), because a darker pressed pink would drop the navy label
 to 4.46:1. The other rows above still need sign-off before Phase 5.
 
+## Open question: the light-surfaces gap
+
+Found in Phase 3. The app layers pale blue surfaces 1–8% lightness apart
+(page `#F1F7FD`, panels `#F6F9FC`, `#EDF3F9`, `#E6EEF6`, `#E3EDF7`, `#DDE7F1`,
+selected cards `#DCEBFA`), but the palette jumps from 50 (~96%) to 100 (~89%).
+Mapping those surfaces to the nearest shade makes panels vanish into the card
+or page behind them. Checked on Send Note: the grounding panel and the
+selected prompt card both disappeared, so Phase 3 kept the surface names at
+their original values.
+
+Decide before Phase 4 touches surfaces. The likely fix is finer light stops
+(for example 25 and 75, or a dedicated surface scale) in the generator, chosen
+so each layer keeps its contrast with the layer behind it.
+
 ## Migration plan
 
 Each phase is its own PR, reviewed with before/after screenshots. CI runs the
@@ -103,7 +117,7 @@ contrast tests on every PR.
 | **0** | Palette, tokens, tests, generator, docs | No | Done |
 | **1** | Point the shared `C` in `components/prema-ui.tsx` at the palette, keeping the key names. 33 screens follow automatically. `C.muted` and `C.danger` keep their exact current shades (neutral-400, danger-500) until Phase 5. | Barely: every `C` value moves by ΔE 0.025 or less | Done |
 | **2** | Replace the four copied palettes (`MatchDetail`, `(tabs)/profile`, onboarding, `CelestialBackground`) with `C` or tokens. Wait for in-progress work on `MatchDetail` and `profile` to merge first. | Slightly: `MatchDetail`'s drifted greys (`#4A6585`, `#7D8DA3`) line up with the rest of the app | 4 files |
-| **3** | Generate the Tailwind colours in `tailwind.config.js` from `palette.json`, so NativeWind classes and tokens can't drift apart | Barely | 1 file |
+| **3** | Generate the Tailwind colours in `tailwind.config.js` from `palette.json`: all six ramps become classes (`bg-brand-300`…), the used text and accent names point at palette shades, and 32 unused mockup names are removed. **The 8 surface names keep their original values** (see the light-surfaces gap below) | Only the `secondary` blue on Send Note: `#4A90D9` → accent-500 `#487FB4`, slightly deeper, and contrast on white goes from 3.34 to 4.23 | Done |
 | **4** | Swap the 507 hard-coded hex values, screen by screen, using the [map](colour-migration-map.md): **exact** (181 uses) first, then **close** (212), then **review** (103) by hand. The 9 **warm art** colours (gold and peach glows in `Aura` and `CelestialBackground`) stay as named constants in those components; they're illustration, not UI. Then the ~180 `rgba()` and short-hex values. | Exact: no. Close: barely. Review: yes, check each | ~40 files |
 | **5** | Accessibility changes above: labels on pink (**approved**: navy), plus muted text and labels on blue, green and red (need sign-off) | **Yes** | After 4 |
 | **6** | Guardrail: a CI check that fails on new hex colours outside `src/theme/` and the two art components | No | Small |
