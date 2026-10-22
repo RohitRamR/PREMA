@@ -86,10 +86,12 @@ approve them before Phase 5 rolls them out.
 | White on green `#3BB273` | 2.69 ✗ | white on success-500 `#07814C` | 4.94 ✓ |
 | White on red `#D64545` | 4.38 ✗ | white on danger-600 `#B22E31` | 6.31 ✓ |
 
-**Pink buttons, the alternative:** keep white labels and darken the button to
-brand-500 `#BF405F` (5.10 ✓). The tokens default to navy-on-pink because it
-keeps PREMA's signature pink. Pressed pink goes *lighter* (brand-200), because
-a darker pressed pink would drop the navy label to 4.46:1.
+**Pink buttons: decided (22 Oct 2026). Navy labels on the existing pink.**
+PREMA keeps its signature pink `#FF6B8B`; button labels change from white to
+navy (`text.onBrand`, primary-900, 6.06:1). The rejected alternative was white
+labels on a darker pink (brand-500 `#BF405F`, 5.10:1). Pressed pink goes
+*lighter* (brand-200), because a darker pressed pink would drop the navy label
+to 4.46:1. The other rows above still need sign-off before Phase 5.
 
 ## Migration plan
 
@@ -103,7 +105,7 @@ contrast tests on every PR.
 | **2** | Replace the four copied palettes (`MatchDetail`, `(tabs)/profile`, onboarding, `CelestialBackground`) with `C` or tokens. Wait for in-progress work on `MatchDetail` and `profile` to merge first. | Slightly: `MatchDetail`'s drifted greys (`#4A6585`, `#7D8DA3`) line up with the rest of the app | 4 files |
 | **3** | Generate the Tailwind colours in `tailwind.config.js` from `palette.json`, so NativeWind classes and tokens can't drift apart | Barely | 1 file |
 | **4** | Swap the 507 hard-coded hex values, screen by screen, using the [map](colour-migration-map.md): **exact** (181 uses) first, then **close** (212), then **review** (103) by hand. The 9 **warm art** colours (gold and peach glows in `Aura` and `CelestialBackground`) stay as named constants in those components; they're illustration, not UI. Then the ~180 `rgba()` and short-hex values. | Exact: no. Close: barely. Review: yes, check each | ~40 files |
-| **5** | Accessibility changes above: muted text, labels on pink, blue, green and red | **Yes**, needs sign-off | After 4 |
+| **5** | Accessibility changes above: labels on pink (**approved**: navy), plus muted text and labels on blue, green and red (need sign-off) | **Yes** | After 4 |
 | **6** | Guardrail: a CI check that fails on new hex colours outside `src/theme/` and the two art components | No | Small |
 
 **Order matters:** Phase 1 gives the most consistency for the least risk. Phase 4
