@@ -7,21 +7,28 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from './Icon';
 import { goBack } from './nav';
+import { colors, ramps } from '../src/theme';
 
+// The shared screen palette, now backed by the colour system (src/theme).
+// Key names are unchanged so every screen keeps working. New code should use
+// `colors` from src/theme directly. See docs/colour-system.md (Phase 1).
 export const C = {
-  bg: '#F1F7FD',
-  pri: '#2C496A',
-  body: '#3E5C7D',
-  muted: '#8892A3',
-  accent: '#74B4F2',
-  accentSoft: '#E7F0F9',
-  pink: '#FF6B8B',
-  pinkSoft: '#FFE8EE',
-  navy: '#1A2E44',
-  shadow: '#E3EDF7',
-  line: '#EEF3F8',
-  white: '#FFFFFF',
-  danger: '#D64545',
+  bg: colors.background.canvas, // was #F1F7FD
+  pri: colors.text.primary, // #2C496A (unchanged)
+  body: colors.text.secondary, // was #3E5C7D
+  // Kept at today's shade until the accessibility pass (Phase 5) moves it to
+  // colors.text.muted, which is darker and meets WCAG AA.
+  muted: ramps.neutral['400'], // #8892A3 (unchanged)
+  accent: colors.decorative.accent, // #74B4F2 (unchanged)
+  accentSoft: colors.background.accentSoft, // was #E7F0F9
+  pink: colors.action.primary.bg, // #FF6B8B (unchanged)
+  pinkSoft: colors.background.brandSoft, // was #FFE8EE
+  navy: colors.background.inverse, // was #1A2E44
+  shadow: colors.decorative.shadow, // was #E3EDF7
+  line: colors.border.subtle, // was #EEF3F8
+  white: colors.background.surface, // #FFFFFF (unchanged)
+  // Kept at today's shade until Phase 5 (white on it is 4.38:1; danger-600 passes).
+  danger: ramps.danger['500'], // #D64545 (unchanged)
 };
 
 export const cardShadow: ViewStyle = {
